@@ -1,0 +1,139 @@
+% Autor der Vorlage: Dominik Auracher
+\documentclass[11pt, bibliography=numbered, headsepline, numbers=withenddot]{scrartcl}
+
+% Paket für Abkürzungsverzeichnis
+\usepackage[acronym, automake=delayed, nopostdot]{glossaries}
+\input{abbreviations.tex}
+\makeglossaries
+
+% Allgemeine Informationen
+\renewcommand{\author}{\color{red}Vorname Nachname} % Autor
+\newcommand{\jury}{\color{red}Prüfungskomitee} % Prüfungskomitee
+\newcommand{\location}{\color{red}München} % Ort, an welchem die Arbeit geschrieben wurde
+\newcommand{\matriculationnumber}{\color{red}123456} % Matrikelnummer
+\newcommand{\submissiondate}{\color{red}\today} % Datum der Abgabe
+\newcommand{\supervisor}{\color{red}Betreuer} % Betreuung
+\renewcommand{\title}{\color{red}Titel der Arbeit} % Titel der Arbeit
+
+% Macro für Anführungsstriche
+% Verwendung: \quotes{Text} -> Resultat: "Text"
+\newcommand{\quotes}[1]{``#1''}
+
+% WICHTIG:
+% Bei erstmaliger Einrichtung TeXstudio -> TeXstudio konfigurieren -> Optionen -> Erzeugen -> "Standard Bibliographieprogramm" = "Biber" setzen!
+\usepackage[a4paper, left=2.5cm, top=3cm, right=3cm, bottom=2.75cm]{geometry}
+
+% Paket zur eigenen Darstellung der Kopf-/Fußzeilen
+\usepackage[automark]{scrlayer-scrpage}
+\clearscrheadfoot
+\setlength{\headheight}{1.27cm}
+\setlength{\footheight}{1.27cm}
+
+% Paket zur Ermittlung der letzten Seite
+\usepackage{lastpage}
+
+% Paket für Deutschsprachige Inhalte
+\usepackage[ngerman]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[babel, german=quotes]{csquotes}
+
+% Paket für Quellcode-Anzeige (auch Inline!)
+\usepackage{listings}
+
+% Paket für Auflistungen
+\usepackage[inline]{enumitem}
+
+% Paket für Grafiken
+\usepackage{graphicx}
+
+% Paket für Farbgebungen
+\usepackage{xcolor}
+
+% Quellenverwaltung
+\usepackage[backend=biber, style=authortitle, isbn=false, hyperref=true]{biblatex}
+\addbibresource{literatur.bib}
+%\DeclareFieldFormat*{title}{#1}            % Format for bibliography
+\DeclareFieldFormat*{citetitle}{#1}        % Format for citations
+
+% Paket, welches das Jahr zusätzlich in die Fußnote aufnehmen kann
+\usepackage{xpatch}
+\xapptobibmacro{cite}{\setunit{\nametitledelim}\printfield{year}}{}{}
+
+% Paket und Konfiguration für Zahlen
+\usepackage[locale=DE]{siunitx}
+\sisetup{per-mode=fraction}
+
+% Paket und Konfiguration für Schriftart
+% Zur Verwendung von Arial, TeXstudio konfigurieren: Optionen -> TeXstudio konfigurieren -> Optionen -> Erzeugen -> "Standardcompiler" = "XeLaTeX" setzen!
+% \usepackage{fontspec}
+% \setmainfont{Arial}
+% \setsansfont{Arial}
+
+% Wichtig: Als letztes Paket laden!
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=false,
+	allbordercolors=white
+}
+
+% Neu-Definition der Namen
+\renewcommand{\sectionautorefname}{Abschnitt}
+\renewcommand{\subsectionautorefname}{Abschnitt}
+\renewcommand{\subsubsectionautorefname}{Abschnitt}
+\renewcommand{\figureautorefname}{Abb.}
+\renewcommand{\tableautorefname}{Tab.}
+\renewcommand{\listoflofentryname}{Abb.}
+
+% Zeilenabstand einstellen
+\renewcommand{\baselinestretch}{1.25}
+
+\begin{document}
+	% Deckblatt
+	\input{coversheet.tex}
+	\newpage
+
+	% Kopf-/Fußzeilen ab 2. Seite
+	\renewcommand*\sectionmarkformat{}% keine Nummerierung im Kopf
+	\renewcommand*{\headfont}{\normalfont} % Nicht kursiv	
+	\rohead*{\includegraphics{"General/HDBW_Logo_small.png"}}
+	\lofoot*{\scriptsize \submissiondate}
+	\rofoot*{\scriptsize Seite \thepage\ von \pageref{LastPage}}
+	
+	% Eidesstattliche Erklärung
+	\input{affidavit.tex}
+	\newpage
+	
+	% Zusammenfassung
+	\input{summary.tex}
+	\newpage
+	
+	% Kopf-/Fußzeilen ab 4. Seite
+	\lohead*{\headmark}
+	
+	% Inhaltsverzeichnis
+	\tableofcontents
+	\newpage
+	
+	% Abkürzungsverzeichnis
+	\printglossary[type=\acronymtype,title={Abbreviations},style=tree,nonumberlist]
+	
+	% Abbildungsverzeichnis
+	\listoffigures
+	
+	% Tabellenverzeichnis
+	%\listoftables
+	
+	% Quellcode-Verzeichnis
+	%\lstlistoflistings
+	\newpage
+	
+	% --- INHALT ---
+	\input{example.tex}
+	
+	
+	% Quellenverzeichnis
+	\newpage
+	\printbibliography
+	
+\end{document}
