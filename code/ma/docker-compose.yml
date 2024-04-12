@@ -1,0 +1,19 @@
+services:
+  phpserver:
+    image: php:8.3.4-cli
+    volumes:
+      - ./phpserver:/usr/src/myapp
+    working_dir: /usr/src/myapp
+    ports:
+      - 8000:8000
+    restart: unless-stopped
+    command: php -S 0.0.0.0:8000 init.php
+
+  proxy:
+    image: nginx:1.25.4
+    ports:
+      - 80:80
+    restart: unless-stopped
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - ./www-data:/data/www
