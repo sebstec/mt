@@ -9,11 +9,20 @@ services:
     restart: unless-stopped
     command: php -S 0.0.0.0:8000 init.php
 
+  nodeserver:
+    image: node:20
+    volumes:
+      - ./nodeserver:/usr/src/myapp
+    working_dir: /usr/src/myapp
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    command: node server.js
+
   proxy:
-    image: nginx:1.25.4
+    build: ./nginx
     ports:
       - 80:80
     restart: unless-stopped
     volumes:
-      - ./nginx:/etc/nginx/conf.d
       - ./www-data:/data/www
