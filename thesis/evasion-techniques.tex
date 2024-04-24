@@ -1,0 +1,52 @@
+\section{Firewall evasion techniques}
+\label{sec:Firewall evasion techniques}
+
+Firewall evasion techniques covering XSS Payloads have been chosen.
+
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstdefinestyle{ruleStyle}{
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	identifierstyle=\color{blue},
+	rulecolor=\color{black},
+	basicstyle=\ttfamily\footnotesize,
+	breakatwhitespace=false,
+	breaklines=true,
+	captionpos=b,
+	keepspaces=true,
+	numbers=left,
+	showspaces=false,
+	showstringspaces=false,
+	showtabs=false,
+	tabsize=2,
+	frame=single,
+	morekeywords={test, do, <file>},
+	aboveskip=1\baselineskip,
+	escapeinside=``
+}
+
+\subsection{XSS Payloads}
+
+\subsubsection{Tagged Template Literals}
+Tagged Template Literals can be used in javascript payloads to avoid detection of javascript function calls in an http request. Tagged Template Literals are ...
+\cite{exploringes6/templatelit}
+
+For instance, as you can also see in Listing~\ref{lst:listing-alertXSS}, the payload \verb|alert('XSS')| will be blocked by the ModSecurity firewall while using CRS 4.1.0.
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=alert("XSS") blocking example]
+`\label{lst:listing-alertXSS}`<payload>alert("XSS")</payload>
+<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"alert("</MatchedData>
+\end{lstlisting}
+
+Technique by \cite{onecons/wafbypass}.
+
+\label{sec:XSS Payloads}
