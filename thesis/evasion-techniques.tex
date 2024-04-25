@@ -35,17 +35,30 @@ Firewall evasion techniques covering XSS Payloads have been chosen.
 \subsection{XSS Payloads}
 
 \subsubsection{Tagged Template Literals}
-Tagged Template Literals can be used in javascript payloads to avoid detection of javascript function calls in an http request. Tagged Template Literals are ...
-\cite{exploringes6/templatelit}
+Tagged Template Literals can be used in javascript payloads to avoid detection of javascript function calls in an http request. Dr. Alex Rauschmeyer explains Tagged Template Literals in ``Exploring ES6'':
+\begin{quotation} Tagged Template Literals are function calls whose parameters are provided via template literals. [...]
+	The following is a tagged template literal (short: tagged template):
+	\begin{lstlisting}
+tagFunction`Hello ${firstName} ${lastName}!`
+\end{lstlisting}
+	Putting a template literal after an expression triggers a function call, similar to how a parameter list (comma-separated values in parentheses) triggers a function call. The previous code is equivalent to the following function call (in reality, first parameter is more than just an Array, but that is explained later).
+	\begin{lstlisting}
+tagFunction(['Hello ', ' ', '!'], firstName, lastName)
+\end{lstlisting}
+	Thus, the name before the content in backticks is the name of a function to call, the tag function.
+	\cite{exploringes6/templatelit}
+\end{quotation}
 
-For instance, as you can also see in Listing~\ref{lst:listing-alertXSS}, the payload \verb|alert('XSS')| will be blocked by the ModSecurity firewall while using CRS 4.1.0.
+For instance, as you can also see in Listing~\ref{lst:listing-alertXSSblocked}, the payload \verb|alert('XSS')| will be blocked by the ModSecurity firewall while using CRS 4.1.0.
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=alert("XSS") blocking example]
-`\label{lst:listing-alertXSS}`<payload>alert("XSS")</payload>
+`\label{lst:listing-alertXSSblocked}`<payload>alert("XSS")</payload>
 <file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
 <fileDetails>[line "714"] [id "941390"]<fileDetails>
 <MatchedData>"alert("</MatchedData>
 \end{lstlisting}
+
+As the function \verb|alert| can be called with an array as first parameter, it is possible to substitute the payload with \verb|alert`XSS`|. The substitute payload will pass through the ModSecurity firewall in the defined configuration. {\color{red}(insert ref to config here)}
 
 Technique by \cite{onecons/wafbypass}.
 
