@@ -34,6 +34,8 @@ Firewall evasion techniques covering XSS Payloads have been chosen.
 
 \subsection{XSS Payloads}
 
+\subsubsection{String passing}
+
 \subsubsection{Tagged Template Literals}
 Tagged Template Literals can be used in javascript payloads to avoid detection of javascript function calls in an http request. Dr. Alex Rauschmeyer explains Tagged Template Literals in ``Exploring ES6'':
 \begin{quotation} Tagged Template Literals are function calls whose parameters are provided via template literals. [...]
@@ -61,5 +63,9 @@ For instance, as you can also see in Listing~\ref{lst:listing-alertXSSblocked}, 
 As the function \verb|alert| can be called with an array as first parameter, it is possible to substitute the payload with \verb|alert`XSS`|. The substitute payload will pass through the ModSecurity firewall in the defined configuration. {\color{red}(insert ref to config here)}
 
 Technique by \cite{onecons/wafbypass}.
+
+\subsubsection{Function constructor}
+Javascript payloads that are being passed in string format can be executed using the eval function. The \verb|eval()| function will evaluate the source string given as an argument and return its completion value. \cite{js/eval}
+A possible usecase for \verb|eval()| in the quest to bypass a \gls{waf} is the splitting of function names that would cause a HTTP request to get rejected by the firewall. Looking at Listing~\ref{lst:listing-alertXSSblocked}, it is clear that the function call \verb|alert('XSS')| is being blocked by the ModSecurity firewall using CRS 4.1.0. To avoid a match on \verb|alert(|, it is possible to split the function call into parts \verb|al|, \verb|e| and \verb|rt('XSS')| by using string concatenation in the form of \verb|`al` + `e` + `rt('XSS')`|. Sending the payload in this form will not cause the the desired effect, as a javascript interpreter will interpret the payload as a string instead of a function call to the \verb|alert()| function. Using the \verb|eval()| function in combination with the splitted string solves this problem. Passing the string \verb|`al` + `e` + `rt('XSS')`| in the form of \verb|eval(`al` + `e` + `rt('XSS')`)| as an argument to the \verb|eval()| function will cause the string to be evaluated and interpreted. {\color{red}unfortunately Firewalls check for eval( too ...}
 
 \label{sec:XSS Payloads}
