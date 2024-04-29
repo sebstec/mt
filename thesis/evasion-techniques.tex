@@ -1,36 +1,7 @@
 \section{Firewall evasion techniques}
-\label{sec:Firewall evasion techniques}
 
+Compatibility with browsers is not being regarded. {\color{red} TODO: check javascript versions (ECMA script 6) and write about browser compatibility}
 Firewall evasion techniques covering XSS Payloads have been chosen.
-
-
-\definecolor{codegreen}{rgb}{0,0.6,0}
-\definecolor{codegray}{rgb}{0.5,0.5,0.5}
-\definecolor{codepurple}{rgb}{0.58,0,0.82}
-\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
-\lstdefinestyle{ruleStyle}{
-	backgroundcolor=\color{backcolour},
-	commentstyle=\color{codegreen},
-	keywordstyle=\color{magenta},
-	numberstyle=\tiny\color{codegray},
-	stringstyle=\color{codepurple},
-	identifierstyle=\color{blue},
-	rulecolor=\color{black},
-	basicstyle=\ttfamily\footnotesize,
-	breakatwhitespace=false,
-	breaklines=true,
-	captionpos=b,
-	keepspaces=true,
-	numbers=left,
-	showspaces=false,
-	showstringspaces=false,
-	showtabs=false,
-	tabsize=2,
-	frame=single,
-	morekeywords={test, do, <file>},
-	aboveskip=1\baselineskip,
-	escapeinside=``
-}
 
 \subsection{XSS Payloads}
 
@@ -53,8 +24,8 @@ tagFunction(['Hello ', ' ', '!'], firstName, lastName)
 
 For instance, as you can also see in Listing~\ref{lst:listing-alertXSSblocked}, the payload \verb|alert('XSS')| will be blocked by the ModSecurity firewall while using CRS 4.1.0.
 
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=alert("XSS") blocking example]
-`\label{lst:listing-alertXSSblocked}`<payload>alert("XSS")</payload>
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=alert("XSS") blocking example, label=lst:listing-alertXSSblocked]
+<payload>alert("XSS")</payload>
 <file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
 <fileDetails>[line "714"] [id "941390"]<fileDetails>
 <MatchedData>"alert("</MatchedData>
@@ -64,8 +35,44 @@ As the function \verb|alert| can be called with an array as first parameter, it 
 
 Technique by \cite{onecons/wafbypass}.
 
-\subsubsection{Function constructor}
-Javascript payloads that are being passed in string format can be executed using the eval function. The \verb|eval()| function will evaluate the source string given as an argument and return its completion value. \cite{js/eval}
-A possible usecase for \verb|eval()| in the quest to bypass a \gls{waf} is the splitting of function names that would cause a HTTP request to get rejected by the firewall. Looking at Listing~\ref{lst:listing-alertXSSblocked}, it is clear that the function call \verb|alert('XSS')| is being blocked by the ModSecurity firewall using CRS 4.1.0. To avoid a match on \verb|alert(|, it is possible to split the function call into parts \verb|al|, \verb|e| and \verb|rt('XSS')| by using string concatenation in the form of \verb|`al` + `e` + `rt('XSS')`|. Sending the payload in this form will not cause the the desired effect, as a javascript interpreter will interpret the payload as a string instead of a function call to the \verb|alert()| function. Using the \verb|eval()| function in combination with the splitted string solves this problem. Passing the string \verb|`al` + `e` + `rt('XSS')`| in the form of \verb|eval(`al` + `e` + `rt('XSS')`)| as an argument to the \verb|eval()| function will cause the string to be evaluated and interpreted. {\color{red}unfortunately Firewalls check for eval( too ...}
+\subsubsection{eval() function}
+\label{sec:eval}
 
-\label{sec:XSS Payloads}
+Javascript payloads that are being passed in string format can be executed using the eval function. The \verb|eval()| function will evaluate the source string given as an argument and return its completion value. \cite{js/eval}
+A possible usecase for \verb|eval()| in the quest to bypass a \gls{waf} is the splitting of function names that would cause a HTTP request to get rejected by the firewall.
+Looking at Listing~\ref{lst:listing-alertXSSblocked}, it is clear that the function call \verb|alert('XSS')| is being blocked by the ModSecurity firewall using CRS 4.1.0.
+To avoid a match on \verb|alert(|, it is possible to split the function call into parts \verb|al|, \verb|e| and \verb|rt('XSS')| by using string concatenation in the form of \verb|`al` + `e` + `rt('XSS')`|.
+Sending the payload in this form will not cause the the desired effect, as a javascript interpreter will interpret the payload as a string instead of a function call to the \verb|alert()| function.
+Using the \verb|eval()| function in combination with the splitted string solves this problem. Passing the string \verb|`al` + `e` + `rt('XSS')`| in the form of \verb|eval(`al` + `e` + `rt('XSS')`)| as an argument to the \verb|eval()| function will cause the string to be evaluated and interpreted. Technique inspired by \cite{onecons/wafbypass}.
+The ModSecurity firewall using CRS 4.1.0. checks for usage of the function \verb|eval()| and tries to block requests containing it. An example is listed in Listing~\ref{lst:listing-evalalertXSSblocked}.
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=eval(`al` + `e` + `rt('XSS')`) blocking example, label={lst:listing-evalalertXSSblocked}]
+<payload>eval(`al` + `e` + `rt('XSS')`)</payload>
+<file>"rules/REQUEST-933-APPLICATION-ATTACK-PHP.conf"</file>
+<fileDetails>[line "331"] [id "933160"]<fileDetails>
+<MatchedData>"eval(`al`   `e`   `rt('XSS')"</MatchedData>
+
+<file>"rules/REQUEST-934-APPLICATION-ATTACK-GENERIC.conf"</file>
+<fileDetails>[line "52"] [id "934100"]<fileDetails>
+<MatchedData>"eval("</MatchedData>
+
+<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"eval("</MatchedData>
+\end{lstlisting}
+
+\subsubsection{function constructor}
+
+When using the function \verb|eval()| causes a request to be blocked (see Section~\ref{sec:eval}), a substitute in the form of \verb|[][`constructor`][`constructor`](`alert('XSS')`)()| is available in javascript.
+	{\color{red}(at the time of writing)}
+Javascript provides a \quotes{square bracket notation} to access properties of an Object. It is used to access multiword properties as well as provide a way of obtaining property names as the result of an expression. \cite{js/brackets}
+This \quotes{square bracket notation} allows to ...
+
+Technique by \cite{onecons/wafbypass}.
+
+
+\subsubsection{string replace}
+
+Some characters like () can be replaced by [open+[]][0][13] [open+[]][0][13]
+
+Technique by \cite{onecons/wafbypass}.

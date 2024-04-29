@@ -70,9 +70,6 @@
 % \setmainfont{Arial}
 % \setsansfont{Arial}
 
-% package for code
-\usepackage{listings}
-
 % Wichtig: Als letztes Paket laden!
 \usepackage{hyperref}
 \hypersetup{
@@ -92,6 +89,9 @@
 \renewcommand{\baselinestretch}{1.25}
 
 \begin{document}
+	%config
+	\input{config.tex}
+
 	% Deckblatt
 	\input{coversheet.tex}
 	\newpage
