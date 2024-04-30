@@ -1,14 +1,16 @@
 \section{Firewall evasion techniques}
 
-Compatibility with browsers is not being regarded. {\color{red} TODO: check javascript versions (ECMA script 6) and write about browser compatibility}
+Compatibility with browsers is not being regarded. {\color{red} TODO: check JavaScript versions (ECMA script 6) and write about browser compatibility}
 Firewall evasion techniques covering XSS Payloads have been chosen.
+
+All techniques are available {\color{red}(at the time of writing)}
 
 \subsection{XSS Payloads}
 
 \subsubsection{String passing}
 
 \subsubsection{Tagged Template Literals}
-Tagged Template Literals can be used in javascript payloads to avoid detection of javascript function calls in an http request. Dr. Alex Rauschmeyer explains Tagged Template Literals in ``Exploring ES6'':
+Tagged Template Literals can be used in JavaScript payloads to avoid detection of JavaScript function calls in an http request. Dr. Alex Rauschmeyer explains Tagged Template Literals in ``Exploring ES6'':
 \begin{quotation} Tagged Template Literals are function calls whose parameters are provided via template literals. [...]
 	The following is a tagged template literal (short: tagged template):
 	\begin{lstlisting}
@@ -38,11 +40,11 @@ Technique by \cite{onecons/wafbypass}.
 \subsubsection{eval() function}
 \label{sec:eval}
 
-Javascript payloads that are being passed in string format can be executed using the eval function. The \verb|eval()| function will evaluate the source string given as an argument and return its completion value. \cite{js/eval}
+JavaScript payloads that are being passed in string format can be executed using the eval function. The \verb|eval()| function will evaluate the source string given as an argument and return its completion value. \cite{js/eval}
 A possible usecase for \verb|eval()| in the quest to bypass a \gls{waf} is the splitting of function names that would cause a HTTP request to get rejected by the firewall.
 Looking at Listing~\ref{lst:listing-alertXSSblocked}, it is clear that the function call \verb|alert('XSS')| is being blocked by the ModSecurity firewall using CRS 4.1.0.
 To avoid a match on \verb|alert(|, it is possible to split the function call into parts \verb|al|, \verb|e| and \verb|rt('XSS')| by using string concatenation in the form of \verb|`al` + `e` + `rt('XSS')`|.
-Sending the payload in this form will not cause the the desired effect, as a javascript interpreter will interpret the payload as a string instead of a function call to the \verb|alert()| function.
+Sending the payload in this form will not cause the the desired effect, as a JavaScript interpreter will interpret the payload as a string instead of a function call to the \verb|alert()| function.
 Using the \verb|eval()| function in combination with the splitted string solves this problem. Passing the string \verb|`al` + `e` + `rt('XSS')`| in the form of \verb|eval(`al` + `e` + `rt('XSS')`)| as an argument to the \verb|eval()| function will cause the string to be evaluated and interpreted. Technique inspired by \cite{onecons/wafbypass}.
 The ModSecurity firewall using CRS 4.1.0. checks for usage of the function \verb|eval()| and tries to block requests containing it. An example is listed in Listing~\ref{lst:listing-evalalertXSSblocked}.
 
@@ -63,12 +65,27 @@ The ModSecurity firewall using CRS 4.1.0. checks for usage of the function \verb
 
 \subsubsection{function constructor}
 
-When using the function \verb|eval()| causes a request to be blocked (see Section~\ref{sec:eval}), a substitute in the form of \verb|[][`constructor`][`constructor`](`alert('XSS')`)()| is available in javascript.
-	{\color{red}(at the time of writing)}
-Javascript provides a \quotes{square bracket notation} to access properties of an Object. It is used to access multiword properties as well as provide a way of obtaining property names as the result of an expression. \cite{js/brackets}
-This \quotes{square bracket notation} allows to ...
+When using the function \verb|eval()| (see Section~\ref{sec:eval}) causes a request to be blocked , a substitute in the form of \verb|[].constructor.constructor(`alert('XSS')`)()| is available in JavaScript. 
+Calling \verb|[]| will create an empty array, which is a special kind of object.
+Any kind of object in JavaScript, with the exception of null prototype objects, will have a constructor property on its prototype. \cite{js/object}
+The Array objects constructor can be accessed by calling \verb|.constructor| on an instance of Array, like \verb|[].constructor|. \cite{js/array} 
+Constructors are technically regular functions. \cite{js/constructor} 
+As such, they are Function objects. Function objects have a constructor themselfes, which again is called using the \verb|.constructor| notation.
+Using \verb|[].constructor.constructor| will yield access to the Function() constructor.
+Calling the Function() constructor directly can create functions dynamically, similar to using \verb|eval()|.
+The difference being that the Function() constructor creates functions that execute in the global scope only.
+The last argument given to the Function() constructor is expected to be a string containing the JavaScript statements compromising the function definition. \cite{js/function} 
+Therefore, the afromentioned substitute for \verb|eval()| -  \verb|[].constructor.constructor(`alert('XSS')`)()| - will create a function with the function body \verb|alert('XSS')| and call it directly.
+In other words: It will call a function that calls \verb|alert('XSS')|.
+
 
 Technique by \cite{onecons/wafbypass}.
+
+\subsubsection{square bracket notation}
+JavaScript provides a \quotes{square bracket notation} to access properties of an Object. It is used to access multiword properties as well as provide a way of obtaining property names as the result of an expression. \cite{js/brackets}
+This \quotes{square bracket notation} allows to ...
+
+\verb|[][`constructor`][`constructor`](`alert('XSS')`)()|
 
 
 \subsubsection{string replace}
