@@ -7,9 +7,11 @@ All techniques are available {\color{red}(at the time of writing)}
 
 \subsection{Various Payloads}
 
-\subsubsection{Unicode encoding}
+\subsubsection{Unicode encoding in JSON}
+Detected by modsecurity, checked with \u0024 and \u0028
 
 \subsubsection{HTML encoding}
+see the <a> thing
 
 \subsection{XSS Payloads}
 
@@ -39,9 +41,10 @@ For instance, as you can also see in Listing~\ref{lst:alertXSSblocked}, the payl
 <MatchedData>"alert("</MatchedData>
 \end{lstlisting}
 
-As the function \verb|alert| can be called with an array as first parameter, it is possible to substitute the payload with \verb|alert`XSS`|. The substitute payload will pass through the ModSecurity firewall in the defined configuration. {\color{red}(insert ref to config here)}
-
+As the function \verb|alert| can be called with an array as first parameter, it is possible to substitute the payload with \verb|alert`XSS`|. The substitute payload will pass through the ModSecurity firewall in the defined configuration. {\color{red}(insert ref to config here)} 
 Technique by \cite{onecons/wafbypass}.
+
+Substituting \verb|alert| with \verb|prompt| in combination with tagged template literals allows to display a parameter given to the template string. Using \verb|alert| will limit the displaying possibilities to the first parameter (an array of strings) of a tagged template literal call. The function \verb|prompt| allows two parameters whereas the second parameter is used for a default input text in the displayed prompt. \cite{js/prompt} Therefore its possible to display the expression in the first placeholder \verb|${expression}| after string coercion.
 
 \subsubsection{eval() function}
 \label{sec:eval}
@@ -100,6 +103,7 @@ For instance, in a payload composed using the function constructor as stated in 
 
 
 \subsubsection{string replace}
+\label{sec:stringreplace}
 When passing certain characters is not feasible, there is a chance they can be substituted in a string replacement strategy using the \verb|+| operator.
 A part of the description of the \verb|+| operator in JavaScript states:
 \begin{quote}

