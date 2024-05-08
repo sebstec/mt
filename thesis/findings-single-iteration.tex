@@ -1,0 +1,43 @@
+\subsection{Single Iteration Evaluation}
+This chapter states the evaluation results of a single iteration of application of an evasion technique to the specified payloads. If a considerable (from the perspective of the author of this work) bypass was found, the result will be detailed. Evaluation results of blocked requests are referred to in attachment.
+
+
+unicode tests:
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=unicode tests \$\{`alert`\}, label={lst:unicodetests}]
+<payload>${`alert`}</payload>
+<message>"Remote Command Execution: Unix Shell Expression Found"</message>
+<file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
+<fileDetails>[line "291"] [id "932130"]<fileDetails>
+<MatchedData>"${`alert`}"</MatchedData>
+
+<payload>\u0024{alert`}</payload>
+<message>"Possible Unicode character bypass detected"</message>
+<file>"/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf"</file>
+<fileDetails>[line "1263"] [id "920540"]<fileDetails>
+<MatchedData>"x5cu0024"</MatchedData>
+
+<payload>encodeURIComponent('\u0024{`alert`}')</payload>
+<payload>%24%7B%60alert%60%7D</payload>
+<message>"Remote Command Execution: Unix Shell Expression Found"</message>
+<file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
+<fileDetails>[line "291"] [id "932130"]<fileDetails>
+<MatchedData>"${`alert`}"</MatchedData>
+\end{lstlisting}
+
+
+url encoding: the modsecurity firewall detects url encoding. when sending example requests in plain and urlencoded forms, the requests get blocked. (See Listing~\ref{lst:urlencodedexampleblocked})
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=url encoded example blocked, label={lst:urlencodedexampleblocked}]
+<payload>alert(`${new Date()}`)</payload>
+<payload>alert(%60%24%7Bnew%20Date()%7D%60)</payload>
+<message>"Remote Command Execution: Unix Shell Expression Found"</message>
+<file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
+<fileDetails>[line "291"] [id "932130"]<fileDetails>
+<MatchedData>"${new date()}"</MatchedData>
+
+<message>"Javascript method detected"</message>
+<file>"/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"alert("</MatchedData>
+\end{lstlisting}
+

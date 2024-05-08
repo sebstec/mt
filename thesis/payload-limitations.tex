@@ -1,0 +1,4 @@
+\subsection{Payload limitations}
+using tagged template literals always results in the first parameter being an array, the second parameter being the first placeholder expression
+
+For instance, substituting \verb|alert| with \verb|prompt| in combination with tagged template literals allows to display a parameter given to the template string. Using \verb|alert| will limit the displaying possibilities to the first parameter (an array of strings) of a tagged template literal call. The function \verb|prompt| allows two parameters whereas the second parameter is used for a default input text in the displayed prompt. \cite{js/prompt} Therefore its possible to display the expression in the first placeholder \verb|${expression}| after string coercion.

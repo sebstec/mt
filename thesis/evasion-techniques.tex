@@ -1,4 +1,4 @@
-\subsection{Firewall evasion techniques}
+\section{Firewall evasion techniques}
 
 Compatibility with browsers is not being regarded. {\color{red} TODO: check JavaScript versions (ECMA script 6) and write about browser compatibility}
 Firewall evasion techniques covering XSS Payloads have been chosen.
@@ -10,10 +10,14 @@ All techniques are available {\color{red}(at the time of writing)}
 \subsubsection{Unicode encoding in JSON}
 Detected by modsecurity, checked with \u0024 and \u0028
 
-\subsubsection{HTML encoding}
-see the <a> thing
+\subsubsection{Case alternation}
+
+
 
 \subsection{XSS Payloads}
+
+\subsubsection{HTML encoding}
+see the <a> thing
 
 \subsubsection{String passing}
 
@@ -44,7 +48,6 @@ For instance, as you can also see in Listing~\ref{lst:alertXSSblocked}, the payl
 As the function \verb|alert| can be called with an array as first parameter, it is possible to substitute the payload with \verb|alert`XSS`|. The substitute payload will pass through the ModSecurity firewall in the defined configuration. {\color{red}(insert ref to config here)} 
 Technique by \cite{onecons/wafbypass}.
 
-Substituting \verb|alert| with \verb|prompt| in combination with tagged template literals allows to display a parameter given to the template string. Using \verb|alert| will limit the displaying possibilities to the first parameter (an array of strings) of a tagged template literal call. The function \verb|prompt| allows two parameters whereas the second parameter is used for a default input text in the displayed prompt. \cite{js/prompt} Therefore its possible to display the expression in the first placeholder \verb|${expression}| after string coercion.
 
 \subsubsection{eval() function}
 \label{sec:eval}

