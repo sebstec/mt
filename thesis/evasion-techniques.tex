@@ -15,7 +15,7 @@ Detected by modsecurity, checked with \u0024 and \u0028
 \subsubsection{Case alternation}
 In order to evade regex filerting by the WAF, the case of a payload can be alternated. \cite{medium/allypetitt}
 Modern regex flavors allow the application of modifiers to parts of the regular expression.
-One such modifier is \verb|(?i)|. It makes the regex case insensitive. \cite{regex/jan} Only when this modifier is not used, can a payload evade regex filtering using case alternation. 
+One such modifier is \verb|(?i)|. It makes the regex case insensitive. \cite{regex/jan} Only when this modifier is not used, can a payload evade regex filtering using case alternation.
 
 Taking the XSS payload \verb|<script>alert('XSS')</script>| as an example, after applying case alternation, it might result in a payload in the form of: \verb|<sCrIpT>alert('XSS')</sCriPt>|.
 Another example is file access on a wrongfully public file.
@@ -24,25 +24,61 @@ On a web server hosted on Windows that exposes a .env file with stored secrets, 
 are treated equally. {\color{blue} verified by the author using the python webserver module on windows 10 [should this be here?]}
 
 
+\subsubsection{Comment interference}
+In some context, comments can be used to break up statements. Regarding SQL, the Oracle Database SQL Reference states:
+\begin{quote}
+	A comment can appear between any keywords, parameters, or punctuation marks in a statement. You can include a comment in a statement in two ways:
+	\begin{itemize}
+		\item Begin the comment with a slash and an asterisk (/*). Proceed with the text of the comment. This text can span multiple lines. End the comment with an asterisk and a slash (*/). The opening and terminating characters need not be separated from the text by a space or a line break.
+		\item Begin the comment with -- (two hyphens). Proceed with the text of the comment. This text cannot extend to a new line. End the comment with a line break.
+	\end{itemize}
+	\cite{oracle/sqlcomments}
+\end{quote}
+Ally Petitt suggests using comments inside SQL statements to break up SQL keywords: \verb|?id=1+un/**/ion+sel/**/ect+1,2,3--| \cite{medium/allypetitt}
+
+
+\subsubsection{Percent encoding}
+
+
+\subsubsection{Charset alternation}
+To indicate the original media type prior to any applied content encoding, the HTTP \verb|Content-Type| representation header is used.
+It can be used in requests by the client to tell the server what type of data is actually sent.
+\verb|charset| is a possible directive, that specifies the character encoding standard. 
+It can be supplied with the \verb|Content-Type| header. \cite{http/contenttype}
+If a web server is supporting requests in different encoding standards, but the WAF is not configured to parse certain encoding standards, the WAF may not recognize such encoded request as malicious.
+
+The payload \verb|'<script>alert("xss")</script>'| becomes \\ 
+\verb|'L%A2%83%99%89%97%A3n%81%93%85%99%A3M%7F%A7%A2%A2%7F%5DLa%A2%83%99%89%97%A3n'|
+after encoding the payload to the charset \verb|IBM037| followed by percent encoding. \\ 
+Meanwhile the same payload in \verb|UTF-8| followed by percent encoding: \\
+\verb|'%3Cscript%3Ealert%28%22xss%22%29%3C%2Fscript%3E'| \\
+\verb|UTF-8| encoding is the standard for URIs \cite{rfc3986} \\
+Technique by \cite{medium/allypetitt}. 
+
+
 \subsection{XSS Payloads}
 
 \subsubsection{Tag modification}
 In a case, where regex filters are configured to look for html tags, modifying html tags might make a payload evade the filter. Possible modifications include:
 \begin{itemize}
 	\item prepending the tag with an additional \verb|<|: \verb|<<script>alert('XSS')</script>|
-	\item omitting the closing tag: \verb|<script>alert('XSS')| 
+	\item omitting the closing tag: \verb|<script>alert('XSS')|
 	\item using double open angle brackets: \verb|<iframe src=javascript:alert('XSS') <|
 	\item using uncommon tags: \\ \verb|<STYLE>.classname{background-image:url("javascript:alert(XSS)");}</STYLE>|
 \end{itemize}
 Technique by \cite{medium/allypetitt}
 
 \subsubsection{Space replace}
-A regex filter that is expecting a space inside a html tag at certain positions can be evaded by replacing the space with a \verb|/|. 
+A regex filter that is expecting a space inside a html tag at certain positions can be evaded by replacing the space with a \verb|/|.
 For instance, \verb|<img src=1 onerror=alert('XSS')>| becomes \verb|<img/src=1/onerror=alert('XSS')>|.
 Technique by \cite{medium/allypetitt}
 
 \subsubsection{HTML encoding}
 see the <a> thing
+
+
+\subsubsection{From charcode}
+String.fromCharCode(0x4c,105,0x6e,117,120) \cite{asecsite/jsobf1}
 
 \subsubsection{String passing}
 
@@ -114,6 +150,13 @@ Therefore, the afromentioned substitute for \verb|eval()| - \\ \verb|[].construc
 In other words: It will call a function that calls \verb|alert('XSS')|.
 Technique by \cite{onecons/wafbypass}.
 
+A more straightforward and less obscure way of accessing the Function() contructor is to call it directly:
+\begin{quote}
+	\verb|Function()| can be called with or without \verb|new|. Both create a new \verb|Function| instance. \cite{js/function}
+\end{quote}
+Depending on the firewall configuration, a WAF might use regex filtering to detect usage of \verb|Function()|.
+In this case, accessing the Function() constructor via an array object can be an alternative.
+
 \subsubsection{square bracket notation}
 JavaScript provides a \quotes{square bracket notation} to access properties of an Object. It is used to access multiword properties as well as provide a way of obtaining property names as the result of an expression. \cite{js/brackets}
 
@@ -145,16 +188,15 @@ function open() {
 In JavaScript, array-like access to String objects is possible. \cite{js/stringbrackets} For example, \verb|[open+[]][0][13]| returns the character \verb|(|. \verb|[open+[]][0][14]| returns the character \verb|)|. Listing~\ref{lst:opentostringindices} visualizes open.toString() with the corresponding indices.
 
 \begin{lstlisting}[style=basicStyle, caption=open.toString() with indices in JavaScript, label={lst:opentostringindices}]
-f u n c t i o n   o p  e  n  (  )     {  \n       
-0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 
+f u n c t i o n   o p  e  n  (  )     {  \n
+0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21
 
-[  n  a  t  i  v  e     c  o  d  e  ]  \n }  
-22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 
+[  n  a  t  i  v  e     c  o  d  e  ]  \n }
+22 23 24 25 26 27 28 29 30 31 32 33 34 35 36
 \end{lstlisting}
 
 
 \subsubsection{Aurebesh}
-
 
 
 
