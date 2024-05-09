@@ -1,20 +1,45 @@
 \section{Firewall evasion techniques}
 
 Compatibility with browsers is not being regarded. {\color{red} TODO: check JavaScript versions (ECMA script 6) and write about browser compatibility}
-Firewall evasion techniques covering XSS Payloads have been chosen.
+Naturally, when discussing web application firewall evasion, most chosen firewall evasion techniques are covering XSS Payloads.
 
 All techniques are available {\color{red}(at the time of writing)}
 
 \subsection{Various Payloads}
 
+\subsubsection{Payload size}
+
 \subsubsection{Unicode encoding in JSON}
 Detected by modsecurity, checked with \u0024 and \u0028
 
 \subsubsection{Case alternation}
+In order to evade regex filerting by the WAF, the case of a payload can be alternated. \cite{medium/allypetitt}
+Modern regex flavors allow the application of modifiers to parts of the regular expression.
+One such modifier is \verb|(?i)|. It makes the regex case insensitive. \cite{regex/jan} Only when this modifier is not used, can a payload evade regex filtering using case alternation. 
 
+Taking the XSS payload \verb|<script>alert('XSS')</script>| as an example, after applying case alternation, it might result in a payload in the form of: \verb|<sCrIpT>alert('XSS')</sCriPt>|.
+Another example is file access on a wrongfully public file.
+The Windows file system trests file and directory names as case-insensitive by default. \cite{windows/casesensitive}
+On a web server hosted on Windows that exposes a .env file with stored secrets, both urls: \\ \verb|http://127.0.0.1:8000/.env| and \verb|http://127.0.0.1:8000/.enV| \\
+are treated equally. {\color{blue} verified by the author using the python webserver module on windows 10 [should this be here?]}
 
 
 \subsection{XSS Payloads}
+
+\subsubsection{Tag modification}
+In a case, where regex filters are configured to look for html tags, modifying html tags might make a payload evade the filter. Possible modifications include:
+\begin{itemize}
+	\item prepending the tag with an additional \verb|<|: \verb|<<script>alert('XSS')</script>|
+	\item omitting the closing tag: \verb|<script>alert('XSS')| 
+	\item using double open angle brackets: \verb|<iframe src=javascript:alert('XSS') <|
+	\item using uncommon tags: \\ \verb|<STYLE>.classname{background-image:url("javascript:alert(XSS)");}</STYLE>|
+\end{itemize}
+Technique by \cite{medium/allypetitt}
+
+\subsubsection{Space replace}
+A regex filter that is expecting a space inside a html tag at certain positions can be evaded by replacing the space with a \verb|/|. 
+For instance, \verb|<img src=1 onerror=alert('XSS')>| becomes \verb|<img/src=1/onerror=alert('XSS')>|.
+Technique by \cite{medium/allypetitt}
 
 \subsubsection{HTML encoding}
 see the <a> thing
@@ -36,16 +61,7 @@ tagFunction(['Hello ', ' ', '!'], firstName, lastName)
 	\cite{exploringes6/templatelit}
 \end{quotation}
 
-For instance, as you can also see in Listing~\ref{lst:alertXSSblocked}, the payload \verb|alert('XSS')| will be blocked by the ModSecurity firewall while using CRS 4.1.0.
-
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=alert("XSS") blocking example, label=lst:alertXSSblocked]
-<payload>alert("XSS")</payload>
-<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
-<fileDetails>[line "714"] [id "941390"]<fileDetails>
-<MatchedData>"alert("</MatchedData>
-\end{lstlisting}
-
-As the function \verb|alert| can be called with an array as first parameter, it is possible to substitute the payload with \verb|alert`XSS`|. The substitute payload will pass through the ModSecurity firewall in the defined configuration. {\color{red}(insert ref to config here)} 
+As the function \verb|alert| can be called with an array as first parameter, it is possible to substitute the payload with \verb|alert`XSS`|. The substitute payload might evade regex filtering that looks for a function name followed by an opening \verb|(|.
 Technique by \cite{onecons/wafbypass}.
 
 
@@ -135,6 +151,10 @@ f u n c t i o n   o p  e  n  (  )     {  \n
 [  n  a  t  i  v  e     c  o  d  e  ]  \n }  
 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 
 \end{lstlisting}
+
+
+\subsubsection{Aurebesh}
+
 
 
 

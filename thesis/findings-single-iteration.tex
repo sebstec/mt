@@ -41,3 +41,13 @@ url encoding: the modsecurity firewall detects url encoding. when sending exampl
 <MatchedData>"alert("</MatchedData>
 \end{lstlisting}
 
+
+\subsection{Tagged Template Literals}
+For instance, as you can also see in Listing~\ref{lst:alertXSSblocked}, the payload \verb|alert('XSS')| will be blocked by the ModSecurity firewall while using CRS 4.1.0.
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=alert("XSS") blocking example, label=lst:alertXSSblocked]
+<payload>alert("XSS")</payload>
+<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"alert("</MatchedData>
+\end{lstlisting}

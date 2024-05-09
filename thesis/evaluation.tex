@@ -1,5 +1,7 @@
-\section{Web Application Firewall Evaluation}
+\section{Evaluation methodology}
 \label{sec:evaluation}
 To bypass a waf, firewall-evasion techniques are discussed and evaluated against the modsecurity firewall with crs 4 {\color{red} TODO, den ersten satz nochmal überarbeiten}
 
 Requests are being sent as a html body as well as a query param.
+
+Black Box testing methodology, but allowed access to logs in order to be more efficient with finding bypassing payloads. Idea: be an attacker with an advantage (use similar resources to an attacker and mimic a real scenario, but save time and test thoroughly[target: test the waf, so its smart to try and circumvent the rules] through knowing the rules). doing blackbox test alone would risk missing some bypasses that can be created using an approach that allows access to firewall logs. it would propose security through obscurity
