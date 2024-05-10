@@ -1,10 +1,16 @@
 \section{Evaluation methodology}
 \label{sec:evaluation}
-To bypass a waf, firewall-evasion techniques are discussed and evaluated against the modsecurity firewall with crs 4 {\color{red} TODO, den ersten satz nochmal überarbeiten}
+To answer the previously mentioned question
+\begin{quote} "How well can web application firewalls in their generic standard configuration protect a web application against targeted malicious requests?"
+\end{quote}
+a Gray Box testing strategy was employed. Tests were conducted inpersonating an attacker persona, much like in Black Box testing.
+To be more efficient in finding payloads that evade the filtering of the WAF, attention to the firewall logs was paid during testing.
 
-Requests are being sent as a html body as well as a query param.
-
-Black Box testing methodology, but allowed access to logs in order to be more efficient with finding bypassing payloads. Idea: be an attacker with an advantage (use similar resources to an attacker and mimic a real scenario, but save time and test thoroughly[target: test the waf, so its smart to try and circumvent the rules] through knowing the rules). doing blackbox test alone would risk missing some bypasses that can be created using an approach that allows access to firewall logs. it would propose security through obscurity
+Testing was done in two steps. In the first step, the original test-payloads were modified using a single evasion technique.
+In the second step, multiple evasion techniques were used to modify the original test-payloads.
+The test-payloads in the second step were iteratively modified based on the firewall logs.
+As the firewall logs state the per-request specific matched data and rule that cause the rejection of the request, through analyzing the firewall logs, it is possible to subsequently apply evasion techniques that would circumvent the reason mentioned in the logs.
+An attempt was made to develop firewall evading payloads by following the iterative cycle of sending a request with a malicious payload, analyzing the reason(s) why the WAF blocked the request and subsequently modifying the payload. In all requests, the payload was sent in the request body. For a list of all original-payloads, see Listing~\ref{lst:originalpayloads}.
 
 All tests have been conducted in a lab environment composed of simple web servers to receive requests that pass the firewall.
 The web servers are reachable via an nginx reverse proxy that is compiled with the ModSecurity-nginx connector module. Nginx runs on a Debian Bookworm host with ModSecurity installed.

