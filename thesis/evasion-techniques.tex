@@ -43,17 +43,17 @@ Ally Petitt suggests using comments inside SQL statements to break up SQL keywor
 \subsubsection{Charset alternation}
 To indicate the original media type prior to any applied content encoding, the HTTP \verb|Content-Type| representation header is used.
 It can be used in requests by the client to tell the server what type of data is actually sent.
-\verb|charset| is a possible directive, that specifies the character encoding standard. 
+\verb|charset| is a possible directive, that specifies the character encoding standard.
 It can be supplied with the \verb|Content-Type| header. \cite{http/contenttype}
 If a web server is supporting requests in different encoding standards, but the WAF is not configured to parse certain encoding standards, the WAF may not recognize such encoded request as malicious.
 
-The payload \verb|'<script>alert("xss")</script>'| becomes \\ 
+The payload \verb|'<script>alert("xss")</script>'| becomes \\
 \verb|'L%A2%83%99%89%97%A3n%81%93%85%99%A3M%7F%A7%A2%A2%7F%5DLa%A2%83%99%89%97%A3n'|
-after encoding the payload to the charset \verb|IBM037| followed by percent encoding. \\ 
-Meanwhile the same payload in \verb|UTF-8| followed by percent encoding: \\
+after encoding the payload to the charset \verb|IBM037| followed by percent encoding. \\
+This differs from the same payload in \verb|UTF-8| followed by percent encoding: \\
 \verb|'%3Cscript%3Ealert%28%22xss%22%29%3C%2Fscript%3E'| \\
-\verb|UTF-8| encoding is the standard for URIs \cite{rfc3986} \\
-Technique by \cite{medium/allypetitt}. 
+\verb|UTF-8| encoding is the standard for URIs according to RFC-3986. \cite{rfc3986} \\
+Technique by \cite{medium/allypetitt}.
 
 
 \subsection{XSS Payloads}
@@ -70,12 +70,11 @@ Technique by \cite{medium/allypetitt}
 
 \subsubsection{Space replace}
 A regex filter that is expecting a space inside a html tag at certain positions can be evaded by replacing the space with a \verb|/|.
-For instance, \verb|<img src=1 onerror=alert('XSS')>| becomes \verb|<img/src=1/onerror=alert('XSS')>|.
+For instance, \verb|<img src="1" onerror="alert('XSS')">| becomes \verb|<img/src="1"/onerror="alert('XSS')">|.
 Technique by \cite{medium/allypetitt}
 
 \subsubsection{HTML encoding}
 see the <a> thing
-
 
 \subsubsection{From charcode}
 String.fromCharCode(0x4c,105,0x6e,117,120) \cite{asecsite/jsobf1}

