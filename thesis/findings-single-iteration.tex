@@ -2,49 +2,20 @@
 This chapter states the evaluation results of a single iteration of application of an evasion technique to the specified payloads. If a considerable (from the perspective of the author of this work) bypass was found, the result will be detailed. Evaluation results of blocked requests are referred to in attachment.
 
 
-unicode tests:
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=unicode tests \$\{`alert`\}, label={lst:unicodetests}]
-<payload>${`alert`}</payload>
-<message>"Remote Command Execution: Unix Shell Expression Found"</message>
-<file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
-<fileDetails>[line "291"] [id "932130"]<fileDetails>
-<MatchedData>"${`alert`}"</MatchedData>
-
-<payload>\u0024{alert`}</payload>
-<message>"Possible Unicode character bypass detected"</message>
-<file>"/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf"</file>
-<fileDetails>[line "1263"] [id "920540"]<fileDetails>
-<MatchedData>"x5cu0024"</MatchedData>
-
-<payload>encodeURIComponent('\u0024{`alert`}')</payload>
-<payload>%24%7B%60alert%60%7D</payload>
-<message>"Remote Command Execution: Unix Shell Expression Found"</message>
-<file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
-<fileDetails>[line "291"] [id "932130"]<fileDetails>
-<MatchedData>"${`alert`}"</MatchedData>
-\end{lstlisting}
+\subsubsection{Unicode in JSON}
+\label{sec:unicodeinjsontest}
+The ModSecurity firewall detects and blocks requests containing \verb|${| followed by a closing \verb|}| after an arbitrary number of characters in between.
+Tests have shown that using Unicode encoding in JSON and substituting the \verb|$| in a JSON request with \verb|\u0024| evades the previously mentioned detection, but triggers another firewall rule: \verb|Possible Unicode character bypass detected|.
+(see Listing~\ref{lst:jsonunicodetests})
 
 
-url encoding: the modsecurity firewall detects url encoding. when sending example requests in plain and urlencoded forms, the requests get blocked. (See Listing~\ref{lst:urlencodedexampleblocked})
-
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=url encoded example blocked, label={lst:urlencodedexampleblocked}]
-<payload>alert(`${new Date()}`)</payload>
-<payload>alert(%60%24%7Bnew%20Date()%7D%60)</payload>
-<message>"Remote Command Execution: Unix Shell Expression Found"</message>
-<file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
-<fileDetails>[line "291"] [id "932130"]<fileDetails>
-<MatchedData>"${new date()}"</MatchedData>
-
-<message>"Javascript method detected"</message>
-<file>"/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
-<fileDetails>[line "714"] [id "941390"]<fileDetails>
-<MatchedData>"alert("</MatchedData>
-\end{lstlisting}
+\subsubsection{Percent encoding}
+The ModSecurity firewall detects some percent-encoded payloads. Requests with plain as well as percent-encoded payloads were sent to the reverse proxy. All requests triggered the same rules. (See Listing~\ref{lst:urlencodedexampleblocked})
 
 
 \subsection{Tagged Template Literals}
-As you can see in Listing~\ref{lst:alertXSSblocked}, the payload \verb|alert('XSS')| is being blocked by the tested firewall.
-After substituting the function call using \verb|('XSS')| with a Tagged Template Literal in the form of \verb|alert`XSS`|, the payload successfully bypasses the firewall and reaches the web server. (Listing~\ref{lst:alertXSSbypass}) 
+As stated in Listing~\ref{lst:alertXSSblocked}, the payload \verb|alert('XSS')| is being blocked by the tested firewall.
+After substituting the function call using \verb|('XSS')| with a Tagged Template Literal in the form of \verb|alert`XSS`|, the payload successfully bypasses the firewall and reaches the web server. (Listing~\ref{lst:alertXSSbypass})
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=alert("XSS") blocked, label=lst:alertXSSblocked]
 <payload>alert("XSS")</payload>
@@ -57,3 +28,5 @@ After substituting the function call using \verb|('XSS')| with a Tagged Template
 <payload>alert("XSS")</payload>
 <bypass>alert`XSS`</payload>
 \end{lstlisting}
+
+

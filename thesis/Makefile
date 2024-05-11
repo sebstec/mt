@@ -4,7 +4,7 @@ all:
 	mkdir -p ./build
 	mkdir -p ./pdf
 	cp ./${NAME_OF_DOC}.tex ./build/${NAME_OF_DOC}.tex
-	latexmk -pdf -output-directory=build ${NAME_OF_DOC}.tex 
+	latexmk -pdflatex=lualatex -pdf -output-directory=build ${NAME_OF_DOC}.tex 
 	# clear all build files and then make
 	# latexmk -gg -pdf -output-directory=build ${NAME_OF_DOC}.tex 
 	# for documents with literature references
