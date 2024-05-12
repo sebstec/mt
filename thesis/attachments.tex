@@ -25,7 +25,8 @@
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=url encoded example blocked, label={lst:urlencodedexampleblocked}]
 <payload>alert(`${new Date()}`)</payload>
-<payload>alert%28%60%24%7Bnew+Date%28%29%7D%60%29</payload>
+<payload>urllib.parse.quote('alert(`${new Date()}`)')</payload>
+<payload>'alert%28%60%24%7Bnew%20Date%28%29%7D%60%29'</payload>
 <message>"Remote Command Execution: Unix Shell Expression Found"</message>
 <file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
 <fileDetails>[line "291"] [id "932130"]<fileDetails>
@@ -39,10 +40,17 @@
 
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=unicode escape in json with additional percent encoding, label={lst:jsonunicodeurlenctest}]
-<payload>urllib.parse.quote_plus('{ "body": "alert\\u0024{1}" }')</payload>
-<payload>%7B+%22body%22%3A+%22alert%5Cu0024%7B1%7D%22+%7D</payload>
+<payload>urllib.parse.quote('{ "body": "alert\\u0024{1}" }')</payload>
+<payload>%7B%20%22body%22%3A%20%22alert%5Cu0024%7B1%7D%22%20%7D</payload>
 <message>"Possible Unicode character bypass detected"</message>
 <file>"/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf"</file>
 <fileDetails>[line "1263"] [id "920540"]<fileDetails>
 <MatchedData>"x5cu0024"</MatchedData>
+\end{lstlisting}
+
+
+\begin{lstlisting}[style=basicStyle, caption=url encoded example pass, label={lst:doublepercentencoding}]
+urllib.parse.quote(urllib.parse.quote('alert(`${new Date()}`)'))
+returns
+alert%2528%2560%2524%257Bnew%2520Date%2528%2529%257D%2560%2529
 \end{lstlisting}

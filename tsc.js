@@ -47,13 +47,25 @@ setTimeout(() => {
 
 	// [][`constructor`][`constructor`]`a${`al` + [open + []][0][11] + `rt` + [open + []][0][13] + [`"`][0] + `Oneconsult` + [`"`][0] + [open + []][0][14]}```;
 	// [][`constructor`][`constructor`]`var s = 'alert' + [open + []][0][13] + '2' + [open + []][0][14];[]['constructor']['constructor']('alert' + [open + []][0][13] + '2' + [open + []][0][14])()```;
-	console.log(encodeURIComponent('<script>alert("xss")</script>'))
-	console.log(encodeURIComponent('\nabc'))
-	console.log(encodeHTMLEntities('\nabc'))
+	// []['constructor']['constructor']('var s = "secret";promp' + 't("something", s)')();
+	// []['constructor']['constructor']`a${'var s = "secret";promp' + 't`something\u{0024}{s}`'}```;
+	// console.log('\u{0024}')
+	// console.log(encodeURIComponent("[]['constructor']['constructor']`a\uFE69{var s = \"secret\";promp' + 't`something\uFE69{s}`'}```"));
+	// console.log("[]['constructor']['constructor']`a﹩{'var s = \"secret\";promp' + 't`something﹩{s}`'}```".normalize('NFKC'));
+	// eval("[]['constructor']['constructor']`a﹩{'var s = \"secret\";promp' + 't`something﹩{s}`'}```".normalize('NFKC'));
+	
+	// alert(`${new Date()}`)
+	console.log("alert(`${new Date()}`")
+	eval(decodeURIComponent(decodeURIComponent("alert%2528%2560%2524%257Bnew%2520Date%2528%2529%257D%2560%2529")))
+	// [][`constructor`][`constructor`]`a${'al' + [open + []][0][11] + 'rt' + [open + []][0][13] + ['"'][0] + 'Oneconsult' + ['"'][0] + [open + []][0][14]}```;
+	console.log(encodeURIComponent('[][`constructor`][`constructor`]`a\uFE69{`al`+[open+[]][0][11]+`rt`+[open+[]][0][13]+[`"`][0]+`Oneconsult`+[`"`][0]+[open+[]][0][14]}```'))
+	console.log(encodeURIComponent('{ "body": "alert\\u0024{1}" }'))
+	console.log(encodeURIComponent('alert(`${new Date()}`)'))
+	console.log(encodeHTMLEntities('$'))
 	const a = replaceWithHTMLCharCode('<script>alert(22)</script>')
 	console.log(a)
 	console.log(decodeHTMLEntities(a))
-	// console.log(JSON.parse('{ "body": "alert(1)" }'));
+	console.log(JSON.parse('{ "body": "alert\\u0024{1}" }'));
 	// console.log(JSON.stringify(encodeURIComponent('\u0024{`alert`}')))
 	// console.log(encodeURIComponent('alert(`${new Date()}`)'))
 	// console.log(encodeURIComponent(encodeURIComponent('alert(`${new Date()}`)')))
@@ -99,8 +111,7 @@ setTimeout(() => {
 	// [][`constructor`][`constructor`]('pro' + 'mpt`seeValueInInput$' + [open + []][0][16] + '1+2' + [open + []][0][36] + ':`')();
 	// [][`constructor`][`constructor`]('pro' + 'mpt`seeValueInInput${2+2}:`')();
 	//
-	function replaceWithHTMLCharCode(text)
-	{
+	function replaceWithHTMLCharCode(text) {
 		return text.replace(/[\u0000-\u9999<>\&]/g, i => '&#' + i.charCodeAt(0) + ';')
 	}
 
