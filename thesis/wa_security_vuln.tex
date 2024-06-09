@@ -1,8 +1,14 @@
-\subsection{Web Application Security and Common Vulnerabilities}
+\subsection{Web application security and security risks}
 According to synopsys, the concept of \quotes{Web Application Security} 
 \begin{quote}
 involves a collection of security controls engineered into a Web application to protect its assets from potentially malicious agents. Web applications, like all software, inevitably contain defects. Some of these defects constitute actual vulnerabilities that can be exploited, introducing risks to organizations. Web application security defends against such defects. It involves leveraging secure development practices and implementing security measures throughout the software development life cycle (SDLC), ensuring that design-level flaws and implementation-level bugs are addressed.
 \end{quote}
-Common vulnerabilities in web applications include ... \cite{OWASP/Top10}
+Developers and publishers of Web applications are leveraging secure development practices to prevent security risks like those specified in the OWASP Top 10 document. 
+The OWASP Top 10 standard awareness document for developers and web application security represents a broad consensus about the most critical security risks to web applications.
+The OWASP Top 10 document includes security risks based on vulnerabilities that could be exploited using malicious HTTP requests. 
+Broken Access Control is the top 1 security risk in the OWASP Top 10 list from 2021.
+Broken Access Control enables users to act outside of their intenden permissions, examples include access to undisclosed information, modification or destruction of data and performing business functions outside the users limits. \cite{OWASP/BrokenAccessControl}
+... \cite{OWASP/Top10}
+{\color{red} perfect security -> owasp top 10 wouldnt exists, mistakes even though sdlc, see also owasp top 10 -> common vuln -> defense in depth -> waf }
 Different kinds of XSS ...
 {\color{red}TODO}
