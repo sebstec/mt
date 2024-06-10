@@ -11,7 +11,7 @@ It includes security risks based on vulnerabilities that could be exploited usin
 Broken Access Control is the top 1 security risk in the OWASP Top 10 list from 2021.
 Broken Access Control enables users to act outside of their intended permissions.
 Examples include access to undisclosed information, modification or destruction of data and performing business functions outside the users limits.
-OWASP mentiones an attack scenario on an Web application with broken access control where the attacker force browses to target URLs. \cite{OWASP/BrokenAccessControl} Force browsing is described by the OWAS Foundation as follows:
+OWASP mentiones an attack scenario on an Web application with broken access control where the attacker force browses to target URLs. \cite{OWASP/BrokenAccessControl,OWASP/Risks2021} Force browsing is described by the OWASP Foundation as follows:
 \begin{quote}
 	Forced browsing is an attack where the aim is to enumerate and access resources that are not referenced by the application, but are still accessible.
 
@@ -22,7 +22,7 @@ OWASP mentiones an attack scenario on an Web application with broken access cont
 	This attack is also known as Predictable Resource Location, File Enumeration, Directory Enumeration, and Resource Enumeration.
 	If the target URL corresponds to an admin page, admin privileges should be required to access the page. \cite{OWASP/forcebrowsing}
 \end{quote}
-If a user without admin privileges can access the page, the access control is broken. 
+If a user without admin privileges can access the page, the access control is broken.
 
 PhpMyAdmin is a Web application that allows users to manage MySQL databases over the web.
 In some cases, the user interface of phpMyAdmin can be accessed via the URL \verb|http://servername/phpmyadmin| after publishing the application via a Web server. Single signon authentication is supported by phpWebAdmin. \cite{phpmyadmin/overview,phpmyadmin/quickinstall,ubuntu/phpmyadmin,phpmyadmin/signon}
@@ -32,6 +32,48 @@ As an additional security control in this case, a Web application firewall could
 If database administration is usually done locally, this would suffice.
 Alternatively, a whitelist of remote addresses allowed to access \verb|/phpmyadmin| could be used in the Web application firewall configuration.
 
+	{\color{red} maybe add ssrf here: \\ \verb|https://owasp.org/Top10/A10_2021-Server-Side_Request_Forgery_\%28SSRF\%29/|}
+
+Injection is the top 1 security risk in the OWASP Top 10 list from 2017.
+An application is vulnerable to attack when, among others, user-input is incorrectly validated, sanitized or filtered by the application.
+The OWASP Foundation mentiones the common weakness CWE-79: \gls{xss} as one of the weaknesses caused by incorrectly neutralized user-controllable input. \cite{OWASP/Risks2017,OWASP/Injection} \gls{xss} vulnerabilities are described in the \gls{cwe} as follows:
+\begin{quote}
+	Cross-site scripting (XSS) vulnerabilities occur when:
+
+	Untrusted data enters a web application, typically from a web request.
+	The web application dynamically generates a web page that contains this untrusted data.
+	During page generation, the application does not prevent the data from containing content that is executable by a web browser, such as JavaScript, HTML tags, HTML attributes, mouse events, Flash, ActiveX, etc.
+	A victim visits the generated web page through a web browser, which contains malicious script that was injected using the untrusted data.
+	Since the script comes from a web page that was sent by the web server, the victim's web browser executes the malicious script in the context of the web server's domain.
+	This effectively violates the intention of the web browser's same-origin policy, which states that scripts in one domain should not be able to access resources or run code in a different domain.
+
+	There are three main kinds of XSS:
+
+	\textbf{Type 1: Reflected XSS (or Non-Persistent)} - The server reads data directly from the HTTP request and reflects it back in the HTTP response. Reflected XSS exploits occur when an attacker causes a victim to supply dangerous content to a vulnerable web application, which is then reflected back to the victim and executed by the web browser. The most common mechanism for delivering malicious content is to include it as a parameter in a URL that is posted publicly or e-mailed directly to the victim. URLs constructed in this manner constitute the core of many phishing schemes, whereby an attacker convinces a victim to visit a URL that refers to a vulnerable site. After the site reflects the attacker's content back to the victim, the content is executed by the victim's browser.
+
+	\textbf{Type 2: Stored XSS (or Persistent)} - The application stores dangerous data in a database, message forum, visitor log, or other trusted data store. At a later time, the dangerous data is subsequently read back into the application and included in dynamic content. From an attacker's perspective, the optimal place to inject malicious content is in an area that is displayed to either many users or particularly interesting users. Interesting users typically have elevated privileges in the application or interact with sensitive data that is valuable to the attacker. If one of these users executes malicious content, the attacker may be able to perform privileged operations on behalf of the user or gain access to sensitive data belonging to the user. For example, the attacker might inject XSS into a log message, which might not be handled properly when an administrator views the logs.
+
+	\textbf{Type 0: DOM-Based XSS} - In DOM-based XSS, the client performs the injection of XSS into the page; in the other types, the server performs the injection. DOM-based XSS generally involves server-controlled, trusted script that is sent to the client, such as Javascript that performs sanity checks on a form before the user submits it. If the server-supplied script processes user-supplied data and then injects it back into the web page (such as with dynamic HTML), then DOM-based XSS is possible.
+
+	Once the malicious script is injected, the attacker can perform a variety of malicious activities. The attacker could transfer private information, such as cookies that may include session information, from the victim's machine to the attacker. The attacker could send malicious requests to a web site on behalf of the victim, which could be especially dangerous to the site if the victim has administrator privileges to manage that site. Phishing attacks could be used to emulate trusted web sites and trick the victim into entering a password, allowing the attacker to compromise the victim's account on that web site. Finally, the script could exploit a vulnerability in the web browser itself possibly taking over the victim's machine, sometimes referred to as "drive-by hacking."
+
+	In many cases, the attack can be launched without the victim even being aware of it. Even with careful users, attackers frequently use a variety of methods to encode the malicious portion of the attack, such as URL encoding or Unicode, so the request looks less suspicious. \cite{mitre/XSS}
+\end{quote}
+
+As an additional protection mechanism, Web application firewalls can be used to block \gls{xss} payloads in HTTP requests. In Web applications where script code transmission is not part of the business, the rules intended to block requests containing \gls{xss} payloads could be pretty strict.
+
+Force browsing as well as XSS payloads will be the main payloads tested in the proceeding of this work. {\color{red} TODO: CHECK THIS}
+Yet Force browsing and XSS are only a fraction of possible weaknesses in Web applications.
+
+When employing a Web application firewall as an 'additional protection mechanism', a Defense-in-Depth strategy is followed.
+The first layer of defense should be the counter measure inside the Web application, like proper access control and neutralization of user-input. 
+An additional layer of defense is then put on top by employing a Web application firewall.
+If a misconfigured security control in the Web application failes to correctly handle a specific malicious request, there can be a chance that the Web application firewall is configured in a way that detects and blocks the malicious request before it can reach the Web application and cause an incident.
+Avoiding security incidents with the Defense-in-Depth strategy corresponds to
+\begin{quote}
+	the application of multiple countermeasures in a layered or stepwise manner to achieve security objectives. The methodology involves layering heterogeneous security technologies in the common attack vectors to ensure that attacks missed by one technology are caught by another.
+\end{quote}
+as defined by the National Institute of Standards and Technology (NIST). \cite{nist/did}
 
 
 
