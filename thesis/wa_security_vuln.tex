@@ -1,14 +1,41 @@
 \subsection{Web application security and security risks}
-According to synopsys, the concept of \quotes{Web Application Security} 
+According to synopsys, the concept of \quotes{Web Application Security}
 \begin{quote}
-involves a collection of security controls engineered into a Web application to protect its assets from potentially malicious agents. Web applications, like all software, inevitably contain defects. Some of these defects constitute actual vulnerabilities that can be exploited, introducing risks to organizations. Web application security defends against such defects. It involves leveraging secure development practices and implementing security measures throughout the software development life cycle (SDLC), ensuring that design-level flaws and implementation-level bugs are addressed.
+	involves a collection of security controls engineered into a Web application to protect its assets from potentially malicious agents. Web applications, like all software, inevitably contain defects. Some of these defects constitute actual vulnerabilities that can be exploited, introducing risks to organizations. Web application security defends against such defects. It involves leveraging secure development practices and implementing security measures throughout the software development life cycle (SDLC), ensuring that design-level flaws and implementation-level bugs are addressed.
 \end{quote}
-Developers and publishers of Web applications are leveraging secure development practices to prevent security risks like those specified in the OWASP Top 10 document. 
+Developers and publishers of Web applications are leveraging secure development practices to prevent security risks like those specified in the OWASP Top 10 document.
 The OWASP Top 10 standard awareness document for developers and web application security represents a broad consensus about the most critical security risks to web applications.
-The OWASP Top 10 document includes security risks based on vulnerabilities that could be exploited using malicious HTTP requests. 
+It includes security risks based on vulnerabilities that could be exploited using malicious HTTP requests.
+\cite{OWASP/Top10}
+
 Broken Access Control is the top 1 security risk in the OWASP Top 10 list from 2021.
-Broken Access Control enables users to act outside of their intenden permissions, examples include access to undisclosed information, modification or destruction of data and performing business functions outside the users limits. \cite{OWASP/BrokenAccessControl}
-... \cite{OWASP/Top10}
-{\color{red} perfect security -> owasp top 10 wouldnt exists, mistakes even though sdlc, see also owasp top 10 -> common vuln -> defense in depth -> waf }
+Broken Access Control enables users to act outside of their intended permissions.
+Examples include access to undisclosed information, modification or destruction of data and performing business functions outside the users limits.
+OWASP mentiones an attack scenario on an Web application with broken access control where the attacker force browses to target URLs. \cite{OWASP/BrokenAccessControl} Force browsing is described by the OWAS Foundation as follows:
+\begin{quote}
+	Forced browsing is an attack where the aim is to enumerate and access resources that are not referenced by the application, but are still accessible.
+
+	An attacker can use Brute Force techniques to search for unlinked contents in the domain directory, such as temporary directories and files, and old backup and configuration files. These resources may store sensitive information about web applications and operational systems, such as source code, credentials, internal network addressing, and so on, thus being considered a valuable resource for intruders.
+
+	This attack is performed manually when the application index directories and pages are based on number generation or predictable values, or using automated tools for common files and directory names.
+
+	This attack is also known as Predictable Resource Location, File Enumeration, Directory Enumeration, and Resource Enumeration.
+	If the target URL corresponds to an admin page, admin privileges should be required to access the page. \cite{OWASP/forcebrowsing}
+\end{quote}
+If a user without admin privileges can access the page, the access control is broken. 
+
+PhpMyAdmin is a Web application that allows users to manage MySQL databases over the web.
+In some cases, the user interface of phpMyAdmin can be accessed via the URL \verb|http://servername/phpmyadmin| after publishing the application via a Web server. Single signon authentication is supported by phpWebAdmin. \cite{phpmyadmin/overview,phpmyadmin/quickinstall,ubuntu/phpmyadmin,phpmyadmin/signon}
+The interface of phpWebAdmin is intended to be accessed by an administrative audience.
+If a user force browses to the specified URL and this page can be accessed by users without administrative privileges through misconfigured single sign on, it is a case of broken access control.
+As an additional security control in this case, a Web application firewall could be used to prohibit any access to the URLs containing the path \verb|/phpmyadmin|.
+If database administration is usually done locally, this would suffice.
+Alternatively, a whitelist of remote addresses allowed to access \verb|/phpmyadmin| could be used in the Web application firewall configuration.
+
+
+
+
+...
+	{\color{red} perfect security -> owasp top 10 wouldnt exists, mistakes even though sdlc, see also owasp top 10 -> common vuln -> defense in depth -> waf }
 Different kinds of XSS ...
-{\color{red}TODO}
+	{\color{red}TODO}
