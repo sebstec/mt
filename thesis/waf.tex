@@ -1,2 +1,58 @@
 \subsection{Web Application Firewall}
-A web application firewall is a firewall acting on the application layer ... {\color{red} TODO}
+In contrast to network firewalls based on IP packet filtering, which operate on layers 3 and 4, a web application firewall is a firewall acting on the application layer.
+
+Users interact with a Web application using their Web browser.
+After instructing the browser to show resources identified by a URI according to the http or https URI Schemes, the Web browser will initiate opening TCP connections to the designated open port on the Web server hosting the Web application.
+Usually the well-known default ports 80 for HTTP connections and 443 for HTTPS connections are being used.
+The TCP connections are used to transport the datagrams of the HTTP connections on the application layer. \cite{rfc7230}
+The Web server and any intermediary gateways inspecting layers 3 and 4 will see open TCP connections initiated from uncontrolled source IP addresses and ports towards the designated destination port and IP address of the Web server.
+From the perspective of an IP packet filtering firewall, all requests towards the Web application look similar in this sense.
+In this configuration, IP packet filtering firewalls can accomplish tasks like rate limiting of incoming connections, among others.
+However, they can not prevent the exploitation of vulnerabilites in the Web application.
+Injection vulnerabilities are exploited using HTTP requests with malicious payloads on the application layer.
+As the IP packet filter firewall exclusively looks at the packets contents corresponding up to the transport layer (session layer in case a stateful firewall is used), the HTTP payloads from the application layer remains unseen.
+To detect and block malicious HTTP requests, a firewall would therefore need to inspect the messages on the application layer. Firewalls inspecting the application layer in a Web application context are called Web application firewalls.
+
+Web application firewalls apply a set of rules to an HTTP conversation.
+These rules determine which traffic is malicious and which traffic is safe.
+The Web application firewall acts as a reverse proxy, an intermediary between client and server that receives, filters and forwards all incoming and outgoing HTTP messages. \cite{OWASP/waf,f5/waf}
+
+Messages originating from a client are first received by the web application firewall.
+At this point, the configured filtering rules are applied and a decision is made if the message is to be forwarded or rejected.
+If the message is considered benign, the web application firewall forwards the message to the server hosting the web application.
+If the message is considered malicious, the web application rejects the message.
+In the case of rejection, the web application will never receive the malicious message and it will stay unaffected by the malicious payload.
+
+HTTP answers originating from a server hosting a web application are also first received by the web application firewall.
+There, rules for outgoing HTTP messages are applied.
+If the content of an HTTP answer is unusual in comparison to the usual outgoing traffic, a rule might match and deny the client from receiving the HTTP answer.
+
+Configuring the web application firewall with which rules to apply to incoming and outgoing traffic requires a balancing act between security and false positives.
+When a genuine HTTP message causes a rule to match, it is described as false positive.
+A stricter ruleset provides more security, but the risk of false positives increases as well.
+The contributors to the OWASP Core Rule Set, which is a generic rule set used by a web application firewall to protect any web application, provide instructions on false positives:
+
+\begin{quote}
+	When a genuine transaction causes a rule from the Core Rule Set to match in error it is described as a false positive. False positives need to be tuned away by writing rule exclusions, [...]
+
+	The Core Rule Set provides generic attack detection capabilities. A fresh CRS deployment has no awareness of the web services that may be running behind it, or the quirks of how those services work. It is possible that genuine transactions may cause some CRS rules to match in error, if the transactions happen to match one of the generic attack behaviors or patterns that are being detected. Such a match is referred to as a false positive, or false alarm.
+
+	False positives are particularly likely to happen when operating at higher paranoia levels [higher paranoia levels correspond to stricter rules]. While paranoia level 1 is designed to cause few, ideally zero, false positives, higher paranoia levels are increasingly likely to cause false positives. Each successive paranoia level introduces additional rules, with higher paranoia levels adding more aggressive rules. As such, the higher the paranoia level is the more likely it is that false positives will occur. That is the cost of the higher security provided by higher paranoia levels: the additional time it takes to tune away the increasing number of false positives. \cite{OWASP/crsfpt}
+\end{quote}
+
+Web application firewalls can be deployed network-based in the form of an hardware appliance, cloud-based integrated with virtual cloud networking services and host-based colocated on the servers where the web applications reside. \cite{palo/waf}
+An example of a host-based Web application firewall is the open-source Libmodsecurity Web application firewall engine.
+It provides the capability to interpret rules written in the ModSecurity SecRules format and apply them to HTTP content provided by an application via connectors.
+The library is consumed by these connectors that interface with web servers and provide the library with a commmon format.
+The ModSecurity project provides connectors for nginx and apache web servers.
+If nginx is compiled and setup with the ModSecurity connector, it can act as a Web application firewall and reverse proxy. \cite{modsec/home, modsec/nginx}
+In this configuration, nginx can be setup to listen for HTTP connections on ports 80 and 443.
+Once a request is incoming, it will be passed to the Libmodsecurity library for the application of filtering rules.
+If no rule(s) match, the request is forwarded to the Web application. The reversed procedure applies for the response, as mentioned earlier.
+For usage with the Libmodsecurity Web application firewall engine, the OWASP Foundation provides the open-source OWASP CoreRuleSet:
+
+\begin{quote}
+	The OWASP® (Open Worldwide Application Security Project) CRS (Core Rule Set) is a free and open-source collection of rules that work with ModSecurity® and compatible web application firewalls (WAFs). These rules are designed to provide easy to use, generic attack detection capabilities, with a minimum of false positives (false alerts), to web applications as part of a well balanced defense-in-depth solution. \cite{OWASP/crshome}
+\end{quote}
+
+A similar setup Web application firewall configured with the OWASP CoreRuleSet will be evaluated in the further course of this work.
