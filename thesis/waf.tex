@@ -35,10 +35,18 @@ The contributors to the OWASP Core Rule Set, which is a generic rule set used by
 \begin{quote}
 	When a genuine transaction causes a rule from the Core Rule Set to match in error it is described as a false positive. False positives need to be tuned away by writing rule exclusions, [...]
 
-	The Core Rule Set provides generic attack detection capabilities. A fresh CRS deployment has no awareness of the web services that may be running behind it, or the quirks of how those services work. It is possible that genuine transactions may cause some CRS rules to match in error, if the transactions happen to match one of the generic attack behaviors or patterns that are being detected. Such a match is referred to as a false positive, or false alarm.
-
-	False positives are particularly likely to happen when operating at higher paranoia levels [higher paranoia levels correspond to stricter rules]. While paranoia level 1 is designed to cause few, ideally zero, false positives, higher paranoia levels are increasingly likely to cause false positives. Each successive paranoia level introduces additional rules, with higher paranoia levels adding more aggressive rules. As such, the higher the paranoia level is the more likely it is that false positives will occur. That is the cost of the higher security provided by higher paranoia levels: the additional time it takes to tune away the increasing number of false positives. \cite{OWASP/crsfpt}
+	The Core Rule Set provides generic attack detection capabilities. A fresh CRS deployment has no awareness of the web services that may be running behind it, or the quirks of how those services work. It is possible that genuine transactions may cause some CRS rules to match in error, if the transactions happen to match one of the generic attack behaviors or patterns that are being detected. Such a match is referred to as a false positive, or false alarm. \cite{OWASP/crsfpt}
 \end{quote}
+
+Rules can be configured in a blacklisting setting or in a whitelisting setting.
+When configuring rules in a whitelisting setting, every possible benign message towards or originating from the Web application needs to be predictable. 
+With this prediction of requests, rules are configured in such a way that they match on the predicted messages. 
+Then the Web application firewall is configured to deny all messages that do not match on any rule. 
+In this setup, the rules act as a whitelist of allowed messages. Unknown and possibly malicious messages are denied by default.
+When configuring rules in a blacklisting setting, the setup is reversed. 
+An effort is made to predict possible malicious messages towards the Web application as well as uncommon messages originating from the Web application.
+Rules are configured to match on these predictions and the Web application firewall is instructed to reject messages that trigger matches on rules. 
+In this setup, the rules act as a blacklist of rejected messages. Unknown and possibly benign messages are allowed by default.
 
 Web application firewalls can be deployed network-based in the form of an hardware appliance, cloud-based integrated with virtual cloud networking services and host-based colocated on the servers where the web applications reside. \cite{palo/waf}
 An example of a host-based Web application firewall is the open-source Libmodsecurity Web application firewall engine.
