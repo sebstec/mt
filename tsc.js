@@ -53,6 +53,9 @@ setTimeout(() => {
 	// console.log(encodeURIComponent("[]['constructor']['constructor']`a\uFE69{var s = \"secret\";promp' + 't`something\uFE69{s}`'}```"));
 	// console.log("[]['constructor']['constructor']`a﹩{'var s = \"secret\";promp' + 't`something﹩{s}`'}```".normalize('NFKC'));
 	// eval("[]['constructor']['constructor']`a﹩{'var s = \"secret\";promp' + 't`something﹩{s}`'}```".normalize('NFKC'));
+	alert`${1+1}`
+	alert(["",""])
+	prompt`${1+1}`
 	
 	// alert(`${new Date()}`)
 	console.log("alert(`${new Date()}`")
