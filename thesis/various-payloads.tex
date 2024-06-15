@@ -1,0 +1,75 @@
+\subsection{Various Payloads}
+
+\subsubsection{Payload size}
+
+\subsubsection{Unicode encoding in JSON}
+RFC 4627 \quotes{The application/json Media Type for JavaScript Object Notation} states under section 2.5 \quotes{Strings}:
+\begin{quote}
+	The representation of strings is similar to conventions used in the C
+	family of programming languages.  A string begins and ends with
+	quotation marks.  All Unicode characters may be placed within the
+	quotation marks except for the characters that must be escaped:
+	quotation mark, reverse solidus, and the control characters (U+0000
+	through U+001F).
+
+	Any character may be escaped.  If the character is in the Basic
+	Multilingual Plane (U+0000 through U+FFFF), then it may be
+	represented as a six-character sequence: a reverse solidus, followed
+	by the lowercase letter u, followed by four hexadecimal digits that
+	encode the character's code point.  The hexadecimal letters A though
+	F can be upper or lowercase.  So, for example, a string containing
+	only a single reverse solidus character may be represented as
+	"\u005C". \cite{rfc4627}
+\end{quote}
+As escaping any character should be possible in a JSON payload, firewall filters that look for a certain sequence of characters might be evaded by escaping one or more characters from that sequence.
+
+
+\subsubsection{Unicode normalization}
+{\color{red}
+\cite{unicode/normalization}
+\cite{medium/allypetitt}
+}
+
+
+\subsubsection{Case alternation}
+In order to evade regex filerting by the WAF, the case of a payload can be alternated. \cite{medium/allypetitt}
+Modern regex flavors allow the application of modifiers to parts of the regular expression.
+One such modifier is \verb|(?i)|. It makes the regex case insensitive. \cite{regex/jan} Only when this modifier is not used, can a payload evade regex filtering using case alternation.
+
+Taking the XSS payload \verb|<script>alert('XSS')</script>| as an example, after applying case alternation, it might result in a payload in the form of: \verb|<sCrIpT>alert('XSS')</sCriPt>|.
+Another example is file access on a wrongfully public file.
+The Windows file system trests file and directory names as case-insensitive by default. \cite{windows/casesensitive}
+On a web server hosted on Windows that exposes a .env file with stored secrets, both urls: \\ \verb|http://127.0.0.1:8000/.env| and \verb|http://127.0.0.1:8000/.enV| \\
+are treated equally. {\color{red}TODO: verified by the author using the python webserver module on windows 10 [should this be here?]}
+
+
+\subsubsection{Comment interference}
+In some context, comments can be used to break up statements. Regarding SQL, the Oracle Database SQL Reference states:
+\begin{quote}
+	A comment can appear between any keywords, parameters, or punctuation marks in a statement. You can include a comment in a statement in two ways:
+	\begin{itemize}
+		\item Begin the comment with a slash and an asterisk (/*). Proceed with the text of the comment. This text can span multiple lines. End the comment with an asterisk and a slash (*/). The opening and terminating characters need not be separated from the text by a space or a line break.
+		\item Begin the comment with -- (two hyphens). Proceed with the text of the comment. This text cannot extend to a new line. End the comment with a line break.
+	\end{itemize}
+	\cite{oracle/sqlcomments}
+\end{quote}
+Ally Petitt suggests using comments inside SQL statements to break up SQL keywords: \verb|?id=1+un/**/ion+sel/**/ect+1,2,3--| \cite{medium/allypetitt}
+
+
+\subsubsection{Percent encoding}
+
+
+\subsubsection{Charset alternation}
+To indicate the original media type prior to any applied content encoding, the HTTP \verb|Content-Type| representation header is used.
+It can be used in requests by the client to tell the server what type of data is actually sent.
+\verb|charset| is a possible directive, that specifies the character encoding standard.
+It can be supplied with the \verb|Content-Type| header. \cite{http/contenttype}
+If a web server is supporting requests in different encoding standards, but the WAF is not configured to parse certain encoding standards, the WAF may not recognize such encoded request as malicious.
+
+The payload \verb|'<script>alert("xss")</script>'| becomes \\
+\verb|'L%A2%83%99%89%97%A3n%81%93%85%99%A3M%7F%A7%A2%A2%7F%5DLa%A2%83%99%89%97%A3n'|
+after encoding the payload to the charset \verb|IBM037| followed by percent encoding. \\
+This differs from the same payload in \verb|UTF-8| followed by percent encoding: \\
+\verb|'%3Cscript%3Ealert%28%22xss%22%29%3C%2Fscript%3E'| \\
+\verb|UTF-8| encoding is the standard for URIs according to RFC-3986. \cite{rfc3986} \\
+Technique by \cite{medium/allypetitt}.

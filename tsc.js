@@ -53,21 +53,32 @@ setTimeout(() => {
 	// console.log(encodeURIComponent("[]['constructor']['constructor']`a\uFE69{var s = \"secret\";promp' + 't`something\uFE69{s}`'}```"));
 	// console.log("[]['constructor']['constructor']`a﹩{'var s = \"secret\";promp' + 't`something﹩{s}`'}```".normalize('NFKC'));
 	// eval("[]['constructor']['constructor']`a﹩{'var s = \"secret\";promp' + 't`something﹩{s}`'}```".normalize('NFKC'));
-	alert`${1+1}`
-	alert(["",""])
-	prompt`${1+1}`
-	
+	// alert`${1+1}`
+	// alert(["",""])
+	// prompt`${1+1}`
+	console.log(['c','a','b'].toSorted())
+
 	// alert(`${new Date()}`)
-	console.log("alert(`${new Date()}`")
-	eval(decodeURIComponent(decodeURIComponent("alert%2528%2560%2524%257Bnew%2520Date%2528%2529%257D%2560%2529")))
+	console.log("alert(`${new Date()}`");
+	eval(
+		decodeURIComponent(
+			decodeURIComponent(
+				"alert%2528%2560%2524%257Bnew%2520Date%2528%2529%257D%2560%2529",
+			),
+		),
+	);
 	// [][`constructor`][`constructor`]`a${'al' + [open + []][0][11] + 'rt' + [open + []][0][13] + ['"'][0] + 'Oneconsult' + ['"'][0] + [open + []][0][14]}```;
-	console.log(encodeURIComponent('[][`constructor`][`constructor`]`a\uFE69{`al`+[open+[]][0][11]+`rt`+[open+[]][0][13]+[`"`][0]+`Oneconsult`+[`"`][0]+[open+[]][0][14]}```'))
-	console.log(encodeURIComponent('{ "body": "alert\\u0024{1}" }'))
-	console.log(encodeURIComponent('alert(`${new Date()}`)'))
-	console.log(encodeHTMLEntities('$'))
-	const a = replaceWithHTMLCharCode('<script>alert(22)</script>')
-	console.log(a)
-	console.log(decodeHTMLEntities(a))
+	console.log(
+		encodeURIComponent(
+			'[][`constructor`][`constructor`]`a\uFE69{`al`+[open+[]][0][11]+`rt`+[open+[]][0][13]+[`"`][0]+`Oneconsult`+[`"`][0]+[open+[]][0][14]}```',
+		),
+	);
+	console.log(encodeURIComponent('{ "body": "alert\\u0024{1}" }'));
+	console.log(encodeURIComponent("alert(`${new Date()}`)"));
+	console.log(encodeHTMLEntities("$"));
+	const a = replaceWithHTMLCharCode("<script>alert(22)</script>");
+	console.log(a);
+	console.log(decodeHTMLEntities(a));
 	console.log(JSON.parse('{ "body": "alert\\u0024{1}" }'));
 	// console.log(JSON.stringify(encodeURIComponent('\u0024{`alert`}')))
 	// console.log(encodeURIComponent('alert(`${new Date()}`)'))
@@ -115,17 +126,20 @@ setTimeout(() => {
 	// [][`constructor`][`constructor`]('pro' + 'mpt`seeValueInInput${2+2}:`')();
 	//
 	function replaceWithHTMLCharCode(text) {
-		return text.replace(/[\u0000-\u9999<>\&]/g, i => '&#' + i.charCodeAt(0) + ';')
+		return text.replace(
+			/[\u0000-\u9999<>\&]/g,
+			(i) => "&#" + i.charCodeAt(0) + ";",
+		);
 	}
 
 	function encodeHTMLEntities(text) {
-		var textArea = document.createElement('textarea');
+		var textArea = document.createElement("textarea");
 		textArea.innerText = text;
 		return textArea.innerHTML;
 	}
 
 	function decodeHTMLEntities(text) {
-		var textArea = document.createElement('textarea');
+		var textArea = document.createElement("textarea");
 		textArea.innerHTML = text;
 		return textArea.value;
 	}

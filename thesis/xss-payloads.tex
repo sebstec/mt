@@ -1,0 +1,158 @@
+\subsection{XSS Payloads}
+
+\subsubsection{Tag modification}
+In a case, where regex filters are configured to look for html tags, modifying html tags might make a payload evade the filter. Possible modifications include:
+\begin{itemize}
+	\item prepending the tag with an additional \verb|<|: \verb|<<script>alert('XSS')</script>|
+	\item omitting the closing tag: \verb|<script>alert('XSS')|
+	\item using double open angle brackets: \verb|<iframe src=javascript:alert('XSS') <|
+	\item using uncommon tags: \\ \verb|<STYLE>.classname{background-image:url("javascript:alert(XSS)");}</STYLE>|
+\end{itemize}
+Technique by \cite{medium/allypetitt}
+
+\subsubsection{Space replace}
+A regex filter that is expecting a space inside a html tag at certain positions can be evaded by replacing the space with a \verb|/|.
+For instance, \verb|<img src="1" onerror="alert('XSS')">| becomes \verb|<img/src="1"/onerror="alert('XSS')">|.
+Technique by \cite{medium/allypetitt}
+
+\subsubsection{HTML encoding}
+{\color{red}TODO: see the <a> thing}
+
+\subsubsection{From charcode}
+{\color{red}TODO: String.fromCharCode(0x4c,105,0x6e,117,120) \cite{asecsite/jsobf1}}
+
+\subsubsection{String passing}
+\subsubsection{JavaScript escaping}
+\label{sec:jsescape}
+{\color{red} TODO:
+\begin{itemize}
+\item js hex escape 
+\item js octal escape
+\item js normal character escape
+\item js unicode escape es6
+\end{itemize}
+}
+
+\subsubsection{Tagged Template Literals}
+\label{sec:taggedtemplateliterals}
+Tagged Template Literals can be used in JavaScript payloads to avoid detection of JavaScript function calls in an http request. Dr. Alex Rauschmeyer explains Tagged Template Literals in ``Exploring ES6'':
+\begin{quotation} Tagged Template Literals are function calls whose parameters are provided via template literals. [...]
+	The following is a tagged template literal (short: tagged template):
+	\begin{lstlisting}
+tagFunction`Hello ${firstName} ${lastName}!`
+\end{lstlisting}
+	Putting a template literal after an expression triggers a function call, similar to how a parameter list (comma-separated values in parentheses) triggers a function call. The previous code is equivalent to the following function call (in reality, first parameter is more than just an Array, but that is explained later).
+	\begin{lstlisting}
+tagFunction(['Hello ', ' ', '!'], firstName, lastName)
+\end{lstlisting}
+	Thus, the name before the content in backticks is the name of a function to call, the tag function.
+	\cite{exploringes6/templatelit}
+\end{quotation}
+
+As the function \verb|alert| can be called with an array as first parameter, it is possible to substitute the payload with \verb|alert`XSS`|. The substitute payload might evade regex filtering that looks for a function name followed by an opening \verb|(|.
+Technique by \cite{onecons/wafbypass}.
+
+
+\subsubsection{eval() function}
+\label{sec:eval}
+
+JavaScript payloads that are being passed in string format can be executed using the eval function. The \verb|eval()| function will evaluate the source string given as an argument and return its completion value. \cite{js/eval}
+A possible usecase for \verb|eval()| in the quest to bypass a \gls{waf} is the splitting of function names that would cause a HTTP request to get rejected by the firewall.
+Looking at Listing~\ref{lst:alertXSSblocked}, it is clear that the function call \verb|alert('XSS')| is being blocked by the ModSecurity firewall using CRS 4.1.0.
+To avoid a match on \verb|alert(|, it is possible to split the function call into parts \verb|al|, \verb|e| and \verb|rt('XSS')| by using string concatenation in the form of \verb|`al` + `e` + `rt('XSS')`|.
+Sending the payload in this form will not cause the the desired effect, as a JavaScript interpreter will interpret the payload as a string instead of a function call to the \verb|alert()| function.
+Using the \verb|eval()| function in combination with the splitted string solves this problem. Passing the string \verb|`al` + `e` + `rt('XSS')`| in the form of \verb|eval(`al` + `e` + `rt('XSS')`)| as an argument to the \verb|eval()| function will cause the string to be evaluated and interpreted. Technique inspired by \cite{onecons/wafbypass}.
+The ModSecurity firewall using CRS 4.1.0. checks for usage of the function \verb|eval()| and tries to block requests containing it. An example is listed in Listing~\ref{lst:evalalertXSSblocked}.
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=eval(`al` + `e` + `rt('XSS')`) blocking example, label={lst:evalalertXSSblocked}]
+<payload>eval(`al` + `e` + `rt('XSS')`)</payload>
+<file>"rules/REQUEST-933-APPLICATION-ATTACK-PHP.conf"</file>
+<fileDetails>[line "331"] [id "933160"]<fileDetails>
+<MatchedData>"eval(`al`   `e`   `rt('XSS')"</MatchedData>
+
+<file>"rules/REQUEST-934-APPLICATION-ATTACK-GENERIC.conf"</file>
+<fileDetails>[line "52"] [id "934100"]<fileDetails>
+<MatchedData>"eval("</MatchedData>
+
+<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"eval("</MatchedData>
+\end{lstlisting}
+
+\subsubsection{function constructor}
+\label{sec:functionconstructor}
+
+When using the function \verb|eval()| (see Section~\ref{sec:eval}) causes a request to be blocked, a substitute in the form of \verb|[].constructor.constructor(`alert('XSS')`)()| is available in JavaScript.
+
+Calling \verb|[]| will create an empty array, which is a special kind of object.
+Any kind of object in JavaScript, with the exception of null prototype objects, will have a constructor property on its prototype. \cite{js/object}
+
+The Array objects constructor can be accessed by calling \verb|.constructor| on an instance of Array, like \verb|[].constructor|. \cite{js/array}
+Constructors are technically regular functions. \cite{js/constructor}
+As such, they are Function objects. Function objects have a constructor themselfes, which again is called using the \verb|.constructor| notation.
+
+Using \verb|[].constructor.constructor| will yield access to the Function() constructor.
+Calling the Function() constructor directly can create functions dynamically, similar to using \verb|eval()|.
+The difference being that the Function() constructor creates functions that execute in the global scope only.
+
+The Function() constructor takes a variable count of arguments. The first $n - 1$ arguments are the \quotes{names to be used by the function as formal argument names. Each must be a string that corresponds to a valid JavaScript parameter [...]} \cite{js/function}
+The last argument given to the Function() constructor is expected to be a string containing the JavaScript statements compromising the function definition. \cite{js/function}
+
+Therefore, the afromentioned substitute for \verb|eval()| - \\ \verb|[].constructor.constructor(`alert('XSS')`)()| - \\ will create a function with the function body \verb|alert('XSS')| and call it directly.
+In other words: It will call a function that calls \verb|alert('XSS')|.
+Technique by \cite{onecons/wafbypass}.
+
+A more straightforward and less obscure way of accessing the Function() contructor is to call it directly:
+\begin{quote}
+	\verb|Function()| can be called with or without \verb|new|. Both create a new \verb|Function| instance. \cite{js/function}
+\end{quote}
+Depending on the firewall configuration, a WAF might use regex filtering to detect usage of \verb|Function()|.
+In this case, accessing the Function() constructor via an array object can be an alternative.
+
+\subsubsection{square bracket notation}
+JavaScript provides a \quotes{square bracket notation} to access properties of an Object. It is used to access multiword properties as well as provide a way of obtaining property names as the result of an expression. \cite{js/brackets}
+
+This \quotes{square bracket notation} allows to substitute the dot notation in a case where using the dot notation is not feasible or blocked by firewall rules.
+For instance, in a payload composed using the function constructor as stated in \ref{sec:functionconstructor}, the part \\ \verb|[].constructor.constructor(`alert('XSS')`)()| can be substituted with \\ \verb|[][`constructor`][`constructor`](`alert('XSS')`)()|.
+
+
+\subsubsection{string replace}
+\label{sec:stringreplace}
+When passing certain characters is not feasible, there is a chance they can be substituted in a string replacement strategy using the \verb|+| operator.
+A part of the description of the \verb|+| operator in JavaScript states:
+\begin{quote}
+	The + operator is overloaded for two distinct operations: numeric addition and string concatenation. When evaluating, it first coerces both operands to primitives. ... \cite{js/+}
+\end{quote}
+In the process of primitive coercion, objects are converted to primitives by calling their \verb|[@@toPrimitive]()|, \verb|valueOf()| and \verb|toString()| methods in the given order. Date and Symbol objects are the only built-in objects that override the \verb|[@@toPrimitive]()| method.
+Objects without an override for the \verb|[@@toPrimitive]()| method inherit \verb|valueOf| from
+\\ \verb|Object.prototype.valueOf|, which returns the object itself.
+Since the return value is an object, it is ignored and \verb|toString()| is called instead. \cite{js/primitiveCoercion}
+
+In the code \verb|open + []|, \verb|open| is a built-in Function object, \verb|[]| is a built-in Array object.
+In the process of primitive coercion, for both, their \verb|toString()| method is being called.
+When they are joined by the \verb|+| operator, it results in a String in the form of \verb|open.toString()| concatenated with \verb|[].toString()|. The result is equal to \verb|open.toString()| (see Listing~\ref{lst:opentostring}) as \verb|[].toString()| returns an empty String.
+
+\begin{lstlisting}[style=basicStyle, caption=open.toString() in JavaScript, label={lst:opentostring}]
+function open() {
+    [native code]
+}
+\end{lstlisting}
+
+In JavaScript, array-like access to String objects is possible. \cite{js/stringbrackets} For example, \verb|[open+[]][0][13]| returns the character \verb|(|. \verb|[open+[]][0][14]| returns the character \verb|)|. Listing~\ref{lst:opentostringindices} visualizes open.toString() with the corresponding indices.
+
+\begin{lstlisting}[style=basicStyle, caption=open.toString() with indices in JavaScript, label={lst:opentostringindices}]
+f u n c t i o n   o p  e  n  (  )     {  \n
+0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21
+
+[  n  a  t  i  v  e     c  o  d  e  ]  \n }
+22 23 24 25 26 27 28 29 30 31 32 33 34 35 36
+\end{lstlisting}
+
+
+\subsubsection{JSFuck}
+
+
+\subsubsection{Aurebesh}
+
+
+
