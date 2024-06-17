@@ -1,7 +1,36 @@
 \subsection{Various Payloads}
 \label{sec:varioustech}
+This section lists evasion techniques applicable to various payloads.
 
 \subsubsection{Payload size}
+Some Web application firewalls are configured to skip requests sizes above a set threshold.
+
+AWS WAF limits the \quotes{Maximum size of a web request body that can be inspected for CloudFront, API Gateway, Amazon Cognito, App Runner, and Verified Access protections**} to 64 KB, the \quotes{Maximum size of a web request body that can be inspected for Application Load Balancer and AWS AppSync protections} to 8 KB. \cite{aws/waflimits}
+
+Microsoft Azure allows the configuration of limits on newer Rule Sets:
+\begin{quote}
+	For Application Gateway v2 Web Application Firewalls running Core Rule Set 3.2, or newer, the maximum request body size enforcement and max file upload size enforcement can be disabled and the Web Application Firewall will no longer reject a request, or file upload, for being too large. When maximum request body size enforcement and max file upload size enforcement are disabled within the Web Application Firewall, Application Gateway's limits determine the maximum size allowable. For more information, see Application Gateway limits. \cite{ms/azurewaflimits}
+\end{quote}
+
+With the \quotes{Maximum request inspection limit (WAF SKU)} at a default value of 2 MB with the option to disable the limit completely according to their "Application Gateway limits" document. \cite{ms/appgatewaylimits}
+
+Akamai answers the question \quotes{Can WAF inspect all arguments and values in request body? Is there any limitation on the size of the request?} on their FAQ page with \quotes{By default, the WAF inspects only the first 8KB of a request. It can increase the limit up to 128KB by adding Advanced Metadata.} \cite{akamai/waflimits}
+
+Cloudflare lists a limit of 128 KB in the Cloudflare Rules language definition, with truncation upon reaching it:
+\begin{quote}
+	All http.request.body.* fields (except http.request.body.size) handle a maximum body size of 128 KB, which means that you cannot define expressions that rely on request body data beyond the first 128 KB. If the request body is larger, the body fields will contain a truncated value and the http.request.body.truncated field will be set to true. The http.request.body.size field will contain the full size of the request without any truncation.
+
+	The maximum body size of 128 KB applies only to the values of HTTP body fields — the origin server will still receive the complete request body.
+\end{quote}
+
+The ModSecurity recommended configuration sets the following limits for requests:
+\begin{quote}
+	SecRequestBodyLimit 13107200 \\
+	SecRequestBodyNoFilesLimit 131072
+\end{quote}
+with requests exceeding the limits being rejected by default. \cite{modsec/recconf}
+
+Depending on the specific rule configuration by each service, blowing up requests with filler-data to exceed the inspection limit might make the malicious payload evade detection. Some Web applications might accept request bodies filled with unused data, as long as there is a valid key: value pair inside. If this key: value pair is positioned past the 8 KB limit of the Akamai WAF for instance, the malicious value might go unnoticed.
 
 
 \subsubsection{Unicode encoding in JSON}
@@ -25,11 +54,13 @@ RFC 4627 \quotes{The application/json Media Type for JavaScript Object Notation}
 \end{quote}
 As escaping any character should be possible in a JSON payload, firewall filters that look for a certain sequence of characters might be evaded by escaping one or more characters from that sequence.
 
+{\color{red} TODO: example, request with unicode replaced \$ }
+
 
 \subsubsection{Unicode normalization}
 {\color{red}
-\cite{unicode/normalization}
-\cite{medium/allypetitt}
+	\cite{unicode/normalization}
+	\cite{medium/allypetitt}
 }
 
 
