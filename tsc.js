@@ -3,6 +3,54 @@ var abc = (...input) => {
 	alert(input);
 };
 
+
+// A = '',
+// B = !A + A,
+// C = !B + A,
+// D = A + {},
+// E = B[A++],
+// F = B[G = A],
+// H = ++G + A,
+// I = D[G + H],
+// B[I += D[A] + (B.C + D)[A] + C[H] + E + F + B[G] + I + E + D[A] + F][I](C[A] + C[G] + B[H] + F + E + "(A)")()
+
+		A = ''              // empty string
+		B = !A + A          // "true"
+		C = !B + A          // "false"
+		D = A + {}          // "[object Object]"
+		E = B[A++]          // "t" = "true"[0]
+		F = B[G = A]        // "r" = "true"[1]
+		H = ++G + A         // 2, 3
+		I = D[G + H]        // "c"
+
+		B[
+		  I +=              // "c"
+		    D[A] +          // "o" = "object"[0]
+		    (B.C+D)[A] +    // "n" = "undefined"[1]
+		    C[H] +          // "s" = "false"[3]
+		    E +             // "t"
+		    F +             // "r"
+		    B[G] +          // "u" = "true"[2]
+		    I +             // "c" = "[object]"[5]
+		    E +             // "t"
+		    D[A] +          // "o" = "[object]"[1]
+		    F               // "r"
+		][
+		  I                 // "constructor"
+		](
+		  'p' +				// "p"
+		  F +				// "r"
+		  D[A] +			// "o"
+		  'm' +				// "m"
+		  'p' +				// "p"
+		  E +               // "t"
+		  '(A,++A)'         // "(1,2)"
+		)()
+
+A='',B=!A+A,C=!B+A,D=A+{},E=B[A++],F=B[G=A],H=++G+A,I=D[G+H],B[I+=D[A]+(B.C+D)[A]+C[H]+E+F+B[G]+I+E+D[A]+F][I]('p'+F+D[A]+'m'+'p'+E+'(A,++A)')()
+
+""["constructor"]["constructor"]('prompt(1,2)')()
+
 setTimeout(() => {
 	// console.log(document.getElementsByName("name")[0].innerHTML);
 	// var secret = document.getElementsByName("name")[0].innerHTML;
@@ -55,18 +103,20 @@ setTimeout(() => {
 	// eval("[]['constructor']['constructor']`a﹩{'var s = \"secret\";promp' + 't`something﹩{s}`'}```".normalize('NFKC'));
 	// alert`${1+1}`
 	// alert(["",""])
-	// prompt`${1+1}`
-	console.log(['c','a','b'].toSorted())
+	console.log('escaped: \x61')
+	// prompt`${1 + 1}`
+	console.log(['c', 'a', 'b'].toSorted())
+
 
 	// alert(`${new Date()}`)
 	console.log("alert(`${new Date()}`");
-	eval(
-		decodeURIComponent(
-			decodeURIComponent(
-				"alert%2528%2560%2524%257Bnew%2520Date%2528%2529%257D%2560%2529",
-			),
-		),
-	);
+	// eval(
+	// 	decodeURIComponent(
+	// 		decodeURIComponent(
+	// 			"alert%2528%2560%2524%257Bnew%2520Date%2528%2529%257D%2560%2529",
+	// 		),
+	// 	),
+	// );
 	// [][`constructor`][`constructor`]`a${'al' + [open + []][0][11] + 'rt' + [open + []][0][13] + ['"'][0] + 'Oneconsult' + ['"'][0] + [open + []][0][14]}```;
 	console.log(
 		encodeURIComponent(

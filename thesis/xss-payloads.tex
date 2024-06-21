@@ -27,12 +27,12 @@ Technique by \cite{medium/allypetitt}
 \subsubsection{JavaScript escaping}
 \label{sec:jsescape}
 {\color{red} TODO:
-\begin{itemize}
-\item js hex escape 
-\item js octal escape
-\item js normal character escape
-\item js unicode escape es6
-\end{itemize}
+	\begin{itemize}
+		\item js hex escape
+		\item js octal escape
+		\item js normal character escape
+		\item js unicode escape es6
+	\end{itemize}
 }
 
 \subsubsection{Tagged Template Literals}
@@ -111,6 +111,11 @@ A more straightforward and less obscure way of accessing the Function() contruct
 Depending on the firewall configuration, a WAF might use regex filtering to detect usage of \verb|Function()|.
 In this case, accessing the Function() constructor via an array object can be an alternative.
 
+{\color{red}TODO: []['map']['constructor'] from elements talk by martin kleppe:
+% https://youtu.be/p0X9UlqarCU?list=PLttm25JhpvA7V0Ol0_ryuRRR_45_L0bLH&t=1253 \\ 
+% or: https://speakerdeck.com/aemkei/holyjs-3l3m3nt5?slide=92
+\\ CAN USE ANY FUNCTION (MAP, FILTER, JOIN, CONSTRUCTOR...)}
+
 \subsubsection{square bracket notation}
 JavaScript provides a \quotes{square bracket notation} to access properties of an Object. It is used to access multiword properties as well as provide a way of obtaining property names as the result of an expression. \cite{js/brackets}
 
@@ -153,8 +158,82 @@ f u n c t i o n   o p  e  n  (  )     {  \n
 
 \subsubsection{JSFuck}
 
+\cite{mk/jsfuck}
 
-\subsubsection{Aurebesh}
+\subsubsection{Aurebesh.js}
+Similar to JSFuck, Aurebesh.js was created by Martin Kleppe. In its minimalistic form, it allows to write a valid JavaScript function calling \verb|alert(1)| with the characters \verb|() + [] ! " =| as well as one other character of choice. Aurebesh.js allows the choice of up to 9 distinct characters or words. In the case where the characters \verb|A B C D E F G H I| are chosen, the system is explained as follows: 
+\begin{lstlisting}[style=basicStyle, caption=Aurebesh.js explanation \cite{mk/aurebesh}, label={lst:aurebeshexplanation}]
+		A = ''              // empty string
+		B = !A + A          // "true"
+		C = !B + A          // "false"
+		D = A + {}          // "[object Object]"
+		E = B[A++]          // "t" = "true"[0]
+		F = B[G = A]        // "r" = "true"[1]
+		H = ++G + A         // 2, 3
+		I = D[G + H]        // "c"
 
+		B[
+		  I +=              // "c"
+		    D[A] +          // "o" = "object"[0]
+		    (B.C+D)[A] +    // "n" = "undefined"[1]
+		    C[H] +          // "s" = "false"[3]
+		    E +             // "t"
+		    F +             // "r"
+		    B[G] +          // "u" = "true"[2]
+		    I +             // "c" = "[object]"[5]
+		    E +             // "t"
+		    D[A] +          // "o" = "[object]"[1]
+		    F               // "r"
+		][
+		  I                 // "constructor"
+		](
+		  C[A] +            //  "a"
+		  C[G] +            //  "l"
+		  B[H] +            //  "e"
+		  F +               //  "r"
+		  E +               //  "t"
+		  "(A)"             // "(1)"
+		)()
+\end{lstlisting}
+If less than 9 characters (or words) are supplied, Aurebesh.js will reuse some characters by concatenating them together to create 9 different variables. \cite{mk/aurebesh}
 
+In contrast to the author who is pursuing the translation of JavaScript into other writing systems, antagonist actors might use this idea to translate \gls{xss} payloads that are blocked by a Web application firewall into \gls{xss} payloads that bypass Web application firewalls. Antagonist actors are not limited to just using 9 variables when crafting \gls{xss} payloads using Aurebesh.js. They can use Aurebesh.js as a base for their payloads while adding more characters and variables as needed.
+The obfuscation gained by using Aurebesh.js might make payloads evade detection while the added payload content maliciously influences the Web application. 
+As a proof of concept, the function \verb|alert| has been substituded with the function \verb|prompt| in the following example:
 
+\begin{lstlisting}[style=basicStyle, caption=Aurebesh.js obfuscation of prompt, label={lst:aurebeshprompt}]
+		A = ''              // empty string
+		B = !A + A          // "true"
+		C = !B + A          // "false"
+		D = A + {}          // "[object Object]"
+		E = B[A++]          // "t" = "true"[0]
+		F = B[G = A]        // "r" = "true"[1]
+		H = ++G + A         // 2, 3
+		I = D[G + H]        // "c"
+
+		B[
+		  I +=              // "c"
+		    D[A] +          // "o" = "object"[0]
+		    (B.C+D)[A] +    // "n" = "undefined"[1]
+		    C[H] +          // "s" = "false"[3]
+		    E +             // "t"
+		    F +             // "r"
+		    B[G] +          // "u" = "true"[2]
+		    I +             // "c" = "[object]"[5]
+		    E +             // "t"
+		    D[A] +          // "o" = "[object]"[1]
+		    F               // "r"
+		][
+		  I                 // "constructor"
+		](
+		  'p' +             // "p"
+		  F +               // "r"
+		  D[A] +            // "o"
+		  'm' +             // "m"
+		  'p' +             // "p"
+		  E +               // "t"
+		  '(A,++A)'         // "(1,2)"
+		)()
+\end{lstlisting}
+
+For the test result of this payload see Listing~\ref{lst:aurebeshpromptbypass}.

