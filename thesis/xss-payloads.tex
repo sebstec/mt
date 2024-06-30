@@ -157,11 +157,42 @@ f u n c t i o n   o p  e  n  (  )     {  \n
 
 
 \subsubsection{JSFuck}
+JSFuck was created by Martin Kleppe to write any valid JavaScript with only 6 different characters. 6 different characters is close to the possible Minimum, there are suggestions to use only 5 different characters, but they have some preconditions. \cite{mk/five, tc39/pipeline}
+Martin Kleppe describes JSFuck as follows:
+\begin{quote}
+	JSFuck is an esoteric and educational programming style based on the atomic parts of JavaScript. It uses only six different characters to write and execute code.
 
-\cite{mk/jsfuck}
+	It does not depend on a browser, so you can even run it on Node.js. \cite{mk/jsfuck}
+\end{quote}
+Encoding the payload \verb|alert(1)| in JSFuck results in following payload:
+\begin{lstlisting}[style=basicStyle, caption=alert(1) in JSFuck, label={lst:alert1jsfuck}]
+  (![] + [])[+!+[]] +
+    (![] + [])[!+[] + !+[]] +
+    (!![] + [])[!+[] + !+[] + !+[]] +
+    (!![] + [])[+!+[]] +
+    (!![] + [])[+[]] +
+    ([][
+      (![] + [])[+[]] +
+        (![] + [])[!+[] + !+[]] +
+        (![] + [])[+!+[]] +
+        (!![] + [])[+[]]
+    ] + [])[+!+[] + [!+[] + !+[] + !+[]]] +
+    [+!+[]] +
+    ([+[]] +
+      ![] +
+      [][
+        (![] + [])[+[]] +
+          (![] + [])[!+[] + !+[]] +
+          (![] + [])[+!+[]] +
+          (!![] + [])[+[]]
+      ])[!+[] + !+[] + [+[]]],
+\end{lstlisting}
+
+This payload is 297 characters long, which is around 37 times more than the 8 characters forming \verb|alert(1)|. On usage of JSFuck, payload size increases dramatically. Encoding the payload \verb|alert('XSS')| already requires 5739 characters (see Listing~\ref{lst:alertxssjsfuck}). If payload size is not limited, a lot of obscuration can be gained by using JSFuck to obscure payloads. 
+
 
 \subsubsection{Aurebesh.js}
-Similar to JSFuck, Aurebesh.js was created by Martin Kleppe. In its minimalistic form, it allows to write a valid JavaScript function calling \verb|alert(1)| with the characters \verb|() + [] ! " =| as well as one other character of choice. Aurebesh.js allows the choice of up to 9 distinct characters or words. In the case where the characters \verb|A B C D E F G H I| are chosen, the system is explained as follows: 
+Similar to JSFuck, Aurebesh.js was created by Martin Kleppe. In its minimalistic form, it allows to write a valid JavaScript function calling \verb|alert(1)| with the characters \verb|() + [] ! " =| as well as one other character of choice. Aurebesh.js allows the choice of up to 9 distinct characters or words. In the case where the characters \verb|A B C D E F G H I| are chosen, the system is explained as follows:
 \begin{lstlisting}[style=basicStyle, caption=Aurebesh.js explanation \cite{mk/aurebesh}, label={lst:aurebeshexplanation}]
 		A = ''              // empty string
 		B = !A + A          // "true"
@@ -198,7 +229,7 @@ Similar to JSFuck, Aurebesh.js was created by Martin Kleppe. In its minimalistic
 If less than 9 characters (or words) are supplied, Aurebesh.js will reuse some characters by concatenating them together to create 9 different variables. \cite{mk/aurebesh}
 
 In contrast to the author who is pursuing the translation of JavaScript into other writing systems, antagonist actors might use this idea to translate \gls{xss} payloads that are blocked by a Web application firewall into \gls{xss} payloads that bypass Web application firewalls. Antagonist actors are not limited to just using 9 variables when crafting \gls{xss} payloads using Aurebesh.js. They can use Aurebesh.js as a base for their payloads while adding more characters and variables as needed.
-The obfuscation gained by using Aurebesh.js might make payloads evade detection while the added payload content maliciously influences the Web application. 
+The obfuscation gained by using Aurebesh.js might make payloads evade detection while the added payload content maliciously influences the Web application.
 As a proof of concept, the function \verb|alert| has been substituded with the function \verb|prompt| in the following example:
 
 \begin{lstlisting}[style=basicStyle, caption=Aurebesh.js obfuscation of prompt, label={lst:aurebeshprompt}]
