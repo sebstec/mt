@@ -192,7 +192,7 @@ This payload is 297 characters long, which is around 37 times more than the 8 ch
 
 
 \subsubsection{Aurebesh.js}
-Similar to JSFuck, Aurebesh.js was created by Martin Kleppe. In its minimalistic form, it allows to write a valid JavaScript function calling \verb|alert(1)| with the characters \verb|() + [] ! " =| as well as one other character of choice. Aurebesh.js allows the choice of up to 9 distinct characters or words. In the case where the characters \verb|A B C D E F G H I| are chosen, the system is explained as follows:
+Similar to JSFuck, Aurebesh.js was created by Martin Kleppe. In its minimalistic form, it allows to write a valid JavaScript function calling \verb|alert(1)| with the characters \verb|() + [] ! " = {}| as well as one other character of choice. Aurebesh.js allows the choice of up to 9 distinct characters or words. In the case where the characters \verb|A B C D E F G H I| are chosen, the system is explained as follows:
 \begin{lstlisting}[style=basicStyle, caption=Aurebesh.js explanation \cite{mk/aurebesh}, label={lst:aurebeshexplanation}]
 		A = ''              // empty string
 		B = !A + A          // "true"
@@ -268,3 +268,5 @@ As a proof of concept, the function \verb|alert| has been substituded with the f
 \end{lstlisting}
 
 For the test result of this payload see Listing~\ref{lst:aurebeshpromptbypass}.
+
+{\color{red} evtl hier noch eine weitere, interessantere payload (fetch)}

@@ -2,10 +2,28 @@
 This chapter states the evaluation results of a single iteration of application of an evasion technique to the specified payloads. If a considerable (from the perspective of the author of this work) bypass was found, the result will be detailed. Evaluation results of blocked requests are referred to in attachment.
 
 
+\subsubsection{Payload length}
+As stated in Listing~\ref{lst:alertXSSblocked}, the payload \verb|alert('XSS')| is being blocked by the tested firewall.
+Filling the request with filler data in the form: \\
+\verb|/**aa..a**/alert('XSS')| \\
+will cause the request to be blocked by ModSecurity without matching on any CoreRuleSet rule:
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=request body bigger than maximum, label={lst:requesttoobig}]
+<payload>/**aaa...(131052 more a)**/alert('XSS')</payload>
+<message>"Failed to parse request body."</message>
+<file>"/nginx/modsecurity.d/modsecurity.conf"</file>
+<fileDetails>[line "76"] [id "200002"]<fileDetails>
+<MatchedData>"Request body excluding files is bigger than the maximum expected."</MatchedData>
+\end{lstlisting}
+
+It takes exactly 131073 1-byte characters to reach this limit. If one less character is used in the request body, the ModSecurity firewall will match on \verb|alert(|, like in Listing~\ref{lst:alertXSSblocked}. This corresponds to the 131072 limit stated in the ModSecurity configuration file.
+
+
 \subsubsection{Unicode in JSON}
 \label{sec:unicodeinjsontest}
 The ModSecurity firewall detects and blocks requests containing \verb|${| followed by a closing \verb|}| after an arbitrary number of characters in between.
-Tests have shown that using Unicode encoding in JSON and substituting the \verb|$| in a JSON request with \verb|\u0024| evades the previously mentioned detection, but triggers another firewall rule: \verb|Possible Unicode character bypass detected|.
+Tests have shown that using Unicode encoding in JSON and substituting the \verb|$| in a JSON request with \verb|\u0024| evades the previously mentioned detection, but triggers another firewall rule: \\
+\verb|Possible Unicode character bypass detected|.
 (see Listing~\ref{lst:jsonunicodetests})
 
 
@@ -29,22 +47,23 @@ After substituting the function call using \verb|('XSS')| with a Tagged Template
 <bypass>alert`XSS`</payload>
 \end{lstlisting}
 
+\subsection{JSFuck}
+The payload \verb|alert('XSS')| has been sent to the Web Application and blocked (Listing~\ref{lst:alertXSSblocked}). Subsequently the payload was obscured using the service provided by JSFuck: https://jsfuck.com/ \\
+The resulting payload is shown in Listing~\ref{lst:alertxssjsfuck}. The ModSecurity firewall using CRS 4.1 detects the JSFuck "encoding" and blocks the payload (Listing~\ref{lst:alertxssjsfuckblocked}).
+
 
 \subsection{Aurebesh.js}
-
-Bypass with prompt
-
+When sending the payload \verb|prompt()|, the ModSecurity firewall using CRS 4.1 detects the \gls{xss} attempt and blocks the request:
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=prompt(1\,2) blocked, label=lst:promptblocked]
 <payload>prompt(1,2)</payload>
 <file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
 <fileDetails>[line "714"] [id "941390"]<fileDetails>
 <MatchedData>"prompt("</MatchedData>
 \end{lstlisting}
-
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=aurebesh prompt bypass, label=lst:aurebeshpromptbypass]
+If the Aurebesh technique is used to substitute most of the payload with the characters \verb|A-I| as well as \verb|() + [] ! ' = {}|, the obscured payload bypasses the firewall:
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=Aurebesh prompt bypass, label=lst:aurebeshpromptbypass]
 <payload>prompt(1,2)</payload>
 <bypass>A='',B=!A+A,C=!B+A,D=A+{},E=B[A++],F=B[G=A],H=++G+A,I=D[G+H],B[I+=D[A]+(B.C+D)[A]+C[H]+E+F+B[G]+I+E+D[A]+F][I]('p'+F+D[A]+'m'+'p'+E+'(A,++A)')()</bypass>
 \end{lstlisting}
-
 
 

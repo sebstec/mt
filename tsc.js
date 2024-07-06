@@ -2,7 +2,7 @@ var abc = (...input) => {
   console.log(input);
   alert(input);
 };
-
+/** asd  **/alert('xss')
 // A = '',
 // B = !A + A,
 // C = !B + A,

