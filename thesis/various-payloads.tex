@@ -54,14 +54,71 @@ RFC 4627 \quotes{The application/json Media Type for JavaScript Object Notation}
 \end{quote}
 As escaping any character should be possible in a JSON payload, firewall filters that look for a certain sequence of characters might be evaded by escaping one or more characters from that sequence.
 
-{\color{red} TODO: example, request with unicode replaced \$ }
+	{\color{red} TODO: example, request with unicode replaced \$ }
 
 
 \subsubsection{Unicode normalization}
-{\color{red}
-	\cite{unicode/normalization}
-	\cite{medium/allypetitt}
-}
+The unicode standard defines two types of equivalence between characters: canonical equivalence and compatibility equivalence. The report "Unicode Normalization Forms" by Ken Whistler for Unicode Version 15.1.0 states the following regarding the two types of equivalence:
+
+\begin{quote}
+	Canonical equivalence is a fundamental equivalency between characters or sequences of characters which represent the same abstract character, and which when correctly displayed should always have the same visual appearance and behavior. Figure 1 shows this type of equivalence with examples of several subtypes.
+	% \\
+	% {
+	% \includegraphics[width=0.5\textwidth]{caneqb.png}
+	% \centering
+	% }
+	% \\
+	\\
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.5\textwidth]{caneq.png}
+		\label{fig:caneq}
+		\caption{ Examples of Canonical Equivalence \cite{unicode/normalization}}
+	\end{figure}
+	\\
+	Compatibility equivalence is a weaker type of equivalence between characters or sequences of characters which represent the same abstract character (or sequence of abstract characters), but which may have distinct visual appearances or behaviors. The visual appearances of the compatibility equivalent forms typically constitute a subset of the expected range of visual appearances of the character (or sequence of characters) they are equivalent to. However, these variant forms may represent a visual distinction that is significant in some textual contexts, but not in others. As a result, greater care is required to determine when use of a compatibility equivalent is appropriate. [...] Figure 2 provides examples of compatibility equivalence. \cite{unicode/normalization}
+	\\
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.5\textwidth]{compeq.png}
+		\label{fig:compeq}
+		\caption{ Examples of Canonical Equivalence \cite{unicode/normalization}}
+	\end{figure}
+	\\
+\end{quote}
+
+Normalization Forms are further described in the report:
+\begin{quote}
+	Unicode Normalization Forms are formally defined normalizations of Unicode strings which make it possible to determine whether any two Unicode strings are equivalent to each other. Depending on the particular Unicode Normalization Form, that equivalence can either be a canonical equivalence or a compatibility equivalence.
+
+	Essentially, the Unicode Normalization Algorithm puts all combining marks in a specified order, and uses rules for decomposition and composition to transform each string into one of the Unicode Normalization Forms. A binary comparison of the transformed strings will then determine equivalence.
+
+	The four Unicode Normalization Forms are summarized in Table 1. \cite{unicode/normalization}
+	\begin{table}[h]
+		\centering
+		\label{tab:normform}
+		\caption{ Normalization Forms }
+		\begin{tabular}{ |c|c| }
+			\hline
+			Form                         & Description                       \\
+			\hline
+			\hline
+			Normalization Form D (NFD)   & Canonical Decomposition           \\
+			\hline
+			Normalization Form C (NFC)   & Canonical Decomposition,          \\
+			                             & followed by Canonical Composition \\
+			\hline
+			Normalization Form KD (NFKD) & Compatibility Decomposition       \\
+			Normalization Form KC (NFKC) & Compatibility Decomposition,      \\
+			                             & followed by Canonical Composition \\
+			\hline
+		\end{tabular}
+	\end{table}
+\end{quote}
+In the context of Firewall Evasion, if inputs on the web server are normalized using one of the afromentioned Normalization Forms during processing, an attacker could try to substitute certain characters inside a malicious payload with equivalent unicode characters. \cite{medium/allypetitt} Such a payload might be able to avoid the filter of the Web Application Firewall that is looking for patterns including the normalized form of the unicode character. As an example, the payload \verb|prompt`${secret}`| could be substituted with the payload \verb|prompt`\uFE69{secret}`|. U+FE69 is named "Small Dollar Sign" and its decomposition form is U+0024, which is the regular Dollar Sign. \cite{comp/uni}
+Using the JavaScript function "normalize", the string containing the Small Dollar Sign: \verb|"\uFE69"| can be decomposed using Compatibility Decomposition (NFKD) into a string containing the normal Dollar Sign: \verb|"\u0024"| respectively \verb|"$"| by calling \verb|"\uFE69".normalize("NFKD")|. 
+
+Unicode Normalization is also supported in programming languages different to JavaScript, such as Python. \cite{python/normalization}
 
 
 \subsubsection{Case alternation}
@@ -73,7 +130,7 @@ Taking the XSS payload \verb|<script>alert('XSS')</script>| as an example, after
 Another example is file access on a wrongfully public file.
 The Windows file system trests file and directory names as case-insensitive by default. \cite{windows/casesensitive}
 On a web server hosted on Windows that exposes a .env file with stored secrets, both urls: \\ \verb|http://127.0.0.1:8000/.env| and \verb|http://127.0.0.1:8000/.enV| \\
-are treated equally. {\color{red}TODO: verified by the author using the python webserver module on windows 10 [should this be here?]}
+are treated equally. 
 
 
 \subsubsection{Comment interference}

