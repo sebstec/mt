@@ -62,12 +62,6 @@ The unicode standard defines two types of equivalence between characters: canoni
 
 \begin{quote}
 	Canonical equivalence is a fundamental equivalency between characters or sequences of characters which represent the same abstract character, and which when correctly displayed should always have the same visual appearance and behavior. Figure 1 shows this type of equivalence with examples of several subtypes.
-	% \\
-	% {
-	% \includegraphics[width=0.5\textwidth]{caneqb.png}
-	% \centering
-	% }
-	% \\
 	\\
 	\begin{figure}[h]
 		\centering
@@ -116,7 +110,7 @@ Normalization Forms are further described in the report:
 	\end{table}
 \end{quote}
 In the context of Firewall Evasion, if inputs on the web server are normalized using one of the afromentioned Normalization Forms during processing, an attacker could try to substitute certain characters inside a malicious payload with equivalent unicode characters. \cite{medium/allypetitt} Such a payload might be able to avoid the filter of the Web Application Firewall that is looking for patterns including the normalized form of the unicode character. As an example, the payload \verb|prompt`${secret}`| could be substituted with the payload \verb|prompt`\uFE69{secret}`|. U+FE69 is named "Small Dollar Sign" and its decomposition form is U+0024, which is the regular Dollar Sign. \cite{comp/uni}
-Using the JavaScript function "normalize", the string containing the Small Dollar Sign: \verb|"\uFE69"| can be decomposed using Compatibility Decomposition (NFKD) into a string containing the normal Dollar Sign: \verb|"\u0024"| respectively \verb|"$"| by calling \verb|"\uFE69".normalize("NFKD")|. 
+Using the JavaScript function "normalize", the string containing the Small Dollar Sign: \verb|"\uFE69"| can be decomposed using Compatibility Decomposition (NFKD) into a string containing the normal Dollar Sign: \verb|"\u0024"| respectively \verb|"$"| by calling \verb|"\uFE69".normalize("NFKD")|.
 
 Unicode Normalization is also supported in programming languages different to JavaScript, such as Python. \cite{python/normalization}
 
@@ -130,10 +124,11 @@ Taking the XSS payload \verb|<script>alert('XSS')</script>| as an example, after
 Another example is file access on a wrongfully public file.
 The Windows file system trests file and directory names as case-insensitive by default. \cite{windows/casesensitive}
 On a web server hosted on Windows that exposes a .env file with stored secrets, both urls: \\ \verb|http://127.0.0.1:8000/.env| and \verb|http://127.0.0.1:8000/.enV| \\
-are treated equally. 
+are treated equally.
 
 
 \subsubsection{Comment interference}
+\label{sec:commint}
 In some context, comments can be used to break up statements. Regarding SQL, the Oracle Database SQL Reference states:
 \begin{quote}
 	A comment can appear between any keywords, parameters, or punctuation marks in a statement. You can include a comment in a statement in two ways:
@@ -147,7 +142,19 @@ Ally Petitt suggests using comments inside SQL statements to break up SQL keywor
 
 
 \subsubsection{Percent encoding}
-
+RFC 3986 states under section 2.1 "Percent-Encoding":
+\begin{quote}
+	A percent-encoding mechanism is used to represent a data octet in a
+	component when that octet's corresponding character is outside the
+	allowed set or is being used as a delimiter of, or within, the
+	component.  A percent-encoded octet is encoded as a character
+	triplet, consisting of the percent character "\%" followed by the two
+	hexadecimal digits representing that octet's numeric value.  For
+	example, "\%20" is the percent-encoding for the binary octet
+	"00100000" (ABNF: \%x20), which in US-ASCII corresponds to the space
+	character (SP). \cite{rfc3986}
+\end{quote}
+If a Web Application Firewall does not perform percent-decoding on filtered requests but the request is being decoded by the Web Server, such as is the case when data is being sent as part of an URI (\cite{rfc3986/sec2.4}), a malicious payload could be percent-encoded to avoid detection by the firewall.
 
 \subsubsection{Charset alternation}
 To indicate the original media type prior to any applied content encoding, the HTTP \verb|Content-Type| representation header is used.

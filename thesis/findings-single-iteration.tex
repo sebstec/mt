@@ -43,9 +43,27 @@ If the opening \verb|(| is substituted with the "Superscript Left Parenthesis" (
 <bypass>alert\u{207D}'normalizeMe')</bypass>
 \end{lstlisting}
 
-Calling \verb|.normalize('NFKD')| on the bypassed string: \verb|"alert\u{207D}'normalizeMe')".normalize('NFKD')| will convert the string to the original payload: \verb|"alert('normalizeMe')"|.
+Calling \verb|.normalize('NFKD')| on the bypassed string:\\ 
+\verb|"alert\u{207D}'normalizeMe')".normalize('NFKD')| will convert the string to the original payload: \verb|"alert('normalizeMe')"|.
 
-\subsubsection{Percent encoding}
+
+\subsubsection{Case Alternation}
+As seen in Listing~\ref{lst:alertxssblocked}, the payload \verb|alert('XSS')| is being blocked. Similarly, the payload \verb|aLeRT('XSS')| is being blocked by the ModSecurity Firewall using CRS4.1. (Listing~\ref{lst:alertcasealternationblocked})
+
+The specific warning that the firewall writes to its log on blocking the case-alternated payload gives a reason as to why the payload is being filtered:
+\begin{lstlisting}[style=basicStyle, caption=ModSecurity warning on case alternated payloads, label={lst:modsecwarning}]
+	ModSecurity: Warning. Matched "Operator `Rx' with parameter `(?i)\b(?:eval|set(?:timeout|interval)|new[\s\x0b]+Function|a(?:lert|tob)|btoa|prompt|confirm)[\s\x0b]*\('
+\end{lstlisting}
+The \verb|(?i)| regex modifier at the beginning of the rule instructs the regex engine to ignore case.
+
+
+\subsubsection{Comment Interference}
+The example given by Ally Petitt \cite{medium/allypetitt} in Section~\ref{sec:commint} has been tested against the ModSecurity Firewall using CRS4.1. The original payload: \verb|?id=1+union+select+1,2,3--| is being blocked by the firewall (Listing~\ref{lst:sqliblocked}), as is the modified payload using Comment Interference: \verb|?id=1+un/**/ion+sel/**/ect+1,2,3--| (Listing~\ref{lst:commentinterferenceinsqlblocked}).
+
+The fact that the ModSecurity Firewall using CRS4.1 blocks this specifically crafted payload does not proof that using Comment Interference will never make payloads bypass the firewall. No more research was conducted into this idea, therefore Comment Interference is not being considered when crafting bypassing payloads in multiple steps in the following section.
+
+
+\subsubsection{Percent Encoding}
 The ModSecurity firewall detects some percent-encoded payloads. Requests with plain as well as percent-encoded payloads were sent to the reverse proxy. All requests triggered the same rules. (See Listing~\ref{lst:urlencodedexampleblocked})
 
 

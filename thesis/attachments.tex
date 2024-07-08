@@ -14,6 +14,14 @@
 <MatchedData>"alert("</MatchedData>
 \end{lstlisting}
 
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=alert("normalizeMe") blocked, label=lst:alertcasealternationblocked]
+<payload>aLeRT('XSS')</payload>
+<file>"/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"aLeRT("</MatchedData>
+<message>"Javascript method detected"</message>
+\end{lstlisting}
+
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=unicode tests \$\{`alert`\}, label={lst:jsonunicodetests}]
 <payload>${`alert`}</payload>
 <message>"Remote Command Execution: Unix Shell Expression Found"</message>
@@ -28,6 +36,27 @@
 <MatchedData>"x5cu0024"</MatchedData>
 \end{lstlisting}
 
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=Comment Interference in SQL blocked, label=lst:commentinterferenceinsqlblocked]
+<payload>?id=1+un/**/ion+sel/**/ect+1,2,3--</payload>
+<file>"/rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf"</file>
+<fileDetails>[line "205"] [id "942190"]<fileDetails>
+<MatchedData>"union select"</MatchedData>
+<message>"Detects MSSQL code execution and information gathering attempts"</message>
+\end{lstlisting}
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=union select injection blocked, label=lst:sqliblocked]
+<payload>?id=1+union+select+1,2,3--</payload>
+
+<file>"/rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf"</file>
+<fileDetails>[line "205"] [id "942190"]<fileDetails>
+<MatchedData>"union select"</MatchedData>
+<message>"Detects MSSQL code execution and information gathering attempts"</message>
+
+<file>"/rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf"</file>
+<fileDetails>[line "469"] [id "942360"]<fileDetails>
+<MatchedData>"1 union select"</MatchedData>
+<message>"Detects concatenated basic SQL injection and SQLLFI attempts"</message>
+\end{lstlisting}
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=url encoded example blocked, label={lst:urlencodedexampleblocked}]
 <payload>alert(`${new Date()}`)</payload>

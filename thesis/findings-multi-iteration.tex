@@ -11,7 +11,14 @@ The ModSecurity firewall detected the unicode escape regardless and rejects the 
 \subsubsection{Double Percent encoding}
 The payload from Listing~\ref{lst:urlencodedexampleblocked} was blocked by the ModSecurity firewall.
 On usage of double Percent encoding (Listing~\ref{lst:doublepercentencoding}), the rules with ids \verb|932130, 941390| no longer triggered and the payload bypasses the WAF.
-However, this payload would not be valid unless the target also performs multiple step url decoding.
+However, this payload would not be valid unless the target also performs multiple step url decoding. Multiple step url decoding is forbidden according to RFC3986 "Uniform Resource Identifier (URI): Generic Syntax" - Section 2.4:
+\begin{quote}
+	Implementations must not
+	percent-encode or decode the same string more than once, as decoding
+	an already decoded string might lead to misinterpreting a percent
+	data octet as the beginning of a percent-encoding, or vice versa in
+	the case of percent-encoding an already percent-encoded string.
+\end{quote}
 
 
 \subsubsection{HTML encoding + JavaScript normal character escape}
