@@ -1,4 +1,5 @@
 \subsection{Single Iteration Evaluation}
+\label{sec:singleiterationeva}
 This chapter states the evaluation results of a single iteration of application of an evasion technique to the specified payloads. If a considerable (from the perspective of the author of this work) bypass was found, the result will be detailed. Evaluation results of blocked requests are referred to in attachment.
 
 
@@ -67,7 +68,10 @@ The fact that the ModSecurity Firewall using CRS4.1 blocks this specifically cra
 The ModSecurity firewall detects some percent-encoded payloads. Requests with plain as well as percent-encoded payloads were sent to the reverse proxy. All requests triggered the same rules. (See Listing~\ref{lst:urlencodedexampleblocked})
 
 
-\subsection{Tagged Template Literals}
+
+\subsubsection{Charset Alternation}
+
+\subsubsection{Tagged Template Literals}
 As stated in Listing~\ref{lst:alertXSSblocked}, the payload \verb|alert('XSS')| is being blocked by the tested firewall.
 After substituting the function call using \verb|('XSS')| with a Tagged Template Literal in the form of \verb|alert`XSS`|, the payload successfully bypasses the firewall and reaches the web server. (Listing~\ref{lst:alertXSSbypass})
 
@@ -83,12 +87,12 @@ After substituting the function call using \verb|('XSS')| with a Tagged Template
 <bypass>alert`XSS`</bypass>
 \end{lstlisting}
 
-\subsection{JSFuck}
+\subsubsection{JSFuck}
 The payload \verb|alert('XSS')| has been sent to the Web Application and blocked (Listing~\ref{lst:alertXSSblocked}). Subsequently the payload was obscured using the service provided by JSFuck: https://jsfuck.com/ \\
 The resulting payload is shown in Listing~\ref{lst:alertxssjsfuck}. The ModSecurity firewall using CRS 4.1 detects the JSFuck "encoding" and blocks the payload (Listing~\ref{lst:alertxssjsfuckblocked}).
 
 
-\subsection{Aurebesh.js}
+\subsubsection{Aurebesh.js}
 When sending the payload \verb|prompt()|, the ModSecurity firewall using CRS 4.1 detects the \gls{xss} attempt and blocks the request:
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=prompt(1\,2) blocked, label=lst:promptblocked]
 <payload>prompt(1,2)</payload>

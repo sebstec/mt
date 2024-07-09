@@ -117,6 +117,7 @@ In this case, accessing the Function() constructor via an array object can be an
 \\ CAN USE ANY FUNCTION (MAP, FILTER, JOIN, CONSTRUCTOR...)}
 
 \subsubsection{square bracket notation}
+\label{sec:sbn}
 JavaScript provides a \quotes{square bracket notation} to access properties of an Object. It is used to access multiword properties as well as provide a way of obtaining property names as the result of an expression. \cite{js/brackets}
 
 This \quotes{square bracket notation} allows to substitute the dot notation in a case where using the dot notation is not feasible or blocked by firewall rules.
@@ -157,6 +158,7 @@ f u n c t i o n   o p  e  n  (  )     {  \n
 
 
 \subsubsection{JSFuck}
+\label{sec:jsfuck}
 JSFuck was created by Martin Kleppe to write any valid JavaScript with only 6 different characters. 6 different characters is close to the possible Minimum, there are suggestions to use only 5 different characters, but they have some preconditions. \cite{mk/five, tc39/pipeline}
 Martin Kleppe describes JSFuck as follows:
 \begin{quote}
@@ -192,6 +194,7 @@ This payload is 297 characters long, which is around 37 times more than the 8 ch
 
 
 \subsubsection{Aurebesh.js}
+\label{sec:aurebesh}
 Similar to JSFuck, Aurebesh.js was created by Martin Kleppe. In its minimalistic form, it allows to write a valid JavaScript function calling \verb|alert(1)| with the characters \verb|() + [] ! " = {}| as well as one other character of choice. Aurebesh.js allows the choice of up to 9 distinct characters or words. In the case where the characters \verb|A B C D E F G H I| are chosen, the system is explained as follows:
 \begin{lstlisting}[style=basicStyle, caption=Aurebesh.js explanation \cite{mk/aurebesh}, label={lst:aurebeshexplanation}]
 		A = ''              // empty string
