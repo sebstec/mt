@@ -49,6 +49,7 @@ Calling \verb|.normalize('NFKD')| on the bypassed string:\\
 
 
 \subsubsection{Case Alternation}
+\label{sec:casealternationevaluation}
 As seen in Listing~\ref{lst:alertxssblocked}, the payload \verb|alert('XSS')| is being blocked. Similarly, the payload \verb|aLeRT('XSS')| is being blocked by the ModSecurity Firewall using CRS4.1. (Listing~\ref{lst:alertcasealternationblocked})
 
 The specific warning that the firewall writes to its log on blocking the case-alternated payload gives a reason as to why the payload is being filtered:
@@ -72,6 +73,7 @@ The ModSecurity firewall detects some percent-encoded payloads. Requests with pl
 \subsubsection{Charset Alternation}
 
 \subsubsection{Tagged Template Literals}
+\label{sec:taggedtemplateliteralsevaluation}
 As stated in Listing~\ref{lst:alertXSSblocked}, the payload \verb|alert('XSS')| is being blocked by the tested firewall.
 After substituting the function call using \verb|('XSS')| with a Tagged Template Literal in the form of \verb|alert`XSS`|, the payload successfully bypasses the firewall and reaches the web server. (Listing~\ref{lst:alertXSSbypass})
 
@@ -93,6 +95,7 @@ The resulting payload is shown in Listing~\ref{lst:alertxssjsfuck}. The ModSecur
 
 
 \subsubsection{Aurebesh.js}
+\label{sec:aurebeshevaluation}
 When sending the payload \verb|prompt()|, the ModSecurity firewall using CRS 4.1 detects the \gls{xss} attempt and blocks the request:
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=prompt(1\,2) blocked, label=lst:promptblocked]
 <payload>prompt(1,2)</payload>

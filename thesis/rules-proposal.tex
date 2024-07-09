@@ -1,5 +1,19 @@
 \subsection{Rules Proposal}
+\label{sec:rulesproposal}
 Generic rules configuration seems exhaustive. Yet some rules for special evasion techniques could fit in.
-Unicode Normalization: ModSec WAF uses transformers to decode URL encoded payloads before they are checked against the ruleset, they same could be done with unicode normalization. normalize according to NFKC and then check the request against the ruleset {\color{red} TODO: nachschauen ob das vielleicht nicht schon bei höherer paranoia stufe gemacht wird}
+
+{\color{red}Ideen bisher:}
+
+Unicode Normalization: ModSec WAF uses transformers to decode URL encoded payloads before they are checked against the ruleset, they same could be done with unicode normalization. normalize according to NFKC and then check the request against the ruleset 
+
+Regex to detect and block \verb|["something(any array or object function)"]["constructor"]|
+
+Regex to detect and block \verb|["something(any array or object function)"].constructor|
+
+Regex to detect and block \verb|[].someThing.constructor|
+
+Regex to detect and block \verb|{}.someThing.constructor|
+
+Regex to detect and block \verb|{}.someThing.constructor|
 \\ 
 {\color{red} TODO: mehr in form von: Considering evaluation result [ref], it a rule in the form of [listing] could potentially avoid a bypass using the technique [ref]}

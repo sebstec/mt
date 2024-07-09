@@ -16,8 +16,8 @@ Request payloads are chosen to supply a proof of concept for a single or a combi
 All tests have been conducted in a lab environment composed of simple web servers to receive requests that pass the firewall.
 The web servers are reachable via an nginx reverse proxy that is compiled with the ModSecurity-nginx connector module. Nginx runs on a Debian Bookworm host with ModSecurity installed.
 All components are built from source from their latest mainline branches as of April 2024.
-For more details see the attached Dockerfiles.
-	{\color{red} sollte ich die Dockerfiles hier erwähnen und anängen?}
+For more details see the Dockerfiles in the attached github repository:\\ \verb|https://github.com/sebstec/mt|. 
+
 ModSecurity is configured using the authors recommended configuration by the time of this writing. \cite{modsec/recconf}
 Adjustments were made such that hits on potentially malicious requests are logged and the requests are being blocked. The response body is not being filtered.
 The configured ruleset is the OWASP CoreRuleSet in version 4.1.0 from 21/03/2024. \cite{crs/410dl}
