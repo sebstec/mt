@@ -6,12 +6,28 @@ This chapter states the evaluation results of multiple iterations of application
 \subsubsection{Percent encoding + Unicode in JSON}
 The ModSecurity firewall blocks requests containing unicode escaped characters in JSON. (see Section~\ref{sec:unicodeinjsontest})
 In order to evade this rule, a payload containing a unicode escaped character was percent-encoded previous to submission.
-The ModSecurity firewall detected the unicode escape regardless and rejects the request. (see Listing~\ref{lst:jsonunicodeurlenctest})
+The ModSecurity firewall detected the unicode escape regardless and rejects the request:
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=unicode escape in json with additional percent encoding, label={lst:jsonunicodeurlenctest}]
+<payload>urllib.parse.quote('{ "body": "alert\\u0024{1}" }')</payload>
+<payload>%7B%20%22body%22%3A%20%22alert%5Cu0024%7B1%7D%22%20%7D</payload>
+<message>"Possible Unicode character bypass detected"</message>
+<file>"/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf"</file>
+<fileDetails>[line "1263"] [id "920540"]<fileDetails>
+<MatchedData>"x5cu0024"</MatchedData>
+\end{lstlisting}
 
 
 \subsubsection{Double Percent encoding}
 The payload from Listing~\ref{lst:urlencodedexampleblocked} was blocked by the ModSecurity firewall.
-On usage of double Percent encoding (Listing~\ref{lst:doublepercentencoding}), the rules with ids \verb|932130, 941390| no longer triggered and the payload bypasses the WAF.
+On usage of double Percent encoding , the rules with ids \verb|932130, 941390| no longer triggered and the payload bypasses the WAF:
+
+\begin{lstlisting}[style=basicStyle, caption=url encoded example pass, label={lst:doublepercentencoding}]
+urllib.parse.quote(urllib.parse.quote('alert(`${new Date()}`)'))
+returns
+alert%2528%2560%2524%257Bnew%2520Date%2528%2529%257D%2560%2529
+\end{lstlisting}
+
 However, this payload would not be valid unless the target also performs multiple step url decoding. Multiple step url decoding is forbidden according to RFC3986 "Uniform Resource Identifier (URI): Generic Syntax" - Section 2.4:
 \begin{quote}
 	Implementations must not
