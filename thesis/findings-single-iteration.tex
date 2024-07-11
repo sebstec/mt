@@ -145,17 +145,12 @@ The ModSecurity firewall detects some percent-encoded payloads. Requests with pl
 As stated in Listing~\ref{lst:alertXSSblocked}, the payload \verb|alert('XSS')| is being blocked by the tested firewall.
 After substituting the function call using \verb|('XSS')| with a Tagged Template Literal in the form of \verb|alert`XSS`|, the payload successfully bypasses the firewall and reaches the web server. (Listing~\ref{lst:alertXSSbypass})
 
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=alert("XSS") blocked, label=lst:alertXSSblocked]
-<payload>alert("XSS")</payload>
-<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
-<fileDetails>[line "714"] [id "941390"]<fileDetails>
-<MatchedData>"alert("</MatchedData>
-\end{lstlisting}
-
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=alert`XSS` bypass, label=lst:alertXSSbypass]
 <payload>alert("XSS")</payload>
 <bypass>alert`XSS`</bypass>
 \end{lstlisting}
+
+{\color{red} hier evtl noch etwas mehr...}
 
 \subsubsection{JSFuck}
 The payload \verb|alert('XSS')| has been sent to the Web Application and blocked (Listing~\ref{lst:alertXSSblocked}). Subsequently the payload was obscured using the service provided by JSFuck: https://jsfuck.com/ \\

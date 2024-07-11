@@ -2,6 +2,7 @@ var abc = (...input) => {
   console.log(input);
   alert(input);
 };
+[].constructor.constructor('al' + 'ert("constructors")')();
 console.log("\uFE69")
 console.log("﹩")
 console.log("﹩".normalize('NFKD'))

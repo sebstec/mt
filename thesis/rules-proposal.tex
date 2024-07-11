@@ -12,8 +12,40 @@ Regex to detect and block \verb|["something(any array or object function)"].cons
 
 Regex to detect and block \verb|[].someThing.constructor|
 
-Regex to detect and block \verb|{}.someThing.constructor|
+\begin{lstlisting}[style=basicStyle, caption=rule proposal to block usage of function constructor, label={lst:constructorsruleproposal}]
+SecRule REQUEST_COOKIES|!REQUEST_COOKIES:/__utm/|REQUEST_COOKIES_NAMES|ARGS_NAMES|ARGS|REQUEST_FILENAME|XML:/* "@rx (?i)(?:(?:\[[^\]]*\])|(?:\{[^}]*\}))\.[a-z]*\.constructor[`,(,\[]" \
+    "id:2,\
+    phase:2,\
+    auditlog,\
+    capture,\
+    t:none,t:urlDecodeUni,t:compressWhitespace,\
+    msg:'XSS JavaScript function with constructor',\
+    logdata:'Matched Data: %{TX.0} found within %{MATCHED_VAR_NAME}: %{MATCHED_VAR}',\
+    tag:'application-multi',\
+    tag:'language-multi',\
+    tag:'attack-xss',\
+    tag:'xss-perf-disable',\
+    tag:'paranoia-level/1',\
+    severity:'CRITICAL',\                                                                               setvar:'tx.xss_score=+%{tx.critical_anomaly_score}',\                                               setvar:'tx.inbound_anomaly_score_pl1=+%{tx.critical_anomaly_score}'"
+\end{lstlisting}
+
+\begin{lstlisting}[style=basicStyle, caption=regex of rule proposal 2, label={lst:constructorsruleproposalregex}]
+  (?i)(?:(?:\[[^\]]*\])|(?:\{[^}]*\}))\.[a-z]*\.constructor[`,(,\[]
+\end{lstlisting}
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=using constructors rule poc, label={lst:constructorsblockedpoc}]
+<payload>[].constructor.constructor('al' + 'ert("constructors")')()</payload>
+<message>"XSS JavaScript function with constructor"</message>
+<file>"/rules/REQUEST-000-XSS-PROPOSAL.conf"</file>
+<fileDetails>[line "13"] [id "2"]<fileDetails>
+<MatchedData>"[].constructor.constructor( "</MatchedData>
+\end{lstlisting}
 
 Regex to detect and block \verb|{}.someThing.constructor|
-\\ 
+
+\begin{lstlisting}[style=basicStyle, caption=regex of rule proposal 2, label={lst:constructorsruleproposalregex}]
+  (?i)(?:(?:\[[^\]]*\])|(?:\{[^}]*\}))\.[a-z]*\.constructor[`,(,\[]
+\end{lstlisting}
+
+
 {\color{red} TODO: mehr in form von: Considering evaluation result [ref], it a rule in the form of [listing] could potentially avoid a bypass using the technique [ref]}
