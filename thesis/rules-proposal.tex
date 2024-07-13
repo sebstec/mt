@@ -187,7 +187,7 @@ Equally, the bypassing payloads using square bracket notation that have been dis
 <message>"XSS JavaScript function with constructor"</message>
 <file>"/rules/REQUEST-000-XSS-PROPOSAL.conf"</file>
 <fileDetails>[line "13"] [id "2"]<fileDetails>
-<MatchedData>"[].constructor.constructor`"</MatchedData>
+<MatchedData>"[]['constructor']['constructor']`"</MatchedData>
 \end{lstlisting}
 
 Section~\ref{sec:avoidingbypassB}: Avoiding {} bypass:
@@ -197,7 +197,7 @@ Section~\ref{sec:avoidingbypassB}: Avoiding {} bypass:
 <message>"XSS JavaScript function with constructor"</message>
 <file>"/rules/REQUEST-000-XSS-PROPOSAL.conf"</file>
 <fileDetails>[line "13"] [id "2"]<fileDetails>
-<MatchedData>"[].constructor.constructor("</MatchedData>
+<MatchedData>"[]['constructor']['constructor']("</MatchedData>
 \end{lstlisting}
 
 The proposed firewall rule manages to block the second part the mentioned bypassing payloads. Using proposed rules \verb|id:2| and \verb|id:3|, all discovered payloads in sections Section~\ref{sec:funconstrconbypass}, Section~\ref{sec:avoidingbypassA} and Section~\ref{sec:avoidingbypassB} are successfully blocked.
