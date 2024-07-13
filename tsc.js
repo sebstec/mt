@@ -4,7 +4,8 @@ var abc = (...input) => {
 };
 [].constructor.constructor('al' + 'ert("constructors")')();
 Proxy.constructor.constructor('al' + 'ert("Proxy")')();
-Array.constructor.constructor('al' + 'ert("Array")')();
+new Array().constructor.constructor('al' + 'ert("Array")')();
+Array['constructor']["constructor"]('al' + 'ert("Array2")')();
 console.log("\uFE69")
 console.log("﹩")
 console.log("﹩".normalize('NFKD'))
