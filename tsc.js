@@ -3,6 +3,8 @@ var abc = (...input) => {
   alert(input);
 };
 [].constructor.constructor('al' + 'ert("constructors")')();
+Proxy.constructor.constructor('al' + 'ert("Proxy")')();
+Array.constructor.constructor('al' + 'ert("Array")')();
 console.log("\uFE69")
 console.log("﹩")
 console.log("﹩".normalize('NFKD'))
