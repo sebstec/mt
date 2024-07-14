@@ -237,14 +237,13 @@ Using this reduced regular expression can be considered too general to be used i
 
 Deciding between using the full regular expression stated in Listing~\ref{lst:constructorsruleproposalregexA} and its reduced variant forces the decision between the increased risk of allowing certain malicious payloads to bypass the firewall or the increased risk of false positives. It points to the required balancing act between the two risks.
 
-In the context of this work, it was decided suitable to balance the mentioned risks by implementing a rule that would detect usage of all built-in objects and classes mentioned under Section~\ref{sec:functionconstructor}. 
-
+In the context of this work, it was decided suitable to balance the mentioned risks by implementing a rule that would detect usage of all built-in objects and classes mentioned under Section~\ref{sec:functionconstructor}. This rule is based on the afromentioned evasion technique and relevant evaluation under Section~\ref{sec:functionconstructorsingleeva}. 
 
 	{\color{blue}kurzer test hat ergeben: das geht auch: Proxy.constructor.constructor('al' + 'ert("Proxy")')(); }
 
 
 
-The proposed rule ensures the coverage of known evasion techniques, decreases the risk of false positives compared to the reduced regular expression mentioned under Listing~\ref{lst:constructorsruleproposalregexB} but simultaneously increases the risk of missed built-in objects compared to the reduced regular expression mentioned under Listing~\ref{lst:constructorsruleproposalregexB}. For instance, once new built-in objects are introduced into the JavaScript language, the proposed rule needs to be updated while usage of the reduced regular expression (Listing~\ref{lst:consturctorsruleproposalregexB}) would match on any character sequence without depending on knowledge about built-in object naming.  
+The proposed rule ensures the coverage of known evasion techniques, decreases the risk of false positives compared to the reduced regular expression mentioned under Listing~\ref{lst:constructorsruleproposalregexB} but simultaneously increases the risk of missed built-in objects compared to the reduced regular expression mentioned under Listing~\ref{lst:constructorsruleproposalregexB}. For instance, once new built-in objects are introduced into the JavaScript language, the proposed rule needs to be updated while usage of the reduced regular expression (Listing~\ref{lst:constructorsruleproposalregexB}) would match on any character sequence without depending on knowledge about built-in object naming.  
 
 
 

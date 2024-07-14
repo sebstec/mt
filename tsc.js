@@ -2,12 +2,15 @@ var abc = (...input) => {
   console.log(input);
   alert(input);
 };
-[].constructor.constructor('al' + 'ert("constructors")')();
-Proxy.constructor.constructor('al' + 'ert("Proxy")')();
-new Array().constructor.constructor('al' + 'ert("Array")')();
-Array['constructor']["constructor"]('al' + 'ert("Array2")')();
-this.Proxy.constructor.constructor('alert("this")')();
-Proxy.constructor.constructor(console.log('Function'))()
+// [].constructor.constructor('al' + 'ert("constructors")')();
+// Proxy.constructor.constructor('al' + 'ert("Proxy")')();
+// new Array().constructor.constructor('al' + 'ert("Array")')();
+// Array['constructor']["constructor"]('al' + 'ert("Array2")')();
+// this.Proxy.constructor.constructor('alert("this")')();
+// Proxy.constructor.constructor(console.log('Function'))()
+// eval.constructor('alert("eval")')();
+// isFinite.constructor('alert("isFinite")')();
+Intl.DateTimeFormat.constructor.constructor('alert("object")')();
 console.log("\uFE69")
 console.log("﹩")
 console.log("﹩".normalize('NFKD'))
@@ -15,7 +18,7 @@ console.log("\uFE69".normalize('NFKC'))
 console.log("eval(\"prompt`\u{FE69}{'normalized'}`\")".normalize('NFKD'))
 // eval("prompt`${'normalized'}`")
 console.log("alert\u{207D}'normalizeMe')".normalize('NFKD'))
-alert('normalizeMe')
+// alert('normalizeMe')
 // A = '',
 // B = !A + A,
 // C = !B + A,
