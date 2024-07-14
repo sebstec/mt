@@ -130,16 +130,17 @@ are treated equally.
 
 \subsubsection{Comment interference}
 \label{sec:commint}
-In some context, comments can be used to break up statements. Regarding SQL, the Oracle Database SQL Reference states:
-\begin{quote}
-	A comment can appear between any keywords, parameters, or punctuation marks in a statement. You can include a comment in a statement in two ways:
-	\begin{itemize}
-		\item Begin the comment with a slash and an asterisk (/*). Proceed with the text of the comment. This text can span multiple lines. End the comment with an asterisk and a slash (*/). The opening and terminating characters need not be separated from the text by a space or a line break.
-		\item Begin the comment with -- (two hyphens). Proceed with the text of the comment. This text cannot extend to a new line. End the comment with a line break.
-	\end{itemize}
-	\cite{oracle/sqlcomments}
-\end{quote}
-Ally Petitt suggests using comments inside SQL statements to break up SQL keywords: \verb|?id=1+un/**/ion+sel/**/ect+1,2,3--| \cite{medium/allypetitt}
+{\color{red} TODO: rework this to javascript comment interference}
+% In some context, comments can be used to break up statements. Regarding SQL, the Oracle Database SQL Reference states:
+% \begin{quote}
+% 	A comment can appear between any keywords, parameters, or punctuation marks in a statement. You can include a comment in a statement in two ways:
+% 	\begin{itemize}
+% 		\item Begin the comment with a slash and an asterisk (/*). Proceed with the text of the comment. This text can span multiple lines. End the comment with an asterisk and a slash (*/). The opening and terminating characters need not be separated from the text by a space or a line break.
+% 		\item Begin the comment with -- (two hyphens). Proceed with the text of the comment. This text cannot extend to a new line. End the comment with a line break.
+% 	\end{itemize}
+% 	\cite{oracle/sqlcomments}
+% \end{quote}
+% Ally Petitt suggests using comments inside SQL statements to break up SQL keywords: \verb|?id=1+un/**/ion+sel/**/ect+1,2,3--| \cite{medium/allypetitt}
 
 
 \subsubsection{Percent encoding}

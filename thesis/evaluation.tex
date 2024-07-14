@@ -3,21 +3,24 @@
 To answer the previously mentioned question
 \begin{quote} "How well can web application firewalls in their generic standard configuration protect a web application against targeted malicious requests?"
 \end{quote}
-a Gray Box testing strategy was employed. Tests were conducted inpersonating an attacker persona, much like in Black Box testing.
+a Gray Box testing strategy using firewall evasion techniques was employed. Tests were conducted inpersonating an attacker persona, much like in Black Box testing.
 To be more efficient in finding payloads that evade the filtering of the WAF, attention to the firewall logs was paid during testing.
 
 Testing was done in two steps. In the first step, the original test-payloads were modified using a single evasion technique.
 In the second step, multiple evasion techniques were used to modify the original test-payloads.
 The test-payloads in the second step were iteratively modified based on the firewall logs.
-As the firewall logs state the per-request specific matched data and rule that cause the rejection of the request, through analyzing the firewall logs, it is possible to subsequently apply evasion techniques that would circumvent the reason mentioned in the logs.
-An attempt was made to develop firewall evading payloads by following the iterative cycle of sending a request with a malicious payload, analyzing the reason(s) why the WAF blocked the request and subsequently modifying the payload. In all requests, the payloads are sent in the request body.
+As the firewall logs state the per-request specific matched data and rule that cause the rejection of the request, through analyzing the firewall logs, it is possible to subsequently apply evasion techniques that would circumvent the reason of rejection mentioned in the logs.
+
+An attempt was made to develop firewall evading payloads by following the iterative cycle of sending a request with a malicious payload, analyzing the reason(s) why the web application firewall blocked the request and subsequently modifying the payload. In all requests, the payloads are sent in the request body.
 Request payloads are chosen to supply a proof of concept for a single or a combination of multiple evasion techniques. The validity of all payloads is determined by running them inside FireFox browser version 124.0.1-1. Only valid payloads are considered in the testing context. %For a list of all original-payloads, see Listing~\ref{lst:originalpayloads}.
 
-All tests have been conducted in a lab environment composed of simple web servers to receive requests that pass the firewall.
-The web servers are reachable via an nginx reverse proxy that is compiled with the ModSecurity-nginx connector module. Nginx runs on a Debian Bookworm host with ModSecurity installed.
+All tests have been conducted in a lab environment composed of simple web servers to receive any requests that pass the firewall.
+The web servers are reachable via a nginx reverse proxy that is compiled from source with the ModSecurity-nginx connector module. Nginx runs on a Debian Bookworm host with ModSecurity installed.
 All components are built from source from their latest mainline branches as of April 2024.
 For more details see the Dockerfiles in the attached github repository:\\ \verb|https://github.com/sebstec/mt|. 
 
 ModSecurity is configured using the authors recommended configuration by the time of this writing. \cite{modsec/recconf}
 Adjustments were made such that hits on potentially malicious requests are logged and the requests are being blocked. The response body is not being filtered.
-The configured ruleset is the OWASP CoreRuleSet in version 4.1.0 from 21/03/2024. \cite{crs/410dl}
+The configured ruleset to be used is the OWASP CoreRuleSet in version 4.1.0 from 21/03/2024. \cite{crs/410dl}
+
+As mentioned in Section~\ref{sec:waf}, the configured ruleset is responsible for setting up the filtering rules used by the web application firewall. Results of successful filtering bypasses as well as successful filtered requests while using CRS4.1 are detailed in the following section, Section~\ref{sec:EvaluationResults}.

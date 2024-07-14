@@ -32,7 +32,7 @@ As an additional security control in this case, a Web application firewall could
 If database administration is usually done locally, this would suffice.
 Alternatively, a whitelist of remote addresses allowed to access \verb|/phpmyadmin| could be used in the Web application firewall configuration.
 
-	{\color{red} maybe add ssrf here: \\ \verb|https://owasp.org/Top10/A10_2021-Server-Side_Request_Forgery_\%28SSRF\%29/|}
+	%{\color{red} maybe add ssrf here: \\ \verb|https://owasp.org/Top10/A10_2021-Server-Side_Request_Forgery_\%28SSRF\%29/|}
 
 Injection is the top 1 security risk in the OWASP Top 10 list from 2017.
 An application is vulnerable to attack when, among others, user-input is incorrectly validated, sanitized or filtered by the application.
@@ -62,13 +62,13 @@ The OWASP Foundation mentiones the common weakness CWE-79: \gls{xss} as one of t
 
 As an additional protection mechanism, Web application firewalls can be used to block \gls{xss} payloads in HTTP requests. In Web applications where script code transmission is not part of the business, the rules intended to block requests containing \gls{xss} payloads could be pretty strict.
 
-Force browsing as well as XSS payloads will be the main payloads tested in the proceeding of this work. {\color{red} TODO: CHECK THIS}
-Yet Force browsing and XSS are only a fraction of possible weaknesses in Web applications.
+Cross-site Scripting (XSS) payloads will be the main payloads tested in the proceeding of this work. 
+Cross-site Scripting weaknesses represent only a fraction of possible weaknesses in Web applications. Therefore, to achieve a comprehensive understanding of a web applications attack surface, research into further kinds of typical web application weaknesses should be considered.
 
-When employing a Web application firewall as an 'additional protection mechanism', a Defense-in-Depth strategy is followed.
+When employing a Web application firewall as an 'additional protection mechanism', the Defense-in-Depth strategy is followed.
 The first layer of defense should be the counter measure inside the Web application, like proper access control and neutralization of user-input. 
 An additional layer of defense is then put on top by employing a Web application firewall.
-If a misconfigured security control in the Web application failes to correctly handle a specific malicious request, there can be a chance that the Web application firewall is configured in a way that detects and blocks the malicious request before it can reach the Web application and cause an incident.
+If a misconfigured security control in the Web application failes to correctly handle a specific malicious request, there is a chance that the Web application firewall is configured in a way that detects and blocks the malicious request before it can reach the Web application and cause an incident.
 Avoiding security incidents with the Defense-in-Depth strategy corresponds to
 \begin{quote}
 	the application of multiple countermeasures in a layered or stepwise manner to achieve security objectives. The methodology involves layering heterogeneous security technologies in the common attack vectors to ensure that attacks missed by one technology are caught by another.

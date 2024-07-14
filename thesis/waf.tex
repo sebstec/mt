@@ -1,4 +1,5 @@
 \subsection{Web Application Firewall}
+\label{sec:waf}
 In contrast to network firewalls based on IP packet filtering, which operate on layers 3 and 4, a web application firewall is a firewall acting on the application layer.
 
 Users interact with a Web application using their Web browser.
@@ -38,7 +39,7 @@ The contributors to the OWASP Core Rule Set, which is a generic rule set used by
 	The Core Rule Set provides generic attack detection capabilities. A fresh CRS deployment has no awareness of the web services that may be running behind it, or the quirks of how those services work. It is possible that genuine transactions may cause some CRS rules to match in error, if the transactions happen to match one of the generic attack behaviors or patterns that are being detected. Such a match is referred to as a false positive, or false alarm. \cite{OWASP/crsfpt}
 \end{quote}
 
-Rules can be configured in a blacklisting setting or in a whitelisting setting.
+Filtering rules can be configured in a blacklisting setting or in a whitelisting setting.
 When configuring rules in a whitelisting setting, every possible benign message towards or originating from the Web application needs to be predictable. 
 With this prediction of requests, rules are configured in such a way that they match on the predicted messages. 
 Then the Web application firewall is configured to deny all messages that do not match on any rule. 
@@ -50,8 +51,8 @@ In this setup, the rules act as a blacklist of rejected messages. Unknown and po
 
 Web application firewalls can be deployed network-based in the form of an hardware appliance, cloud-based integrated with virtual cloud networking services and host-based colocated on the servers where the web applications reside. \cite{palo/waf}
 An example of a host-based Web application firewall is the open-source Libmodsecurity Web application firewall engine.
-It provides the capability to interpret rules written in the ModSecurity SecRules format and apply them to HTTP content provided by an application via connectors.
-The library is consumed by these connectors that interface with web servers and provide the library with a commmon format.
+It provides the capability to interpret rules written in the ModSecurity SecRules format and to apply them to HTTP content provided by an application via connectors.
+The library is consumed by these connectors. Connectors interface with web servers to provide the library with a common format.
 The ModSecurity project provides connectors for nginx and apache web servers.
 If nginx is compiled and setup with the ModSecurity connector, it can act as a Web application firewall and reverse proxy. \cite{modsec/home, modsec/nginx}
 In this configuration, nginx can be setup to listen for HTTP connections on ports 80 and 443.
@@ -63,6 +64,6 @@ For usage with the Libmodsecurity Web application firewall engine, the OWASP Fou
 	The OWASP® (Open Worldwide Application Security Project) CRS (Core Rule Set) is a free and open-source collection of rules that work with ModSecurity® and compatible web application firewalls (WAFs). These rules are designed to provide easy to use, generic attack detection capabilities, with a minimum of false positives (false alerts), to web applications as part of a well balanced defense-in-depth solution. \cite{OWASP/crshome}
 \end{quote}
 
-{\color{red} TODO: explain rule setup?}
+{\color{red} TODO: explain rule setup. give euample rule that prohibits access to /phpadmin where rule setup is explained and ref web app security section: broken access control}
 
 A similar setup Web application firewall configured with the OWASP CoreRuleSet will be evaluated in the further course of this work.

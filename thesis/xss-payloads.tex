@@ -1,6 +1,6 @@
-\subsection{XSS Payloads}
+\subsection{Cross-site Scripting Payloads}
 \label{sec:xsstech}
-This section lists evasion techniques applicable to \gls{xss} payloads.
+This section lists evasion techniques applicable to Cross-site Scripting payloads.
 
 \subsubsection{Tag modification}
 In a case, where regex filters are configured to look for html tags, modifying html tags might make a payload evade the filter. Possible modifications include:
@@ -64,22 +64,6 @@ Looking at Listing~\ref{lst:alertXSSblocked}, it is clear that the function call
 To avoid a match on \verb|alert(|, it is possible to split the function call into parts \verb|al|, \verb|e| and \verb|rt('XSS')| by using string concatenation in the form of \verb|`al` + `e` + `rt('XSS')`|.
 Sending the payload in this form will not cause the the desired effect, as a JavaScript interpreter will interpret the payload as a string instead of a function call to the \verb|alert()| function.
 Using the \verb|eval()| function in combination with the splitted string solves this problem. Passing the string \verb|`al` + `e` + `rt('XSS')`| in the form of \verb|eval(`al` + `e` + `rt('XSS')`)| as an argument to the \verb|eval()| function will cause the string to be evaluated and interpreted. Technique inspired by \cite{onecons/wafbypass}.
-The ModSecurity firewall using CRS 4.1.0. checks for usage of the function \verb|eval()| and tries to block requests containing it. An example is listed in Listing~\ref{lst:evalalertXSSblocked}.
-
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=eval(`al` + `e` + `rt('XSS')`) blocking example, label={lst:evalalertXSSblocked}]
-<payload>eval(`al` + `e` + `rt('XSS')`)</payload>
-<file>"rules/REQUEST-933-APPLICATION-ATTACK-PHP.conf"</file>
-<fileDetails>[line "331"] [id "933160"]<fileDetails>
-<MatchedData>"eval(`al`   `e`   `rt('XSS')"</MatchedData>
-
-<file>"rules/REQUEST-934-APPLICATION-ATTACK-GENERIC.conf"</file>
-<fileDetails>[line "52"] [id "934100"]<fileDetails>
-<MatchedData>"eval("</MatchedData>
-
-<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
-<fileDetails>[line "714"] [id "941390"]<fileDetails>
-<MatchedData>"eval("</MatchedData>
-\end{lstlisting}
 
 \subsubsection{function constructor}
 \label{sec:functionconstructor}
@@ -114,9 +98,10 @@ In this case, accessing the Function() constructor via an array object can be an
 {\color{red}TODO: []['map']['constructor'] from elements talk by martin kleppe:
 % https://youtu.be/p0X9UlqarCU?list=PLttm25JhpvA7V0Ol0_ryuRRR_45_L0bLH&t=1253 \\ 
 % or: https://speakerdeck.com/aemkei/holyjs-3l3m3nt5?slide=92
-\\ CAN USE ANY FUNCTION (MAP, FILTER, JOIN, CONSTRUCTOR...)}
+\\ CAN USE ANY FUNCTION (MAP, FILTER, JOIN, CONSTRUCTOR...)
+\\ also: mention global objects here \cite{js/builtin}
+}
 
-also: mention global objects here \cite{js/builtin}
 
 \subsubsection{square bracket notation}
 \label{sec:sbn}
@@ -124,6 +109,8 @@ JavaScript provides a \quotes{square bracket notation} to access properties of a
 
 This \quotes{square bracket notation} allows to substitute the dot notation in a case where using the dot notation is not feasible or blocked by firewall rules.
 For instance, in a payload composed using the function constructor as stated in \ref{sec:functionconstructor}, the part \\ \verb|[].constructor.constructor(`alert('XSS')`)()| can be substituted with \\ \verb|[][`constructor`][`constructor`](`alert('XSS')`)()|.
+
+{\color{red} hier evtl noch bisschen mehr details}
 
 
 \subsubsection{string replace}
@@ -192,7 +179,7 @@ Encoding the payload \verb|alert(1)| in JSFuck results in following payload:
       ])[!+[] + !+[] + [+[]]],
 \end{lstlisting}
 
-This payload is 297 characters long, which is around 37 times more than the 8 characters forming \verb|alert(1)|. On usage of JSFuck, payload size increases dramatically. Encoding the payload \verb|alert('XSS')| already requires 5739 characters (see Listing~\ref{lst:alertxssjsfuck}). If payload size is not limited, a lot of obscuration can be gained by using JSFuck to obscure payloads. The JSFuck website provides an encoder that is ready to use. It supports evaluating the source such that no additional measure is needed to execute the payload. \cite{mk/jsfuck}
+This payload is 297 characters long, which is around 37 times more than the 8 characters forming \verb|alert(1)|. On usage of JSFuck, payload size increases dramatically. Encoding the payload \verb|alert('XSS')| already requires 5739 characters (see Listing~\ref{lst:alertxssjsfuck}). If payload size is not limited, a lot of obscuration can be gained by using JSFuck to obscure payloads. The JSFuck website provides an encoder that is ready to use. It supports implemented evaluating of the payload such that no additional measure is needed to execute the payload. \cite{mk/jsfuck}
 
 
 \subsubsection{Aurebesh.js}
@@ -275,3 +262,6 @@ As a proof of concept, the function \verb|alert| has been substituded with the f
 For the test result of this payload see Listing~\ref{lst:aurebeshpromptbypass}.
 
 {\color{red} evtl hier noch eine weitere, interessantere payload (fetch)}
+
+
+Mentioned evasion techniques under this section (Section~\ref{sec:firewallevasiontechniques}) will be used to create targeted malicious requests in an effort to evaluate the performace of a tested firewall configuration against these requests. The evaluation methodology will be explained in the following section (Section~\ref{sec:evaluation}).
