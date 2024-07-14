@@ -6,6 +6,8 @@ var abc = (...input) => {
 Proxy.constructor.constructor('al' + 'ert("Proxy")')();
 new Array().constructor.constructor('al' + 'ert("Array")')();
 Array['constructor']["constructor"]('al' + 'ert("Array2")')();
+this.Proxy.constructor.constructor('alert("this")')();
+Proxy.constructor.constructor(console.log('Function'))()
 console.log("\uFE69")
 console.log("﹩")
 console.log("﹩".normalize('NFKD'))
