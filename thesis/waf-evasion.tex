@@ -10,12 +10,24 @@ To evade a regex based rule that looks for the character sequence \verb|alert(|,
 In this case, the semantics of the payload stayed the same while the syntax was changed to evade detection by the Web application firewall.
 Further techniques to create firewall evading payloads are described in Section~\ref{sec:firewallevasiontechniques}.
 
-With increased obscurity, the difficulty of creating a valid payload increases. Building on the afromentioned example around \verb|alert()|, some payload limitations occur with the usage of Tagged Template Literals. When switching the target from displaying a dialog with the content \verb|"1"| to displaying a dialog with content based on an expression, these limitations become apparent. Considering the expression \verb|1+1|, the target could be achieved by supplying the payload \verb|alert(1+1)| - without a Web application firewall rejecting messages containing the character sequence \verb|alert(|. Calling the function this way, with the expression as an argument, the expression will be evaluated and the browser displays a dialog with the content based on the expression result: \verb|"2"|.
+With increased obscurity, the difficulty of creating a valid payload increases. Building on the afromentioned example around \verb|alert()|, some payload limitations occur with the usage of Tagged Template Literals. When switching the target from displaying a dialog with the content \verb|"1"| to displaying a dialog with content based on an expression, these limitations become apparent. Considering the expression \verb|1+1|, the target could be achieved by supplying the payload
+\begin{lstlisting}[style=basicStyle]
+alert(1+1)
+\end{lstlisting}
+- without a Web application firewall rejecting messages containing the character sequence \verb|alert(|. Calling the function this way, with the expression as an argument, the expression will be evaluated and the browser displays a dialog with the content based on the expression result: \verb|"2"|.
 
-If Tagged Template Literals are used to evade the firewall in the same bracket-replacing fashion as before, \verb|alert`1+1`|, the result will be semantically different to the intended target.
+If Tagged Template Literals are used to evade the firewall in the same bracket-replacing fashion as before: 
+\begin{lstlisting}[style=basicStyle]
+alert`1+1`
+\end{lstlisting}
+the result will be semantically different to the intended target.
 Because of how Tagged Template Literals are designed in the JavaScript programming language, the call to \verb|alert`1+1`| will display a dialog with the content \verb|"1+1"|. The expression will not be evaluated, the target has not been achieved. Therefore the payload is not valid. It is neccessary to invite more obscurity into the payload. 
 
-Placeholders in the form of \verb|${expression}| can be used inside Tagged Template Literals. The payload can be modified to \verb|alert`${1+1}`|. Executing this payload will result in the display of a dialog with the content \verb|","|. When calling a function using Tagged Template Literals in JavaScript, the first argument given to the function will be an array of strings corresponding to the strings surrounding the \verb|${expression}| placeholders. In the call \verb|alert`${1+1}`|, this array is of the form \verb|["",""]|. When calling the function \verb|alert| with an argument other than a string, it will be converted to a string before being displayed. The array \verb|["",""]| converted to string results in the string \verb|","|. 
+Placeholders in the form of \verb|${expression}| can be used inside Tagged Template Literals. The payload can be modified to 
+\begin{lstlisting}[style=basicStyle]
+alert`${1+1}`
+\end{lstlisting}
+Executing this payload will result in the display of a dialog with the content \verb|","|. When calling a function using Tagged Template Literals in JavaScript, the first argument given to the function will be an array of strings corresponding to the strings surrounding the \verb|${expression}| placeholders. In the call \verb|alert`${1+1}`|, this array is of the form \verb|["",""]|. When calling the function \verb|alert| with an argument other than a string, it will be converted to a string before being displayed. The array \verb|["",""]| converted to string results in the string \verb|","|. 
 As the function \verb|alert| accepts a single argument, it can not be used together with Tagged Template Literals to display a dialog with content based on the evaluation of an expression.
 
 When calling a function using Tagged Template Literals that contain \verb|${expression}| placeholders, the evaluation results of the expressions in the placeholders will be given to the calling function as the second and following arguments.
