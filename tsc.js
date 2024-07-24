@@ -10,7 +10,7 @@ var abc = (...input) => {
 // Proxy.constructor.constructor(console.log('Function'))()
 // eval.constructor('alert("eval")')();
 // isFinite.constructor('alert("isFinite")')();
-Intl.DateTimeFormat.constructor.constructor('alert("object")')();
+// Intl.DateTimeFormat.constructor.constructor('alert("object")')();
 console.log("\uFE69")
 console.log("﹩")
 console.log("﹩".normalize('NFKD'))

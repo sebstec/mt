@@ -13,12 +13,49 @@ In a case, where regex filters are configured to look for html tags, modifying h
 Technique by \cite{medium/allypetitt}
 
 \subsubsection{Space replace}
-A regex filter that is expecting a space inside a html tag at certain positions can be evaded by replacing the space with a \verb|/|.
-For instance, \verb|<img src="1" onerror="alert('XSS')">| becomes \verb|<img/src="1"/onerror="alert('XSS')">|.
-Technique by \cite{medium/allypetitt}
+A regex filter that is expecting a space inside a html tag at certain positions can be evaded by replacing the space with the forward slash: \verb|/|.
+For instance, the payload
 
-\subsubsection{HTML encoding}
-{\color{red}TODO: see the <a> thing}
+\begin{lstlisting}[style=basicStyle]
+<img src="1" onerror="alert('XSS')">
+\end{lstlisting}
+
+becomes 
+
+\begin{lstlisting}[style=basicStyle]
+<img/src="1"/onerror="alert('XSS')">
+\end{lstlisting}
+
+Technique by \cite{medium/allypetitt}. {\color{red}TODO: link to evaluation}
+
+\subsubsection{HTML character references}
+Sometimes Cross-site scripting payloads are using HTML elements to deliver a payload. Inside such payloads, HTML character references can be used to obscure the payload. The HTML specification states that in certain cases, text may be mixed with character references. Character references must start with a U+0026 AMPERSAND character (\&). Following this, there are three possible kinds of character references: Named character references, Decimal numeric character references or Hexadecimal numeric character references. \cite{www/html}
+
+Considering the example payload using the \verb|<a>| element to exploit a stored Cross-site scripting vulnerability:
+
+\begin{lstlisting}[style=basicStyle]
+<a href=javascript:alert('a')>ClickMeFor$</a>
+\end{lstlisting}
+
+which is semantically equal to the following payload where a named character reference is used to substitute the left parenthesis of the initial payload:
+
+\begin{lstlisting}[style=basicStyle]
+<a href=javascript:alert&lpar;'a')>ClickMeFor$</a>
+\end{lstlisting}
+
+If a decimal numeric character reference is used to substitute a latin small letter a, the initial payload becomes the following:
+
+\begin{lstlisting}[style=basicStyle]
+<a href=jav&#97;script:alert('a')>ClickMeFor$</a>
+\end{lstlisting}
+
+Finally, if hexadecimal numeric character references are used to substitute a latin small letter a as well as the left parenthesis, the initial payload becomes:
+
+\begin{lstlisting}[style=basicStyle]
+<a href=jav&#x61;script:alert&#x28;'a')>ClickMeFor$</a>
+\end{lstlisting}
+
+The evaluation results of payloads obscured using this technique are stated under Section~\ref{sec:htmlcharrefsingleeva} (single iteration) and Section~\ref{sec:htmlencjsesc} (multi iteration).
 
 \subsubsection{From charcode}
 {\color{red}TODO: String.fromCharCode(0x4c,105,0x6e,117,120) \cite{asecsite/jsobf1}}
@@ -100,6 +137,7 @@ In this case, accessing the Function() constructor via an array object can be an
 % or: https://speakerdeck.com/aemkei/holyjs-3l3m3nt5?slide=92
 \\ CAN USE ANY FUNCTION (MAP, FILTER, JOIN, CONSTRUCTOR...)
 \\ also: mention global objects here \cite{js/builtin}
+Intl.DateTimeFormat.constructor.constructor('alert("object")')();
 }
 
 
