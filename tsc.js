@@ -18,6 +18,11 @@ console.log("\uFE69".normalize('NFKC'))
 console.log("eval(\"prompt`\u{FE69}{'normalized'}`\")".normalize('NFKD'))
 // eval("prompt`${'normalized'}`")
 console.log("alert\u{207D}'normalizeMe')".normalize('NFKD'))
+const secret = "very secret string"
+const incomingPayload = "a\");prompt`\u{FE69}{secret}`;(\""
+const message = "Hello " + incomingPayload.normalize('NFKD')
+const evaluateMe = "console.log(\"" + message + "\")"
+eval(evaluateMe)
 // alert('normalizeMe')
 // A = '',
 // B = !A + A,

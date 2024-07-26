@@ -30,10 +30,10 @@ The ModSecurity recommended configuration sets the following limits for requests
 \end{quote}
 with requests exceeding the limits being rejected by default. \cite{modsec/recconf}
 
-Depending on the specific rule configuration by each service, blowing up requests with filler-data to exceed the inspection limit might make the malicious payload evade detection. Some Web applications might accept request bodies filled with unused data, as long as there is a valid key: value pair inside. If this key: value pair is positioned past the 8 KB limit of the Akamai WAF for instance, the malicious value might go unnoticed.
+Depending on the specific rule configuration by each service, blowing up requests with filler-data to exceed the inspection limit might make the malicious payload evade detection. Some Web applications might accept request bodies filled with unused data, as long as there is a valid key: value pair inside. If this key: value pair is positioned past the 8 KB limit of the Akamai WAF for instance, the malicious value might go unnoticed. Results of using this technique during the evaluation are stated under Section~\ref{sec:paylensingleiter}.
 
 
-\subsubsection{Unicode encoding in JSON}
+\subsubsection{Unicode escaping in JSON}
 RFC 4627 \quotes{The application/json Media Type for JavaScript Object Notation} states under section 2.5 \quotes{Strings}:
 \begin{quote}
 	The representation of strings is similar to conventions used in the C
@@ -50,11 +50,33 @@ RFC 4627 \quotes{The application/json Media Type for JavaScript Object Notation}
 	encode the character's code point.  The hexadecimal letters A though
 	F can be upper or lowercase.  So, for example, a string containing
 	only a single reverse solidus character may be represented as
-	"\u005C". \cite{rfc4627}
+	"\verb|\u005C|". \cite{rfc4627}
 \end{quote}
-As escaping any character should be possible in a JSON payload, firewall filters that look for a certain sequence of characters might be evaded by escaping one or more characters from that sequence.
+As escaping any character should be possible in a JSON payload, firewall filters that look for a certain sequence of characters might be evaded by escaping one or more characters from that sequence. Messages exchanged between web clients and web servers are often in JSON format. As such, sometimes the JSON format is used when crafting messages containing malicious payloads. In this case, any character inside the JSON formatted message can be escaped using this technique. For example, the payload inside the JSON formatted body of a HTTP message:
 
-	{\color{red} TODO: example, request with unicode replaced \$ }
+\begin{lstlisting}[style=basicStyle]
+{
+	"message": "alert(\"JSON\")"
+}
+\end{lstlisting}
+
+to evade a filter looking for the character sequence "\verb|alert(|", the payload inside the message may be modified to:
+
+\begin{lstlisting}[style=basicStyle]
+{
+	"message": "alert\u0028\"JSON\")"
+}
+\end{lstlisting}
+
+The JSON parser does not differentiate between both payloads. As such, the following statements running inside a web browser are semantically equal:
+
+\begin{lstlisting}[style=basicStyle]
+eval(JSON.parse('{"message":"alert(\\"JSON\\")"}').message)
+
+eval(JSON.parse('{"message":"alert\\u0028\\"JSON\\")"}').message)
+\end{lstlisting}
+
+Results of using this technique during the evaluation are stated under Section~\ref{sec:unicodeinjsontest}.
 
 
 \subsubsection{Unicode normalization}
@@ -72,17 +94,15 @@ The unicode standard defines two types of equivalence between characters: canoni
 	\end{figure}
 	\\
 	Compatibility equivalence is a weaker type of equivalence between characters or sequences of characters which represent the same abstract character (or sequence of abstract characters), but which may have distinct visual appearances or behaviors. The visual appearances of the compatibility equivalent forms typically constitute a subset of the expected range of visual appearances of the character (or sequence of characters) they are equivalent to. However, these variant forms may represent a visual distinction that is significant in some textual contexts, but not in others. As a result, greater care is required to determine when use of a compatibility equivalent is appropriate. [...] Figure 2 provides examples of compatibility equivalence. \cite{unicode/normalization}
-	\\
 	\begin{figure}[h]
 		\centering
 		\includegraphics[width=0.5\textwidth]{compeq.png}
 		\label{fig:compeq}
 		\caption{ Examples of Canonical Equivalence \cite{unicode/normalization}}
 	\end{figure}
-	\\
 \end{quote}
 
-Normalization Forms are further described in the report:
+Regarding Normalization Forms, the report states in further proceedings:
 \begin{quote}
 	Unicode Normalization Forms are formally defined normalizations of Unicode strings which make it possible to determine whether any two Unicode strings are equivalent to each other. Depending on the particular Unicode Normalization Form, that equivalence can either be a canonical equivalence or a compatibility equivalence.
 
@@ -110,10 +130,50 @@ Normalization Forms are further described in the report:
 		\end{tabular}
 	\end{table}
 \end{quote}
-In the context of Firewall Evasion, if inputs on the web server are normalized using one of the afromentioned Normalization Forms during processing, an attacker could try to substitute certain characters inside a malicious payload with equivalent unicode characters. \cite{medium/allypetitt} Such a payload might be able to avoid the filter of the Web Application Firewall that is looking for patterns including the normalized form of the unicode character. As an example, the payload \verb|prompt`${secret}`| could be substituted with the payload \verb|prompt`\uFE69{secret}`|. U+FE69 is named "Small Dollar Sign" and its decomposition form is U+0024, which is the regular Dollar Sign. \cite{comp/uni}
-Using the JavaScript function "normalize", the string containing the Small Dollar Sign: \verb|"\uFE69"| can be decomposed using Compatibility Decomposition (NFKD) into a string containing the normal Dollar Sign: \verb|"\u0024"| respectively \verb|"$"| by calling \verb|"\uFE69".normalize("NFKD")|.
+In the context of Firewall Evasion, if inputs on the web server are normalized using one of the afromentioned Normalization Forms during processing, an attacker could try to substitute certain characters inside a malicious payload with equivalent unicode characters. \cite{medium/allypetitt} Such a payload might be able to avoid the filter of the Web Application Firewall that is looking for patterns including the normalized form of the unicode character. As an example, the payload:
+
+\begin{lstlisting}[style=basicStyle]
+"prompt`${secret}`"
+\end{lstlisting}
+
+could be substituted with the payload:
+
+\begin{lstlisting}[style=basicStyle]
+"prompt`\uFE69{secret}`"
+\end{lstlisting}
+
+The unicode character U+FE69 is named "Small Dollar Sign" and its decomposition form is U+0024, which is the regular Dollar Sign. \cite{comp/uni}
+
+Using the JavaScript function "normalize", the string containing the Small Dollar Sign: \verb|"\uFE69"| can be decomposed using Compatibility Decomposition (NFKD) into a string containing the normal Dollar Sign: \verb|"\u0024"| respectively \verb|"$"|.
+By calling normalize on the afromentioned example payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+"prompt`\uFE69{secret}`".normalize("NFKD")
+\end{lstlisting}
+
+the payload will be normalized to the initial payload:
+
+\begin{lstlisting}[style=basicStyle]
+"prompt`${secret}`"
+\end{lstlisting}
+
+If the web application evaluates the payload post normalization, the target effect has been achieved by the antagonist actor. An example of a vulnerable function inside a web application is given in the following code sample. Consider the variable \verb|incomingPayload| to be holding the incoming payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+const secret = "very secret string"
+const incomingPayload = "a\");prompt`\uFE69{secret}`;(\""
+const message = "Hello " + incomingPayload.normalize('NFKD')
+const evaluateMe = "console.log(\"" + message + "\")"
+eval(evaluateMe)
+\end{lstlisting}
+
+
+
+
 
 Unicode Normalization is also supported in programming languages different to JavaScript, such as Python. \cite{python/normalization}
+
+Results of evaluated payloads obscured using this technique are stated under Section~\ref{sec:uninormsingleiter} and {\color{red} multi iteration?}
 
 
 \subsubsection{Case alternation}
@@ -121,11 +181,32 @@ In order to evade regex filerting by the WAF, the case of a payload can be alter
 Modern regex flavors allow the application of modifiers to parts of the regular expression.
 One such modifier is \verb|(?i)|. It makes the regex case insensitive. \cite{regex/jan} Only when this modifier is not used, can a payload evade regex filtering using case alternation.
 
-Taking the XSS payload \verb|<script>alert('XSS')</script>| as an example, after applying case alternation, it might result in a payload in the form of: \verb|<sCrIpT>alert('XSS')</sCriPt>|.
+Taking the XSS payload:
+
+\begin{lstlisting}[style=basicStyle]
+<script>alert('XSS')</script>
+\end{lstlisting}
+
+as an example, after applying case alternation, it might result in a payload in the form of:
+
+\begin{lstlisting}[style=basicStyle]
+<sCrIpT>alert('XSS')</sCriPt>
+\end{lstlisting}
+
 Another example is file access on a wrongfully public file.
 The Windows file system trests file and directory names as case-insensitive by default. \cite{windows/casesensitive}
-On a web server hosted on Windows that exposes a .env file with stored secrets, both urls: \\ \verb|http://127.0.0.1:8000/.env| and \verb|http://127.0.0.1:8000/.enV| \\
-are treated equally.
+On a web server hosted on Windows that exposes a .env file with stored secrets, the url:
+
+\begin{lstlisting}[style=basicStyle]
+http://127.0.0.1:8000/.env
+\end{lstlisting}
+
+is treated equally to the url:
+
+\begin{lstlisting}[style=basicStyle]
+http://127.0.0.1:8000/.enV
+\end{lstlisting}
+
 
 
 \subsubsection{Comment interference}

@@ -4,6 +4,7 @@ This chapter states the evaluation results of a single iteration of application 
 
 
 \subsubsection{Payload length}
+\label{sec:paylensingleiter}
 As stated in Listing~\ref{lst:alertXSSblocked}, the payload \verb|alert('XSS')| is being blocked by the tested firewall:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=alert('XSS'), label={lst:alertXSSblocked}]
@@ -29,7 +30,7 @@ will cause the request to be blocked by ModSecurity without matching on any Core
 It takes exactly 131073 1-byte characters to reach this limit. If one less character is used in the request body, the ModSecurity firewall will match on \verb|alert(|, like in Listing~\ref{lst:alertXSSblocked}. This corresponds to the 131072 limit with rejection by default on exceeding the limit stated in the ModSecurity configuration file.
 
 
-\subsubsection{Unicode in JSON}
+\subsubsection{Unicode encoding in JSON}
 \label{sec:unicodeinjsontest}
 The ModSecurity firewall detects and blocks requests containing \verb|${| followed by a closing \verb|}| after an arbitrary number of characters in between.
 Tests have shown that using Unicode encoding in JSON and substituting the \verb|$| in a JSON request with \verb|\u0024| evades the previously mentioned detection, but triggers another firewall rule: \\
@@ -50,6 +51,7 @@ Tests have shown that using Unicode encoding in JSON and substituting the \verb|
 \end{lstlisting}
 
 \subsubsection{Unicode Normalization}
+\label{sec:uninormsingleiter}
 The following payload using the function \verb|alert()| is being blocked by the ModSecurity Firewall:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=alert("normalizeMe") blocked, label=lst:alertnormalizemeblocked]
@@ -61,13 +63,24 @@ The following payload using the function \verb|alert()| is being blocked by the 
 \end{lstlisting}
 
 If the opening \verb|(| is substituted with the "Superscript Left Parenthesis" (U+207D), the payload bypasses the filter:
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=alert('normalizeMe') bypass, label=lst:alertnormalizemebypass]
-<payload>alert("normalizeMe")</payload>
-<bypass>alert\u{207D}'normalizeMe')</bypass>
+
+\begin{lstlisting}[style=basicStyle, caption=alert('normalizeMe') bypass, label=lst:alertnormalizemebypass]
+alert\u{207D}'normalizeMe')
 \end{lstlisting}
 
-Calling \verb|.normalize('NFKD')| on the bypassed string:\\ 
-\verb|"alert\u{207D}'normalizeMe')".normalize('NFKD')| will convert the string to the original payload: \verb|"alert('normalizeMe')"|. As such, this payload would be a valid bypass on web applications that normalize payloads on incoming requests using the NFKD or another normalization algorith that normalizes the payload equally. 
+Calling \verb|.normalize('NFKD')| on the bypassed string:
+
+\begin{lstlisting}[style=basicStyle]
+"alert\u{207D}'normalizeMe')".normalize('NFKD')
+\end{lstlisting}
+
+will convert the string to the original payload:
+
+\begin{lstlisting}[style=basicStyle]
+"alert('normalizeMe')"
+\end{lstlisting}
+
+As such, this payload would be a valid bypass on web applications that normalize payloads on incoming requests using the NFKD or another normalization algorith that normalizes the payload equally. 
 
 
 \subsubsection{Case Alternation}
