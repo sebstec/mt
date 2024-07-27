@@ -54,7 +54,7 @@ RFC 4627 \quotes{The application/json Media Type for JavaScript Object Notation}
 \end{quote}
 As escaping any character should be possible in a JSON payload, firewall filters that look for a certain sequence of characters might be evaded by escaping one or more characters from that sequence. Messages exchanged between web clients and web servers are often in JSON format. As such, sometimes the JSON format is used when crafting messages containing malicious payloads. In this case, any character inside the JSON formatted message can be escaped using this technique. For example, the payload inside the JSON formatted body of a HTTP message:
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 {
 	"message": "alert(\"JSON\")"
 }
@@ -62,7 +62,7 @@ As escaping any character should be possible in a JSON payload, firewall filters
 
 to evade a filter looking for the character sequence "\verb|alert(|", the payload inside the message may be modified to:
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 {
 	"message": "alert\u0028\"JSON\")"
 }
@@ -70,7 +70,7 @@ to evade a filter looking for the character sequence "\verb|alert(|", the payloa
 
 The JSON parser does not differentiate between both payloads. As such, the following statements running inside a web browser are semantically equal:
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 eval(JSON.parse('{"message":"alert(\\"JSON\\")"}').message)
 
 eval(JSON.parse('{"message":"alert\\u0028\\"JSON\\")"}').message)
@@ -132,13 +132,13 @@ Regarding Normalization Forms, the report states in further proceedings:
 \end{quote}
 In the context of Firewall Evasion, if inputs on the web server are normalized using one of the afromentioned Normalization Forms during processing, an attacker could try to substitute certain characters inside a malicious payload with equivalent unicode characters. \cite{medium/allypetitt} Such a payload might be able to avoid the filter of the Web Application Firewall that is looking for patterns including the normalized form of the unicode character. As an example, the payload:
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 "prompt`${secret}`"
 \end{lstlisting}
 
 could be substituted with the payload:
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 "prompt`\uFE69{secret}`"
 \end{lstlisting}
 
@@ -153,7 +153,7 @@ By calling normalize on the afromentioned example payload:
 
 the payload will be normalized to the initial payload:
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 "prompt`${secret}`"
 \end{lstlisting}
 
@@ -167,10 +167,6 @@ const evaluateMe = "console.log(\"" + message + "\")"
 eval(evaluateMe)
 \end{lstlisting}
 
-
-
-
-
 Unicode Normalization is also supported in programming languages different to JavaScript, such as Python. \cite{python/normalization}
 
 Results of evaluated payloads obscured using this technique are stated under Section~\ref{sec:uninormsingleiter} and {\color{red} multi iteration?}
@@ -181,15 +177,15 @@ In order to evade regex filerting by the WAF, the case of a payload can be alter
 Modern regex flavors allow the application of modifiers to parts of the regular expression.
 One such modifier is \verb|(?i)|. It makes the regex case insensitive. \cite{regex/jan} Only when this modifier is not used, can a payload evade regex filtering using case alternation.
 
-Taking the XSS payload:
+Taking the Cross-site scripting payload:
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 <script>alert('XSS')</script>
 \end{lstlisting}
 
 as an example, after applying case alternation, it might result in a payload in the form of:
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 <sCrIpT>alert('XSS')</sCriPt>
 \end{lstlisting}
 
@@ -197,21 +193,23 @@ Another example is file access on a wrongfully public file.
 The Windows file system trests file and directory names as case-insensitive by default. \cite{windows/casesensitive}
 On a web server hosted on Windows that exposes a .env file with stored secrets, the url:
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 http://127.0.0.1:8000/.env
 \end{lstlisting}
 
 is treated equally to the url:
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 http://127.0.0.1:8000/.enV
 \end{lstlisting}
 
+Results of conducting the evaluation using this technique are stated under Section~\ref{sec:casealternationevaluation}.
 
 
-\subsubsection{Comment interference}
-\label{sec:commint}
-{\color{red} TODO: rework this to javascript comment interference}
+
+% \subsubsection{Comment interference}
+% \label{sec:commint}
+% {\color{red} TODO: rework this to javascript comment interference}
 
 % In some context, comments can be used to break up statements. Regarding SQL, the Oracle Database SQL Reference states:
 % \begin{quote}
@@ -240,17 +238,50 @@ RFC 3986 states under section 2.1 "Percent-Encoding":
 \end{quote}
 If a Web Application Firewall does not perform percent-decoding on filtered requests but the request is being decoded by the Web Server, such as is the case when data is being sent as part of an URI (\cite{rfc3986/sec2.4}), a malicious payload could be percent-encoded to avoid detection by the firewall.
 
+The payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+<script>alert('XSS')</script>
+\end{lstlisting}
+
+becomes 
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+%3Cscript%3Ealert%28%27XSS%27%29%3C%2Fscript%3E
+\end{lstlisting}
+
+after percent encoding it with the Python function \verb|urllib.parse.quote_plus|. Evaluation results using this technique are stated under Section~\ref{sec:percencsingleiter}
+
+
 \subsubsection{Charset alternation}
 To indicate the original media type prior to any applied content encoding, the HTTP \verb|Content-Type| representation header is used.
 It can be used in requests by the client to tell the server what type of data is actually sent.
 \verb|charset| is a possible directive, that specifies the character encoding standard.
 It can be supplied with the \verb|Content-Type| header. \cite{http/contenttype}
-If a web server is supporting requests in different encoding standards, but the WAF is not configured to parse certain encoding standards, the WAF may not recognize such encoded request as malicious.
+If a Web server is supporting requests in different encoding standards, but the Web application firewall is not configured to parse certain encoding standards, the Web application firewall may not recognize such encoded request as malicious.
 
-The payload \verb|'<script>alert("xss")</script>'| becomes \\
-\verb|'L%A2%83%99%89%97%A3n%81%93%85%99%A3M%7F%A7%A2%A2%7F%5DLa%A2%83%99%89%97%A3n'|
-after encoding the payload to the charset \verb|IBM037| followed by percent encoding. \\
-This differs from the same payload in \verb|UTF-8| followed by percent encoding: \\
-\verb|'%3Cscript%3Ealert%28%22xss%22%29%3C%2Fscript%3E'| \\
-\verb|UTF-8| encoding is the standard for URIs according to RFC-3986. \cite{rfc3986} \\
+The payload: 
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+<script>alert("xss")</script>
+\end{lstlisting}
+
+becomes:
+
+\begin{lstlisting}[style=basicStyle]
+\xff\xfe<\x00s\x00c\x00r\x00i\x00p\x00t\x00>\x00a\x00l\x00e\x00r\x00t\x00(\x00'\x00x\x00s\x00s\x00'\x00)\x00<\x00/\x00s\x00c\x00r\x00i\x00p\x00t\x00>\x00
+\end{lstlisting}
+
+after encoding the payload to the charset \verb|UTF-16|, as stated in the Python 3 code sample:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+pl = "<script>alert('xss')</script>"
+ex_encoding = 'UTF-16'
+pl_encoded = pl.encode(ex_encoding)
+\end{lstlisting}
+
+This differs from the original payload in \verb|UTF-8|. \verb|UTF-8| encoding is the standard for URIs according to RFC-3986. \cite{rfc3986} 
+
+If a Web server accepts HTTP requests in \verb|UTF-16| encoding and the Web application firewall does not recognize payloads encoded in \verb|UTF-16|, any payload can be sent towards the Web application without being detected by the Web application firewall. Results of testing this technique during the evaluation are stated under Section~\ref{sec:charaltsingleiter}.
+
 Technique by \cite{medium/allypetitt}.

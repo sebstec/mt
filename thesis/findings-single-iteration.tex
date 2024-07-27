@@ -102,8 +102,8 @@ The specific warning that the firewall writes to its log on blocking the case-al
 The \verb|(?i)| regex modifier at the beginning of the rule instructs the regex engine to ignore case.
 
 
-\subsubsection{Comment Interference}
-{\color{red}TODO XSS comment interference}
+% \subsubsection{Comment Interference}
+% {\color{red}TODO XSS comment interference}
 % The example given by Ally Petitt \cite{medium/allypetitt} in Section~\ref{sec:commint} has been tested against the ModSecurity Firewall using CRS4.1. The original payload: \verb|?id=1+union+select+1,2,3--| is being blocked by the firewall:
 %
 % \begin{lstlisting}[style=ruleStyle, language=XML, caption=union select injection blocked, label=lst:sqliblocked]
@@ -134,12 +134,13 @@ The \verb|(?i)| regex modifier at the beginning of the rule instructs the regex 
 %
 
 \subsubsection{Percent Encoding}
+\label{sec:percencsingleiter}
 The ModSecurity firewall detects some percent-encoded payloads. Requests with plain as well as percent-encoded payloads were sent to the reverse proxy. All requests triggered the same rules:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=url encoded example blocked, label={lst:urlencodedexampleblocked}]
 <payload>alert(`${new Date()}`)</payload>
-<payload>urllib.parse.quote('alert(`${new Date()}`)')</payload>
-<payload>'alert%28%60%24%7Bnew%20Date%28%29%7D%60%29'</payload>
+<payload>urllib.parse.quote_plus('alert(`${new Date()}`)')</payload>
+<payload>'alert%28%60%24%7Bnew+Date%28%29%7D%60%29'</payload>
 <message>"Remote Command Execution: Unix Shell Expression Found"</message>
 <file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
 <fileDetails>[line "291"] [id "932130"]<fileDetails>
@@ -151,10 +152,11 @@ The ModSecurity firewall detects some percent-encoded payloads. Requests with pl
 <MatchedData>"alert("</MatchedData>
 \end{lstlisting}
 
-Many rules that are delivered as part of the CoreRuleSet in version 4.1 use the \verb|t:urlDecode| or \verb|t:urlDecodeUni| transformations that transform a filtered request by url decoding input strings before checking for rule matches. Therefore, using percent (url) encoding to try and bypass a firewall equipped with rules from CRS4.1 is considered futile.
-
+Many rules that are delivered as part of the CoreRuleSet in version 4.1 use the \verb|t:urlDecode| or \verb|t:urlDecodeUni| transformations that transforms a filtered request by url decoding input strings before checking for rule matches. Therefore, using percent (url-) encoding to try and bypass a firewall equipped with rules from CRS4.1 is considered futile.
 
 \subsubsection{Charset Alternation}
+\label{sec:charaltsingleiter}
+
 {\color{red}TODO }
 
 \subsubsection{HTML character references}
