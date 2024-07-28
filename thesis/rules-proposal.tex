@@ -204,6 +204,7 @@ The proposed firewall rule manages to block the second part the mentioned bypass
 
 
 \subsubsection{Function Constructor: Reflection}
+\label{sec:rulespropfunctionconstructorreflection}
 The rules implemented in the previous section (Section~\ref{sec:rulespropfunctionconstructor}: Function Constructor: Results) have been reflected upon the used evasion technique stated in Section~\ref{sec:functionconstructor}: Function Constructor.
 
 While accessing the function constructor as it is done in the mentioned bypassing payloads is no longer possible with the proposed rules \verb|id:2| and \verb|id:3| from Section~\ref{sec:rulespropfunctionconstructor}, the practice of creating firewall evading payloads through accessing the function constructor by accessing the constructor of JavaScripts built-in objects will still yield successful results. Not all vectors opened by this technique are covered by the proposed rules. Creating an Array object by calling \verb|new Array()| is equivalent to calling \verb|[]| in terms of creating a malicious payload that accesses the function constructor. Section~\ref{sec:functionconstructor} states more options to access the function constructor via other built-in objects that are part of JavaScript at the time of this writing.

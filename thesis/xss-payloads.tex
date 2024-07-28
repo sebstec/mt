@@ -20,7 +20,7 @@ For instance, the payload
 <img src="1" onerror="alert('XSS')">
 \end{lstlisting}
 
-becomes 
+becomes
 
 \begin{lstlisting}[style=basicStyle]
 <img/src="1"/onerror="alert('XSS')">
@@ -106,12 +106,18 @@ Using the \verb|eval()| function in combination with the splitted string solves 
 \subsubsection{function constructor}
 \label{sec:functionconstructor}
 
-When using the function \verb|eval()| (see Section~\ref{sec:eval}) causes a request to be blocked, a substitute in the form of \verb|[].constructor.constructor(`alert('XSS')`)()| is available in JavaScript.
+When using the function \verb|eval()| (see Section~\ref{sec:eval}) causes a request to be blocked, a substitute payload in the form of
+
+\begin{lstlisting}[style=basicStyle,language=Python]
+[].constructor.constructor(`alert('XSS')`)()
+\end{lstlisting}
+
+is available in JavaScript.
 
 Calling \verb|[]| will create an empty array, which is a special kind of object.
 Any kind of object in JavaScript, with the exception of null prototype objects, will have a constructor property on its prototype. \cite{js/object}
 
-The Array objects constructor can be accessed by calling \verb|.constructor| on an instance of Array, like \verb|[].constructor|. \cite{js/array}
+The Array objects constructor ca n be accessed by calling \verb|.constructor| on an instance of Array, like \verb|[].constructor|. \cite{js/array}
 Constructors are technically regular functions. \cite{js/constructor}
 As such, they are Function objects. Function objects have a constructor themselfes, which again is called using the \verb|.constructor| notation.
 
@@ -122,7 +128,13 @@ The difference being that the Function() constructor creates functions that exec
 The Function() constructor takes a variable count of arguments. The first $n - 1$ arguments are the \quotes{names to be used by the function as formal argument names. Each must be a string that corresponds to a valid JavaScript parameter [...]} \cite{js/function}
 The last argument given to the Function() constructor is expected to be a string containing the JavaScript statements compromising the function definition. \cite{js/function}
 
-Therefore, the afromentioned substitute for \verb|eval()| - \\ \verb|[].constructor.constructor(`alert('XSS')`)()| - \\ will create a function with the function body \verb|alert('XSS')| and call it directly.
+Therefore, the afromentioned substitute for \verb|eval()|: 
+
+\begin{lstlisting}[style=basicStyle,language=Python]
+[].constructor.constructor(`alert('XSS')`)()
+\end{lstlisting}
+
+will create a function with the function body \verb|alert('XSS')| and call it directly.
 In other words: It will call a function that calls \verb|alert('XSS')|.
 Technique by \cite{onecons/wafbypass}.
 
@@ -133,13 +145,41 @@ A more straightforward and less obscure way of accessing the Function() contruct
 Depending on the firewall configuration, a WAF might use regex filtering to detect usage of \verb|Function()|.
 In this case, accessing the Function() constructor via an array object can be an alternative.
 
-{\color{red}TODO: []['map']['constructor'] from elements talk by martin kleppe:
-% https://youtu.be/p0X9UlqarCU?list=PLttm25JhpvA7V0Ol0_ryuRRR_45_L0bLH&t=1253 \\ 
-% or: https://speakerdeck.com/aemkei/holyjs-3l3m3nt5?slide=92
-\\ CAN USE ANY FUNCTION (MAP, FILTER, JOIN, CONSTRUCTOR...)
-\\ also: mention global objects here \cite{js/builtin}
-Intl.DateTimeFormat.constructor.constructor('alert("object")')();
-}
+In addition to accessing the function constructor via the \verb|constructor| function present on most object prototypes, the function constructor can also be accessed via other functions present on certain object prototypes. For instance, the \verb|map| function is present on the Array object's prototype. Therefore the following payload is also valid: 
+
+\begin{lstlisting}[style=basicStyle,language=Python,escapeinside=\^\^]
+[].^map^.constructor(`alert('XSS')`)()
+\end{lstlisting}
+
+(Technique using \verb|map| by \cite{mk/elementsVid}).
+
+If, for any reason, the Array object can not be used, there are substitutes available in the form of JavaScript's standard built-in objects. \cite{js/builtin}
+JavaScript's built-in objects include but are not limited to built-in global functions that can be used as a substitute:
+
+\begin{lstlisting}[style=basicStyle,language=Python,escapeinside=\^\^]
+isNaN.constructor(`alert('XSS')`)()
+\end{lstlisting}
+
+as well as a multitude of other built-in objects, for example the \verb|Error| object:
+
+\begin{lstlisting}[style=basicStyle,language=Python,escapeinside=\^\^]
+Error.constructor.constructor(`alert('XSSSSS')`)()
+\end{lstlisting}
+
+If firewall rule maintainers implement new rules to specifically block the access to the function constructor by blacklisting all built-in JavaScript objects, there is still the possibility that in the time after an update to JavaScript (ECMAScript) some newly released built-in objects are not blocked yet. This can be caused by either the rule maintainers slow adaption speed or a missing update on the Web application firewall.
+
+In any case, the access to the \verb|Function| constructor is possible on self defined objects too. The following code sample displays this:
+
+\begin{lstlisting}[style=basicStyle,language=Python,escapeinside=\^\^]
+const someObject = { someProperty: "some string" }
+someObject.constructor.constructor(`alert('XSSSSS')`)()
+\end{lstlisting}
+
+If the availablitiy of custom object references in the execution scope of the payload-code is given, custom object references can be used to create a function via the \verb|Function| constructor. 
+
+The results of evaluating the ModSecurity firewall using CRS4.1 by applying this evasion technique are shown under Section~\ref{sec:functionconstructorsingleeva} for the single iteration evaluation and Section~\ref{sec:funconstrconbypass} for the multi iteration evaluation.
+
+Firewall rules for the OWASP CoreRuleSet in version 4.1 are proposed under Section~\ref{sec:rulespropfunctionconstructor} and Section~\ref{sec:rulespropfunctionconstructorreflection}.
 
 
 \subsubsection{square bracket notation}
