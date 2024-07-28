@@ -3,15 +3,10 @@ import urllib.parse
 pl = "<script>alert('xss')</script>"
 encodings = [
     "UTF-8",
-    "UTF-7",
     "UTF-16",
     "ISO-8859-1",
-    "ISO-8859-2",
-    "ISO-8859-3",
-    "ISO-8859-4",
-    "GB18030",
-    "IBM037",
-    "IBM866",
+    "ISO-8859-15",
+    "windows-1252",
 ]
 for enc in encodings:
     pl_encoded = pl.encode(enc)

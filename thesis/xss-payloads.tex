@@ -29,6 +29,7 @@ becomes
 Technique by \cite{medium/allypetitt}. {\color{red}TODO: link to evaluation}
 
 \subsubsection{HTML character references}
+\label{sec:htmlcharreftech}
 Sometimes Cross-site scripting payloads are using HTML elements to deliver a payload. Inside such payloads, HTML character references can be used to obscure the payload. The HTML specification states that in certain cases, text may be mixed with character references. Character references must start with a U+0026 AMPERSAND character (\&). Following this, there are three possible kinds of character references: Named character references, Decimal numeric character references or Hexadecimal numeric character references. \cite{www/html}
 
 Considering the example payload using the \verb|<a>| element to exploit a stored Cross-site scripting vulnerability:
