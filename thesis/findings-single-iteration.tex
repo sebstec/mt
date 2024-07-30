@@ -244,6 +244,21 @@ This payload bypasses the rules with ids \verb|941170| (NoScript XSS InjectionCh
 
 As this result is promising, another iteration of applying this technique has been used in the multi iteration evaluation. The results are stated unter Section~\ref{sec:doublehtmlcharref}.
 
+\subsubsection{From charcode}
+\label{sec:charcodesingleiter}
+As stated under Section~\ref{sec:fromcharcodetech}, a payload where the string containing malicious JavaScript statements was substituted by a call to \verb|String.fromCharCode()| was tested against the ModSecurity firewall using CRS4.1:
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=fromCharCode blocked, label={lst:fromcharcodeblocked}]
+<payload>String.fromCharCode(^0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29^)</payload>
+
+<message>"Node.js Injection Attack 1/2"</message>
+<file>"/rules/REQUEST-934-APPLICATION-ATTACK-GENERIC.conf"</file>
+<fileDetails>[line "52"] [id "934100"]<fileDetails>
+<MatchedData>"Matched Data: String.fromCharCode"</MatchedData>
+\end{lstlisting}
+
+This rule matches on the character sequence \verb|String.fromCharCode| while this evasion technique depends on using this function. Further use of this technique would require to split the statement into a minimum of two parts. Section~\ref{sec:charcodemultiiter} follows up on this idea. In a single iteration, the firewall effectively prohibits payloads obscured using this technique.
+
 
 \subsubsection{Function Constructor}
 \label{sec:functionconstructorsingleeva}

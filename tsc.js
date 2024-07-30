@@ -22,7 +22,15 @@ const secret = "very secret string"
 const incomingPayload = "a\");prompt`\u{FE69}{secret}`;(\""
 const message = "Hello " + incomingPayload.normalize('NFKD')
 const evaluateMe = "console.log(\"" + message + "\")"
-eval(evaluateMe)
+console.log(String.fromCharCode(0x4c,105,0x6e,117,120))
+console.log(String.fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29))
+console.log(String);
+// eval(String.fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29))
+[].map.constructor('[].map.constructor(' + 'String.' + 'fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29)' + ')();')()
+[].map.constructor('alert(1)')()
+
+
+// eval(evaluateMe)
 // alert('normalizeMe')
 // A = '',
 // B = !A + A,

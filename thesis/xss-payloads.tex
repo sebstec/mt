@@ -16,13 +16,13 @@ Technique by \cite{medium/allypetitt}
 A regex filter that is expecting a space inside a html tag at certain positions can be evaded by replacing the space with the forward slash: \verb|/|.
 For instance, the payload
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 <img src="1" onerror="alert('XSS')">
 \end{lstlisting}
 
 becomes
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 <img/src="1"/onerror="alert('XSS')">
 \end{lstlisting}
 
@@ -34,34 +34,54 @@ Sometimes Cross-site scripting payloads are using HTML elements to deliver a pay
 
 Considering the example payload using the \verb|<a>| element to exploit a stored Cross-site scripting vulnerability:
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
 <a href=javascript:alert('a')>ClickMeFor$</a>
 \end{lstlisting}
 
 which is semantically equal to the following payload where a named character reference is used to substitute the left parenthesis of the initial payload:
 
-\begin{lstlisting}[style=basicStyle]
-<a href=javascript:alert&lpar;'a')>ClickMeFor$</a>
+\begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
+<a href=javascript:alert^\&lpar;^'a')>ClickMeFor$</a>
 \end{lstlisting}
 
 If a decimal numeric character reference is used to substitute a latin small letter a, the initial payload becomes the following:
 
-\begin{lstlisting}[style=basicStyle]
-<a href=jav&#97;script:alert('a')>ClickMeFor$</a>
+\begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
+<a href=jav^\&\#97;^script:alert('a')>ClickMeFor$</a>
 \end{lstlisting}
 
 Finally, if hexadecimal numeric character references are used to substitute a latin small letter a as well as the left parenthesis, the initial payload becomes:
 
-\begin{lstlisting}[style=basicStyle]
-<a href=jav&#x61;script:alert&#x28;'a')>ClickMeFor$</a>
+\begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
+<a href=jav^\&\#x61;script:alert\&\#x28;^'a')>ClickMeFor$</a>
 \end{lstlisting}
 
 The evaluation results of payloads obscured using this technique are stated under Section~\ref{sec:htmlcharrefsingleeva} (single iteration) and Section~\ref{sec:htmlencjsesc} (multi iteration).
 
 \subsubsection{From charcode}
-{\color{red}TODO: String.fromCharCode(0x4c,105,0x6e,117,120) \cite{asecsite/jsobf1}}
+\label{sec:fromcharcodetech}
+Evading signature based Web application firewalls that match on payloads containing JavaScript statements can be achieved by syntactically modifying the payload String. This technique can be used if the JavaScript statements constituting the malicious part of the payload are passed in string format. Rules blocking requests based on detected character sequences might be evaded by substituting payloads with a sematically equivalent but syntactically different String. This and the next two subsections will detail three different methods to syntactically alter payload strings in JavaScript.
+
+With the built-in \verb|String| object, JavaScript provides the static \verb|fromCharCode| function. The \verb|String.fromCharCode()| function returns a string created from the sequence of UTF-16 code units given as parameters to the function. \cite{js/fromCharCode}
+
+For instance, the payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+eval(String.fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29))
+\end{lstlisting}
+
+is semantically equal to the payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+eval("alert('xss')")
+\end{lstlisting}
+
+The obscured payload uses charcodes specified in decimal or hexadecimal format to compose the malicious payload string. Evaluation results using this evasion technique are stated under Section~\ref{sec:charcodesingleiter}.
+
+Technique by \cite{asecsite/jsobf1}.
 
 \subsubsection{String passing}
+
 \subsubsection{JavaScript escaping}
 \label{sec:jsescape}
 {\color{red} TODO:
@@ -163,7 +183,7 @@ isNaN.constructor(`alert('XSS')`)()
 as well as a multitude of other built-in objects, for example the \verb|Error| object:
 
 \begin{lstlisting}[style=basicStyle,language=Python,escapeinside=\^\^]
-Error.constructor.constructor(`alert('XSSSSS')`)()
+Error.constructor.constructor(`alert('XSS')`)()
 \end{lstlisting}
 
 If firewall rule maintainers implement new rules to specifically block the access to the function constructor by blacklisting all built-in JavaScript objects, there is still the possibility that in the time after an update to JavaScript (ECMAScript) some newly released built-in objects are not blocked yet. This can be caused by either the rule maintainers slow adaption speed or a missing update on the Web application firewall.
@@ -172,7 +192,7 @@ In any case, the access to the \verb|Function| constructor is possible on self d
 
 \begin{lstlisting}[style=basicStyle,language=Python,escapeinside=\^\^]
 const someObject = { someProperty: "some string" }
-someObject.constructor.constructor(`alert('XSSSSS')`)()
+someObject.constructor.constructor(`alert('XSS')`)()
 \end{lstlisting}
 
 If the availablitiy of custom object references in the execution scope of the payload-code is given, custom object references can be used to create a function via the \verb|Function| constructor. 

