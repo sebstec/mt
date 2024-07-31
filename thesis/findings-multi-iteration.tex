@@ -142,7 +142,20 @@ The regex used in this rule:
 (?:\((?:.+\)(?:[\"'][\-0-9A-Z_a-z]+[\"'])?\(.+|[^\)]*string[^\)]*\)[\s\x0b\"'\-\.0-9A-\[\]_a-\{\}]+\([^\)]*)|(?:\[[0-9]+\]|\{[0-9]+\}|\$[^\(\),\.\/;\x5c]+|[\"'][\-0-9A-Z\x5c_a-z]+[\"'])\(.+)\);
 \end{lstlisting}
 
-requires a semicolon to finish the statement. In JavaScript, cases exist, where this semicolon is not neccessary. On such case would be the existance of a semicolon finished statement in the code just before where the payload is injected. {\color{red} todo: what if array access follows []}
+requires a semicolon to finish the statement. In JavaScript, cases exist, where this semicolon is not neccessary. One such case would be the existance of a semicolon finished statement in the code just before where the payload is injected and a newline followed by another function call or variable assignment in the code after where the payload is injected. A case where the semicolon would be neccessary to achieve code execution is the following:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+<statements before>
+
+[].map.constructor('[].map.constructor(' + 'String.' + 'fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29)' + ')();')()
+
+[].constructor.constructor('alert("exception")')()
+
+<statements after>
+\end{lstlisting}
+
+JavaScript is able to automatically insert some semicolons to create valid syntax from statements where the semicolons have been omitted. JavaScript's automatic semicolon insertion rules are stated under \cite{js/autosemi}.
+
 
 
 

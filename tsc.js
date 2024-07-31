@@ -26,7 +26,24 @@ console.log(String.fromCharCode(0x4c,105,0x6e,117,120))
 console.log(String.fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29))
 console.log(String);
 // eval(String.fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29))
-[].map.constructor('[].map.constructor(' + 'String.' + 'fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29)' + ')();')()
+[].map.constructor('[].map.constructor(' + 'String.' + 'fromCharCode(0x61,108,0x65,114,116,0x28,96,120,116,115,0x60,0x29)' + ')();')()
+const b = 10
+console.log(b)
+
+const i = 'alert' + '("i")';
+eval("" + i)
+
+// [].constructor.constructor('alert("exception")')()
+// [0,1].map.constructor('alert(123)')()
+// function abcd() {
+//   console.log('abcd')
+// }
+var x = 3
+console.log(x)
+console.log(2)
+console.log(1)
+// abcd()
+assert(1===2);
 [].map.constructor('alert(1)')()
 
 

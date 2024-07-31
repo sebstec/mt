@@ -76,11 +76,39 @@ is semantically equal to the payload:
 eval("alert('xss')")
 \end{lstlisting}
 
-The obscured payload uses charcodes specified in decimal or hexadecimal format to compose the malicious payload string. Evaluation results using this evasion technique are stated under Section~\ref{sec:charcodesingleiter}.
+The obscured payload uses charcodes specified in decimal or hexadecimal format to compose the malicious payload string. Evaluation results using this evasion technique are stated under Section~\ref{sec:charcodesingleiter} and Section~\ref{sec:charcodemultiiter}.
 
 Technique by \cite{asecsite/jsobf1}.
 
-\subsubsection{String passing}
+\subsubsection{String concatenation}
+In cases where the payload contains statements to be executed and these are passed in string format, string concatenation might be used to obscure the payload. This technique is further limited to cases where the string containing the statements is evaluated on the target. An example for vulnerable code on a target is the following:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+var toEvaluate = "" + <input>
+eval(toEvaluate)
+\end{lstlisting}
+
+If \verb|<input>| will be replaced by the payload string, this string will be evaluated as part of the statements that compose the variable \verb|toEvaluate|.
+
+If the payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+"alert('concatenation')"
+\end{lstlisting}
+
+is sent towards the target Web application, it will be concatenated to the empty string and subsequently evaluated and executed by the call to the \verb|eval()| function.
+
+If a Web application firewall filters and blocks this payload, the payload can be obscured by using string concatenation. If the target runs the afromentioned or similar vulnerable code, following obscured payload is also semantically valid:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+"alert" + "('concatenation')"
+\end{lstlisting}
+
+Results of evaluating the tested Web application firewall against this technique are stated under Section~\ref{sec:stringconcsingleiter}, Section~\ref{sec:charcodemultiiter} and Section~\ref{sec:funconstrconbypass}. This technique is especially useful in combination with methods to force the evaluation of statements sent inside a payload string. Such methods are stated under Section~\ref{sec:eval} and Section~\ref{sec:functionconstructor}.
+
+
+
+
 
 \subsubsection{JavaScript escaping}
 \label{sec:jsescape}
