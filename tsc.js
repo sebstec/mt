@@ -22,6 +22,7 @@ const secret = "very secret string"
 const incomingPayload = "a\");prompt`\u{FE69}{secret}`;(\""
 const message = "Hello " + incomingPayload.normalize('NFKD')
 const evaluateMe = "console.log(\"" + message + "\")"
+// eval(evaluateMe)
 console.log(String.fromCharCode(0x4c,105,0x6e,117,120))
 console.log(String.fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29))
 console.log(String);
@@ -29,9 +30,28 @@ console.log(String);
 [].map.constructor('[].map.constructor(' + 'String.' + 'fromCharCode(0x61,108,0x65,114,116,0x28,96,120,116,115,0x60,0x29)' + ')();')()
 const b = 10
 console.log(b)
+console.log(eval('"1" + " 23"'))
 
-const i = 'alert' + '("i")';
-eval("" + i)
+console.log(JSON.stringify({input: 'alert' + '("i")'}))
+
+const j = `{"input":"alert(\\"i\\")"}`
+const i = `{"input":"'alert' + '(\\"i\\")'"}`;
+console.log(document.getElementById('img2'))
+console.log(JSON.parse(i).input);
+document.getElementById('div1').insertAdjacentHTML('afterbegin','<img src=0 onerror="[].constructor.constructor(\'alert\'+\'(1)\')()"/>')
+document.getElementById('div1').insertAdjacentHTML('afterbegin','<img src=0 onerror=' + '"[].constructor.constructor(\'alert\'+\'(11)\')()"' + '/>')
+document.getElementById('div1').insertAdjacentHTML('afterbegin','<img src=0 onerror=' + '"alert(111)"' + '/>')
+const input = JSON.parse("{\"body\":\"[].constructor.constructor('alert'+'(1111)')()\"}")
+console.log(input.body)
+document.getElementById('div1').insertAdjacentHTML('afterbegin',`<img src=0 onerror=${input.body}>`)
+let input2 = JSON.parse("{\"body\":\"'alert'+'(222)'\"}")
+input2 = JSON.parse("{\"body\":\"'alert' + '(`concatenation`)'\"}")
+console.log(input2.body)
+const statements = 'const x = 42; console.log(x);' + input2.body
+document.getElementById('div1').insertAdjacentHTML('afterbegin',`<img src=0 onerror=${eval(statements)}>`)
+// document.getElementsByTagName('body')[0].appendChild('<p>test</p>')
+document.getElementById('img2').onerror="[].constructor.constructor('alert'+'(2)')()"
+// eval(eval(JSON.parse(i).input))
 
 // [].constructor.constructor('alert("exception")')()
 // [0,1].map.constructor('alert(123)')()

@@ -254,13 +254,38 @@ As stated under Section~\ref{sec:fromcharcodetech}, a payload where the string c
 <message>"Node.js Injection Attack 1/2"</message>
 <file>"/rules/REQUEST-934-APPLICATION-ATTACK-GENERIC.conf"</file>
 <fileDetails>[line "52"] [id "934100"]<fileDetails>
-<MatchedData>"Matched Data: String.fromCharCode"</MatchedData>
+<MatchedData>"String.fromCharCode"</MatchedData>
 \end{lstlisting}
 
 This rule matches on the character sequence \verb|String.fromCharCode| while this evasion technique depends on using this function. Further use of this technique would require to split the statement into a minimum of two parts. Section~\ref{sec:charcodemultiiter} follows up on this idea. In a single iteration, the firewall effectively prohibits payloads obscured using this technique.
 
 \subsubsection{String concatenation}
 \label{sec:stringconcsingleiter}
+The example payload mentioned under Section~\ref{sec:stringconc}:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+"alert('concatenation')"
+\end{lstlisting}
+
+was used to evaluate the tested firewall against this evasion technique. The ModSecurity firewall using CRS4.1 blocks requests containing this payload according to the following rule:
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=fromCharCode blocked, label={lst:fromcharcodeblocked}]
+<payload>"alert('concatenation')"</payload>
+
+<message>"Javascript method detected"</message>
+<file>"/rules/REQUEST-941-APPLICATION-ATTACK-XS"</file>
+<fileDetails>[line "748"] [id "941390"]<fileDetails>
+<MatchedData>"alert("</MatchedData>
+\end{lstlisting}
+
+after using string concatenation to craft an obscured variant of the example payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+'alert' + '(`concatenation`)'
+\end{lstlisting}
+
+the payload successfully evaded the firewall rule and reached the tested Web server. As mentioned under Section~\ref{sec:stringconc}, this technique is more effective when combined with forced evaluation. Evalutation results of combining this technique with using the function constructor to force the evaluation of the payload are stated under Section~\ref{sec:funconstrconbypass} and Section~\ref{sec:charcodemultiiter}.
+
 
 
 \subsubsection{Function Constructor}

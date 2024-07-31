@@ -81,14 +81,20 @@ The obscured payload uses charcodes specified in decimal or hexadecimal format t
 Technique by \cite{asecsite/jsobf1}.
 
 \subsubsection{String concatenation}
+\label{sec:stringconc}
 In cases where the payload contains statements to be executed and these are passed in string format, string concatenation might be used to obscure the payload. This technique is further limited to cases where the string containing the statements is evaluated on the target. An example for vulnerable code on a target is the following:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
-var toEvaluate = "" + <input>
-eval(toEvaluate)
+<some html code that contains a div with id="div1">
+
+<script>
+const toEvaluate = "<some statements>" + route.query.payload
+
+document.getElementById('div1').insertAdjacentHTML('afterbegin',`<img src=0 onerror=${eval(toEvaluate)}>`)
+</script>
 \end{lstlisting}
 
-If \verb|<input>| will be replaced by the payload string, this string will be evaluated as part of the statements that compose the variable \verb|toEvaluate|.
+If \verb|route.query.payload| is replaced by the payload string, this string will be evaluated as part of the statements that compose the variable \verb|toEvaluate|. Wether the payload will be executed with the desired effect depends on the statements that compose \verb|toEvaluate|. In the following, it will be asumed that these statements do not have any effect. 
 
 If the payload:
 
@@ -96,19 +102,17 @@ If the payload:
 "alert('concatenation')"
 \end{lstlisting}
 
-is sent towards the target Web application, it will be concatenated to the empty string and subsequently evaluated and executed by the call to the \verb|eval()| function.
+is sent towards the target Web application, it will be concatenated to the \verb|toEvaluate| string and subsequently evaluated by the call to the \verb|eval()| function. With the initial payload, this is where the desired effect is achieved. 
 
-If a Web application firewall filters and blocks this payload, the payload can be obscured by using string concatenation. If the target runs the afromentioned or similar vulnerable code, following obscured payload is also semantically valid:
+If a Web application firewall filters and blocks this payload, the payload can be obscured by using string concatenation. If the target executes the afromentioned or similar vulnerable code, following obscured payload is also semantically valid:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 "alert" + "('concatenation')"
 \end{lstlisting}
 
-Results of evaluating the tested Web application firewall against this technique are stated under Section~\ref{sec:stringconcsingleiter}, Section~\ref{sec:charcodemultiiter} and Section~\ref{sec:funconstrconbypass}. This technique is especially useful in combination with methods to force the evaluation of statements sent inside a payload string. Such methods are stated under Section~\ref{sec:eval} and Section~\ref{sec:functionconstructor}.
+Again, the payload string will be concatenated to the \verb|toEvaluate| string and subsequently evaluated by the call to the \verb|eval()| function. Subsequently, the evaluated and thereby concatenated string will be called on as soon as the \verb|img| with \verb|src=0| fails to load an image from the invalid 0-source.
 
-
-
-
+Results of evaluating the tested Web application firewall against this technique are stated under Section~\ref{sec:stringconcsingleiter}, Section~\ref{sec:charcodemultiiter} and Section~\ref{sec:funconstrconbypass}. This technique is especially useful in combination with methods to force the evaluation of statements sent inside a payload string. If forced evaluation is achieved by parts of the payload, this technique does no longer depend on evaluation by the vulnerable code. Methods to achieve forced evaluation are stated under Section~\ref{sec:eval} and Section~\ref{sec:functionconstructor}.
 
 \subsubsection{JavaScript escaping}
 \label{sec:jsescape}
@@ -165,7 +169,7 @@ is available in JavaScript.
 Calling \verb|[]| will create an empty array, which is a special kind of object.
 Any kind of object in JavaScript, with the exception of null prototype objects, will have a constructor property on its prototype. \cite{js/object}
 
-The Array objects constructor ca n be accessed by calling \verb|.constructor| on an instance of Array, like \verb|[].constructor|. \cite{js/array}
+The Array objects constructor can be accessed by calling \verb|.constructor| on an instance of Array, like \verb|[].constructor|. \cite{js/array}
 Constructors are technically regular functions. \cite{js/constructor}
 As such, they are Function objects. Function objects have a constructor themselfes, which again is called using the \verb|.constructor| notation.
 
