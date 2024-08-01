@@ -127,7 +127,7 @@ Results of evaluating the tested Web application firewall against this technique
 
 \subsubsection{Tagged Template Literals}
 \label{sec:taggedtemplateliterals}
-Tagged Template Literals can be used in JavaScript payloads to avoid detection of JavaScript function calls in an http request. Dr. Alex Rauschmeyer explains Tagged Template Literals in ``Exploring ES6'':
+Tagged Template Literals can be used in JavaScript payloads to avoid detection of JavaScript function calls in an HTTP request payload. Dr. Alex Rauschmeyer explains Tagged Template Literals in ``Exploring ES6'':
 \begin{quotation} Tagged Template Literals are function calls whose parameters are provided via template literals. [...]
 	The following is a tagged template literal (short: tagged template):
 	\begin{lstlisting}
@@ -144,6 +144,8 @@ tagFunction(['Hello ', ' ', '!'], firstName, lastName)
 As the function \verb|alert| can be called with an array as first parameter, it is possible to substitute the payload with \verb|alert`XSS`|. The substitute payload might evade regex filtering that looks for a function name followed by an opening \verb|(|.
 Technique by \cite{onecons/wafbypass}.
 
+Results of using this technique in payloads to evaluate the tested firewall configuration are stated under Section~\ref{sec:taggedtemplateliteralsevaluation} during single iteration evaluation and Section~\ref{sec:avoidingbypassA} and Section~\ref{sec:avoidingbypassB} during multi iteration evaluation.
+
 
 \subsubsection{eval() function}
 \label{sec:eval}
@@ -155,7 +157,7 @@ To avoid a match on \verb|alert(|, it is possible to split the function call int
 Sending the payload in this form will not cause the the desired effect, as a JavaScript interpreter will interpret the payload as a string instead of a function call to the \verb|alert()| function.
 Using the \verb|eval()| function in combination with the splitted string solves this problem. Passing the string \verb|`al` + `e` + `rt('XSS')`| in the form of \verb|eval(`al` + `e` + `rt('XSS')`)| as an argument to the \verb|eval()| function will cause the string to be evaluated and interpreted. Technique inspired by \cite{onecons/wafbypass}.
 
-\subsubsection{function constructor}
+\subsubsection{Function constructor}
 \label{sec:functionconstructor}
 
 When using the function \verb|eval()| (see Section~\ref{sec:eval}) causes a request to be blocked, a substitute payload in the form of
@@ -205,6 +207,10 @@ In addition to accessing the function constructor via the \verb|constructor| fun
 
 (Technique using \verb|map| by \cite{mk/elementsVid}).
 
+Depending on the context where the payload will be inserted, sometimes the function constructor can not be accessed using empty arrays or empty objects. Such a case can occur when there are statements in the context prior to the point of payload insertion. Not explicitly terminated statements that depend on JavaScripts automatic semicolon insertion can cause the payload to not execute correctly. In some cases, when using empty arrays or objectsin the beginning of the payload, the automatic semicolon insertion might not insert a semicolon between the end of the statement prior to the point of payload insertion and the beginning of the payload. Subsequently, the JavaScript parser will throw a SyntaxError at this point. One example for such a case is mentioned under Section~\ref{sec:charcodemultiiter}. MDN contributors state details around automatic semicolon insertion under the Lexical grammar section of their JavaScript reference \cite{js/autosemi}. 
+
+
+
 If, for any reason, the Array object can not be used, there are substitutes available in the form of JavaScript's standard built-in objects. \cite{js/builtin}
 JavaScript's built-in objects include but are not limited to built-in global functions that can be used as a substitute:
 
@@ -234,17 +240,28 @@ The results of evaluating the ModSecurity firewall using CRS4.1 by applying this
 Firewall rules for the OWASP CoreRuleSet in version 4.1 are proposed under Section~\ref{sec:rulespropfunctionconstructor} and Section~\ref{sec:rulespropfunctionconstructorreflection}.
 
 
-\subsubsection{square bracket notation}
+\subsubsection{Square bracket notation}
 \label{sec:sbn}
-JavaScript provides a \quotes{square bracket notation} to access properties of an Object. It is used to access multiword properties as well as provide a way of obtaining property names as the result of an expression. \cite{js/brackets}
+JavaScript provides a square bracket notation to access properties of an Object. It is used to access multiword properties as well as provide a way of obtaining property names as the result of an expression. \cite{js/brackets}
 
-This \quotes{square bracket notation} allows to substitute the dot notation in a case where using the dot notation is not feasible or blocked by firewall rules.
-For instance, in a payload composed using the function constructor as stated in \ref{sec:functionconstructor}, the part \\ \verb|[].constructor.constructor(`alert('XSS')`)()| can be substituted with \\ \verb|[][`constructor`][`constructor`](`alert('XSS')`)()|.
+This square bracket notation allows to substitute the dot notation in a case where using the dot notation is not feasible or blocked by firewall rules.
+For instance, in a payload composed using the function constructor:
 
-{\color{red} hier evtl noch bisschen mehr details}
+\begin{lstlisting}[style=basicStyle,language=Python]
+[].constructor.constructor(`alert('XSS')`)()
+\end{lstlisting}
+
+the dot notation can be substituted by the square bracket notation:
+
+\begin{lstlisting}[style=basicStyle,language=Python]
+[]["constructor"]["constructor"](`alert('XSS')`)()
+\end{lstlisting}
+
+The \quotes{String replace}, \quotes{JSFuck} and \quotes{Aurebesh.js} techniques mentioned in the further proceedings of this section heavily rely on JavaScript's square bracket notation.
 
 
-\subsubsection{string replace}
+
+\subsubsection{String replace}
 \label{sec:stringreplace}
 When passing certain characters is not feasible, there is a chance they can be substituted in a string replacement strategy using the \verb|+| operator.
 A part of the description of the \verb|+| operator in JavaScript states:

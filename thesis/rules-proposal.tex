@@ -247,6 +247,9 @@ The proposed rule ensures the coverage of known evasion techniques, decreases th
 
 {\color{red}weitere Ideen bisher:}
 
+html character reference decoding
+
+
 Unicode Normalization: ModSec WAF uses transformers to decode URL encoded payloads before they are checked against the ruleset, they same could be done with unicode normalization. normalize according to NFKC and then check the request against the ruleset
 
 

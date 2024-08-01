@@ -9,6 +9,7 @@ As stated in Listing~\ref{lst:alertXSSblocked}, the payload \verb|alert('XSS')| 
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=alert('XSS'), label={lst:alertXSSblocked}]
 <payload>alert('XSS')</payload>
+
 <message>"Javascript method detected"</message>
 <file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
 <fileDetails>[line "714"] [id "941390"]<fileDetails>
@@ -284,27 +285,95 @@ after using string concatenation to craft an obscured variant of the example pay
 'alert' + '(`concatenation`)'
 \end{lstlisting}
 
-the payload successfully evaded the firewall rule and reached the tested Web server. As mentioned under Section~\ref{sec:stringconc}, this technique is more effective when combined with forced evaluation. Evalutation results of combining this technique with using the function constructor to force the evaluation of the payload are stated under Section~\ref{sec:funconstrconbypass} and Section~\ref{sec:charcodemultiiter}.
-
+the payload successfully evaded the firewall rule and reached the tested Web server. As mentioned under Section~\ref{sec:stringconc}, this technique is more effective when combined with forced evaluation. Evalutation results of combining this technique with using the function constructor to force the evaluation of the payload are stated under Section~\ref{sec:funconstrconbypass} and Section~\ref{sec:charcodemultiiter}. 
 
 
 \subsubsection{Function Constructor}
 \label{sec:functionconstructorsingleeva}
+Considering the example payload of the previous subsection: String concatenation: Creating a modified payload that forces the evaluation of the part equal to the example payload from the previous subsection would remove the dependency of evaluation through the vulnerable code. The modified payload might use the \verb|eval()| function to achieved forced evaluation:
 
+\begin{lstlisting}[style=basicStyle, language=Python]
+eval('alert' + '(`concatenation`)')
+\end{lstlisting}
 
-{\color{red}TODO also: mention global objects here \cite{js/builtin}}
+When sent in a request directed to the test Web server protected by the evaluted Web application firewall, this payload triggers the following blocking firewall rules:
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=eval() blocked, label={lst:evalblocked}]
+<payload>"eval('alert' + '(`concatenation`)')"</payload>
+
+<message>"PHP Injection Attack: High-Risk PHP Function Call Found"</message>
+<file>"/rules/REQUEST-933-APPLICATION-ATTACK-PHP.conf"</file>
+<fileDetails>[line "331"] [id "933160"]<fileDetails>
+<MatchedData>"eval('alert'   '(`concatenation`)')"</MatchedData>
+
+<message>"Node.js Injection Attack 1/2"</message>
+<file>"/rules/REQUEST-934-APPLICATION-ATTACK-GENERIC.conf"</file>
+<fileDetails>[line "52"] [id "934100"]<fileDetails>
+<MatchedData>"eval("</MatchedData>
+
+<message>"Javascript method detected"</message>
+<file>"/rules/REQUEST-933-APPLICATION-ATTACK-PHP.conf"</file>
+<fileDetails>[line "748"] [id "941390"]<fileDetails>
+<MatchedData>"eval("</MatchedData>
+\end{lstlisting}
+
+It is apparent, that usage of the \verb|eval()| function is heavily blacklisted. Therefore, \verb|eval()| has been substituted by the function constructor in order to obscure the payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+[].constructor.constructor('alert' + '(`concatenation`)')()
+\end{lstlisting}
+
+The obscured payload successfully bypasses the ModSecurity firewall using CRS4.1.
+
+\subsubsection{Square bracket notation}
+As stated under Section~\ref{sec:sbn}, the square bracket notation can be used to substitute the dot notation in order to access object properties. When using the Function constructor as mentioned under Section~\ref{sec:functionconstructor}, access to object properties is neccessary. Using the square bracket notation in such a case is standing to reason. 
+
+The bypassing payload mentioned under Section~\ref{sec:functionconstructorsingleeva}:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+[].constructor.constructor('alert' + '(`concatenation`)')()
+\end{lstlisting}
+
+has been obscured using the square bracket notation: 
+
+\begin{lstlisting}[style=basicStyle, language=Python, caption=square bracket notation bypass]
+[]["constructor"]["constructor"]('alert' + '(`concatenation`)')()
+\end{lstlisting}
+
+Equally to the result of the original payload, the obscured payload successfully bypasses the ModSecurity firewall using CRS4.1.
+
+Further usages of this technique are stated under Section~\ref{sec:funconstrconbypass}, Section~\ref{sec:avoidingbypassA} and Section~\ref{sec:avoidingbypassB} during multi iteration evaluation.
+
 
 \subsubsection{Tagged Template Literals}
 \label{sec:taggedtemplateliteralsevaluation}
-As stated in Listing~\ref{lst:alertXSSblocked}, the payload \verb|alert('XSS')| is being blocked by the tested firewall.
-After substituting the function call using \verb|('XSS')| with a Tagged Template Literal in the form of \verb|alert`XSS`|, the payload successfully bypasses the firewall and reaches the web server:
+The example payload stated under Section~\ref{sec:taggedtemplateliterals}:
 
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=alert`XSS` bypass, label=lst:alertXSSbypass]
-<payload>alert("XSS")</payload>
-<bypass>alert`XSS`</bypass>
+\begin{lstlisting}[style=basicStyle, language=Python]
+alert("XSS")
 \end{lstlisting}
 
-{\color{red} hier evtl noch etwas mehr...}
+has been used to evaluate the tested firewall configuration. It is blocked by the ModSecurity firewall using CRS4.1:
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=alert('XSS') blocked, label={lst:alertXSSblocked}]
+<payload>alert('XSS')</payload>
+
+<message>"Javascript method detected"</message>
+<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"alert("</MatchedData>
+\end{lstlisting}
+
+After substituting the function call using \verb|("XSS")| with a Tagged Template Literal in the form of \verb|`XSS`|, the obscured payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python, caption=alert`XSS` bypass, label=lst:alertXSSbypass]
+alert`XSS`
+\end{lstlisting}
+
+successfully bypasses the firewall and reaches the web server. 
+
+Further usage of this technique during multi iteration evaluation is stated under Section~\ref{sec:avoidingbypassA} and Section~\ref{sec:avoidingbypassB}.
+
 
 \subsubsection{eval() function}
 The ModSecurity firewall using CRS 4.1.0. checks for usage of the function \verb|eval()| and tries to block requests containing it. An example is listed in Listing~\ref{lst:evalalertXSSblocked}.

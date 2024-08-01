@@ -31,6 +31,9 @@ console.log(String);
 const b = 10
 console.log(b)
 console.log(eval('"1" + " 23"'))
+console.log('test');
+// [].constructor.constructor('alert' + '(`concatenation`)')()
+[]["constructor"]["constructor"]('alert' + '(`conaaaaacatenation`)')()
 
 console.log(JSON.stringify({input: 'alert' + '("i")'}))
 
