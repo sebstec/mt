@@ -94,7 +94,7 @@ document.getElementById('div1').insertAdjacentHTML('afterbegin',`<img src=0 oner
 </script>
 \end{lstlisting}
 
-If \verb|route.query.payload| is replaced by the payload string, this string will be evaluated as part of the statements that compose the variable \verb|toEvaluate|. Wether the payload will be executed with the desired effect depends on the statements that compose \verb|toEvaluate|. In the following, it will be asumed that these statements do not have any effect. 
+If \verb|route.query.payload| is replaced by the payload string, this string will be evaluated as part of the statements that compose the variable \verb|toEvaluate|. Wether the payload will be executed with the desired effect depends on the statements that compose \verb|toEvaluate|. In the following, it will be asumed that these statements do not have any effect.
 
 If the payload:
 
@@ -102,7 +102,7 @@ If the payload:
 "alert('concatenation')"
 \end{lstlisting}
 
-is sent towards the target Web application, it will be concatenated to the \verb|toEvaluate| string and subsequently evaluated by the call to the \verb|eval()| function. With the initial payload, this is where the desired effect is achieved. 
+is sent towards the target Web application, it will be concatenated to the \verb|toEvaluate| string and subsequently evaluated by the call to the \verb|eval()| function. With the initial payload, this is where the desired effect is achieved.
 
 If a Web application firewall filters and blocks this payload, the payload can be obscured by using string concatenation. If the target executes the afromentioned or similar vulnerable code, following obscured payload is also semantically valid:
 
@@ -114,16 +114,41 @@ Again, the payload string will be concatenated to the \verb|toEvaluate| string a
 
 Results of evaluating the tested Web application firewall against this technique are stated under Section~\ref{sec:stringconcsingleiter}, Section~\ref{sec:charcodemultiiter} and Section~\ref{sec:funconstrconbypass}. This technique is especially useful in combination with methods to force the evaluation of statements sent inside a payload string. If forced evaluation is achieved by parts of the payload, this technique does no longer depend on evaluation by the vulnerable code. Methods to achieve forced evaluation are stated under Section~\ref{sec:eval} and Section~\ref{sec:functionconstructor}.
 
-\subsubsection{JavaScript escaping}
+\subsubsection{JavaScript character escaping}
 \label{sec:jsescape}
-{\color{red} TODO:
-	\begin{itemize}
-		\item js hex escape
-		\item js octal escape
-		\item js normal character escape
-		\item js unicode escape es6
-	\end{itemize}
-}
+In JavaScript, characters can be represented by escape sequences:
+
+\begin{itemize}
+	\item Hex escape: \verb|\xHH| (exactly two hexadecimal digits)
+	\item Unicode escape: \verb|\xHHHH| (exactly four hexadecimal digits)
+	\item Unicode code point escape: \verb|\u{...}| (one or more hexadecimal digits)
+	\item Octal escape: \verb|\Ddd| (one to three octal digits)
+	\item Single character escape: \verb|\C| (one character)
+\end{itemize}
+
+Single character escapes are subject to some reserved characters represented by the regular expression: \verb|\\[bfnrtv0'"\\]|. Apart from those, any character without special meaning can be escaped using single character escape. For instance: \verb|'\a' == 'a'|.
+
+Unicode code point escapes have been introduced in ES6, octal escapes have been deprecated since ES5. As such, unicode code point escapes might not be recognized by outdated firewall rulesets, octal escapes might not be valid on some up-to-date targets.
+
+The following table details where certain escape sequences can be used:
+
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{|c||c| c| c| c|c|}
+		\hline
+		Location          & Hex & Unicode & Unicode code point & Octal & Single character \\
+		\hline\hline
+		String literals   & y   & y       & y                  & y     & y                \\
+		Template literals & y   & y       & y                  & n     & y                \\
+		Identifiers       & n   & y       & y                  & n     & n                \\
+		\hline
+	\end{tabular}
+	\caption{Locations where escape sequences can be used in JavaScript}
+\end{table}
+\cite{exploringes6/escapeseq,bynens/escape,js/lexicalgrammar}
+
+This technique is used under Section~\ref{sec:jsescapesingleiter} and under Section~\ref{sec:avoidingbypassA} during multi iteration evaluation.
+
 
 \subsubsection{Tagged Template Literals}
 \label{sec:taggedtemplateliterals}
@@ -182,7 +207,7 @@ The difference being that the Function() constructor creates functions that exec
 The Function() constructor takes a variable count of arguments. The first $n - 1$ arguments are the \quotes{names to be used by the function as formal argument names. Each must be a string that corresponds to a valid JavaScript parameter [...]} \cite{js/function}
 The last argument given to the Function() constructor is expected to be a string containing the JavaScript statements compromising the function definition. \cite{js/function}
 
-Therefore, the afromentioned substitute for \verb|eval()|: 
+Therefore, the afromentioned substitute for \verb|eval()|:
 
 \begin{lstlisting}[style=basicStyle,language=Python]
 [].constructor.constructor(`alert('XSS')`)()
@@ -199,7 +224,7 @@ A more straightforward and less obscure way of accessing the Function() contruct
 Depending on the firewall configuration, a WAF might use regex filtering to detect usage of \verb|Function()|.
 In this case, accessing the Function() constructor via an array object can be an alternative.
 
-In addition to accessing the function constructor via the \verb|constructor| function present on most object prototypes, the function constructor can also be accessed via other functions present on certain object prototypes. For instance, the \verb|map| function is present on the Array object's prototype. Therefore the following payload is also valid: 
+In addition to accessing the function constructor via the \verb|constructor| function present on most object prototypes, the function constructor can also be accessed via other functions present on certain object prototypes. For instance, the \verb|map| function is present on the Array object's prototype. Therefore the following payload is also valid:
 
 \begin{lstlisting}[style=basicStyle,language=Python,escapeinside=\^\^]
 [].^map^.constructor(`alert('XSS')`)()
@@ -207,7 +232,7 @@ In addition to accessing the function constructor via the \verb|constructor| fun
 
 (Technique using \verb|map| by \cite{mk/elementsVid}).
 
-Depending on the context where the payload will be inserted, sometimes the function constructor can not be accessed using empty arrays or empty objects. Such a case can occur when there are statements in the context prior to the point of payload insertion. Not explicitly terminated statements that depend on JavaScripts automatic semicolon insertion can cause the payload to not execute correctly. In some cases, when using empty arrays or objectsin the beginning of the payload, the automatic semicolon insertion might not insert a semicolon between the end of the statement prior to the point of payload insertion and the beginning of the payload. Subsequently, the JavaScript parser will throw a SyntaxError at this point. One example for such a case is mentioned under Section~\ref{sec:charcodemultiiter}. MDN contributors state details around automatic semicolon insertion under the Lexical grammar section of their JavaScript reference \cite{js/autosemi}. 
+Depending on the context where the payload will be inserted, sometimes the function constructor can not be accessed using empty arrays or empty objects. Such a case can occur when there are statements in the context prior to the point of payload insertion. Not explicitly terminated statements that depend on JavaScripts automatic semicolon insertion can cause the payload to not execute correctly. In some cases, when using empty arrays or objectsin the beginning of the payload, the automatic semicolon insertion might not insert a semicolon between the end of the statement prior to the point of payload insertion and the beginning of the payload. Subsequently, the JavaScript parser will throw a SyntaxError at this point. One example for such a case is mentioned under Section~\ref{sec:charcodemultiiter}. MDN contributors state details around automatic semicolon insertion under the Lexical grammar section of their JavaScript reference \cite{js/autosemi}.
 
 
 
@@ -233,7 +258,7 @@ const someObject = { someProperty: "some string" }
 someObject.constructor.constructor(`alert('XSS')`)()
 \end{lstlisting}
 
-If the availablitiy of custom object references in the execution scope of the payload-code is given, custom object references can be used to create a function via the \verb|Function| constructor. 
+If the availablitiy of custom object references in the execution scope of the payload-code is given, custom object references can be used to create a function via the \verb|Function| constructor.
 
 The results of evaluating the ModSecurity firewall using CRS4.1 by applying this evasion technique are shown under Section~\ref{sec:functionconstructorsingleeva} for the single iteration evaluation and Section~\ref{sec:funconstrconbypass} for the multi iteration evaluation.
 

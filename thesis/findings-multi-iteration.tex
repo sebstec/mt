@@ -157,6 +157,35 @@ requires a semicolon to finish the statement. In JavaScript, cases exist, where 
 JavaScript is able to automatically insert some semicolons to create valid syntax from statements where the semicolons have been omitted. JavaScript's automatic semicolon insertion rules are stated under \cite{js/autosemi}.
 
 
+\subsubsection{Eval + JavaScript character escape}
+\label{sec:jsescapemultiiter}
+As shown in Section~\ref{sec:jsescapesingleiter}, JavaScript's unicode code point escape sequence can be used to escape identifiers.
+Characters in String literals can also be replaced by escape sequences in JavaScript. Considering the bypass in Listing~\ref{lst:strconcbypass} mentioned under Section~\ref{sec:stringconcsingleiter}, the bypassing payload containing a string literal:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+'alert' + '(`concatenation`)'
+\end{lstlisting}
+
+with the intention of bypassing the regex filter matching on \verb|alert(| can be improved. The payload needs to be evaluated twice on the target in order to achieve the desired effect. The first evaluation concatenates the string composing the desired JavaScript statements, the second evaluation achieved the desired effect through evaluating JavaScript statements contained in the just concatenated string. 
+
+The first way to substitute the evaluation, that concatenates the payload string, is by a payload obscured using JavaScrip escape sequences instead of string concatenation:
+
+\begin{lstlisting}[style=basicStyle, language=Python, caption='alert\textbackslash u\{0028\}`escaped`) bypass]
+'alert\u{0028}`escaped`)'
+\end{lstlisting}
+
+Through substituting the opening parenthesis \verb|(|, the firewall does not match on the character sequence \verb|alert(| and the string concatenation can be omitted.
+
+The second way to substitute the evaluation, that concatenates the payload string, is by a payload using \verb|eval()| that has been obscured through JavaScript escape sequences that enforces this evaluation:
+
+\begin{lstlisting}[style=basicStyle, language=Python, caption='ev\textbackslash u\{0061\}l('alert' + '(`escaped`)') bypass]
+ev\u{0061}l('alert' + '(`escaped`)')
+\end{lstlisting}
+
+Through substituting a part of the \verb|eval()| function, matches on \verb|eval(|, that are seen in Listing~\ref{lst:evalalertXSSblocked} under Section~\ref{sec:evalsingleiter}, are avoided. A similar result to the bypass listed in Listing~\ref{lst:funconbypass} under Section~\ref{sec:functionconstructorsingleeva} has been achieved.
+
+
+
 \subsubsection{Function constructor + String concatenation}
 \label{sec:funconstrconbypass}
 In this test, the payload logic should include multiple statements and reveal a secret by accessing a property.

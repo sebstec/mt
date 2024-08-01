@@ -31,9 +31,16 @@ console.log(String);
 const b = 10
 console.log(b)
 console.log(eval('"1" + " 23"'))
-console.log('test');
+console.log(`t\est`);
+document.getElementById('div1').insertAdjacentHTML('afterbegin','<img src=0 onerror=' + '"alert\u{0028}\'works\')"' + '/>')
 // [].constructor.constructor('alert' + '(`concatenation`)')()
-[]["constructor"]["constructor"]('alert' + '(`conaaaaacatenation`)')()
+// []["constructor"]["constructor"]('alert' + '(`conaaaaacatenation`)')()
+// \u{0061}lert("cpescaped")
+ev\u{0061}l('alert("evalescaped")')
+assert(1)
+console.log(\u0061lert("XSS"))
+console.log(\u0062)
+
 
 console.log(JSON.stringify({input: 'alert' + '("i")'}))
 

