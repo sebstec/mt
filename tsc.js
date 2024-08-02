@@ -41,10 +41,24 @@ console.log(`t\est`);
 // console.log(\u0062)
 function tester() {
 	const b = 11
+  const funb = () => {return 'funb'};
 	console.log(eval(59 + b))
 	console.log([].map.constructor('return 59+b')())
+  console.log(eval('funb()'))
+	// console.log([].map.constructor('funb()')())
 }
-// tester()
+tester()
+
+const value = 1
+function testFunc() {
+	const value = 2
+	const func = () => { return 'func' }
+	console.log(eval('1 + value'))
+	console.log([].map.constructor('return 1 + value')())
+	console.log(eval('func()'))
+	console.log([].map.constructor('func()')())
+}
+testFunc()
 // prompt`\u0024{secret}`
 
 
@@ -54,19 +68,30 @@ function tester() {
 // const i = `{"input":"'alert' + '(\\"i\\")'"}`;
 // console.log(document.getElementById('img2'))
 // console.log(JSON.parse(i).input);
-// document.getElementById('div1').insertAdjacentHTML('afterbegin', '<img src=0 onerror="[].constructor.constructor(\'alert\'+\'(1)\')()"/>')
+document.getElementById('div1').insertAdjacentHTML('afterbegin', '<img src=0 onerror="`var s = \'sss\'; promp` + `t(s, s)`">')
 // document.getElementById('div1').insertAdjacentHTML('afterbegin', '<img src=0 onerror=' + '"[].constructor.constructor(\'alert\'+\'(11)\')()"' + '/>')
 // document.getElementById('div1').insertAdjacentHTML('afterbegin', '<img src=0 onerror=' + '"alert(111)"' + '/>')
 // var secret= "some sec"
-const input = JSON.parse("{\"body\":\"prompt`\\uFE69{secret}`\"}")
+// console.log(JSON.stringify({xss: "[]['constructor']['constructor']('var\\ s=\"secret\";promp'+'t(s,s)')()" }));
+// []['constructor']['constructor']('var s = `secret`;promp' + 't(s, s)')();
+// []['constructor']['constructor']('var s = \"secret\";promp' + 't(s, s)')();
+// const input = JSON.parse("{\"body\":\"[]['constructor']['constructor']('var s = \\\"secret\\\";promp' + 't(s, s)')()\"}");
+// const input = JSON.parse("{\"body\":\"`var\/**\/s='secret';promp`+`t(s,s)`\"}");
+//
+// const input = JSON.parse("{\"body\":\"[]['constructor']['constructor'](`var\/**\/s\/**\/=\/**\/'secret';\/**\/promp`\/**\/+\/**\/`t(s,\/**\/s)`)()\"}");
+const input = JSON.parse("{\"body\":\"[]['constructor']['constructor'](`var/**/s/**/=/**/'secret';/**/promp`/**/+/**/`t(s,/**/s)`)()\"}");
 console.log(input.body)
-input.body = input.body.normalize('NFKC');
-console.log(input.body)
+// input.body = input.body.normalize('NFKC');
+// console.log(input.body)
 document.getElementById('div1').insertAdjacentHTML('afterbegin', `<img src=0 onerror=${input.body}>`)
 
+eval('prompt`\u0024{111}`'.normalize('NFKC'))
+// var/**/s/**/=/**/5;/**/prompt(s,/**/s)
 
-const input2 = 
-  JSON.parse("{\"body\":\"<a href=jav&#x61;script:alert&#x28;'aaa')>ClickMeFor$</a>\"}")
+assert(1)
+
+
+const input2 = JSON.parse("{\"body\":\"<a href=jav&#x61;script:alert&#x28;'aaa')>ClickMeFor$</a>\"}")
 console.log(input2.body)
 document.getElementById('div1').insertAdjacentHTML('afterbegin', input2.body)
 // let input2 = JSON.parse("{\"body\":\"'alert'+'(222)'\"}")

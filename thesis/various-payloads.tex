@@ -224,6 +224,7 @@ Results of conducting the evaluation using this technique are stated under Secti
 
 
 \subsubsection{Percent encoding}
+\label{sec:percenc}
 RFC 3986 states under section 2.1 "Percent-Encoding":
 \begin{quote}
 	A percent-encoding mechanism is used to represent a data octet in a
@@ -250,7 +251,7 @@ becomes
 %3Cscript%3Ealert%28%27XSS%27%29%3C%2Fscript%3E
 \end{lstlisting}
 
-after percent encoding it with the Python function \verb|urllib.parse.quote_plus|. Evaluation results using this technique are stated under Section~\ref{sec:percencsingleiter}
+after percent encoding it with the Python function \verb|urllib.parse.quote_plus|. Evaluation results using this technique are stated under Section~\ref{sec:percencsingleiter}, Section~\ref{sec:doublepercenc} and Section~\ref{sec:forcedunicodenorm}.
 
 
 \subsubsection{Charset alternation}
