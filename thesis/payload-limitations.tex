@@ -1,12 +1,26 @@
 \subsection{Payload limitations}
 \label{sec:payloadlimitations}
 {\color{blue} evtl das hier raus? falls nicht mehr viel mehr dazu gefunden wird}
-On usage of Tagged Template Literals, the function always get called with the first parameter being an array, the second parameter being the first placeholder expression. (see Section~\ref{sec:taggedtemplateliterals}) Therefore, a workaround must be found if the return value of an expression is to be displayed. For instance, substituting \verb|alert| with \verb|prompt| in combination with Tagged Template Literals allows to display a parameter given to the template string. Using \verb|alert| will limit the displaying possibilities to the first parameter (an array of strings) of a Tagged Template Literal call. The function \verb|prompt| allows two parameters whereas the second parameter is used for a default input text in the displayed prompt. \cite{js/prompt} Therefore its possible to display the expression in the first placeholder \verb|${expression}| after string coercion. {\color{red} todo: according to this example, sometimes workaround in the form of payloads with a similar logic are neccessary}
+On usage of Tagged Template Literals, the function always get called with the first parameter being an array, the second parameter being the first placeholder expression. (see Section~\ref{sec:taggedtemplateliterals}) Therefore, a workaround must be found if the return value of an expression is to be displayed. For instance, substituting \verb|alert| with \verb|prompt| in combination with Tagged Template Literals allows to display a parameter given to the template string. Using \verb|alert| will limit the displaying possibilities to the first parameter (an array of strings) of a Tagged Template Literal call. The function \verb|prompt| allows two parameters whereas the second parameter is used for a default input text in the displayed prompt. \cite{js/prompt} Therefore its possible to display the expression in the first placeholder {\verb|{expression}|} after string coercion. {\color{red} todo: according to this example, sometimes workaround in the form of payloads with a similar logic are neccessary}
 
 string concatenation payloads need to be evaluated additionally, can be replaced by js escape sequences to avoid 1 iteration of evaluation
 
 It seems to be more versatile to use the function constructor or eval in some form to be able to use string operations on the payload. {\color{red} TODO: explain and conclude -> successful blocking of eval + function constructor by waf will limit injection possibilities}
 
-{}[].constructor.constructor('alert' + '(`concatenation`)')(): de
-depending on the context, where the payload will be inserted, sometimes the function constructor can not be used 
+using function constructor: funciton will be executed in global scope, eval will return the result of execution direcly, function constructor function needs to have return statement
 
+percent encoding: only works if the payload is sent as query/path param or explicit percent decoding is performed on the body by the web server
+
+\begin{lstlisting}
+const b = 10
+function tester() {
+	const b = 11
+	console.log(eval(59 + b))
+	console.log([].map.constructor('return 59+b')())
+}
+\end{lstlisting}
+
+{}[].constructor.constructor('alert' + '(`concatenation`)')(): de
+depending on the context, where the payload will be inserted, sometimes the function constructor can not be used
+
+Even if a firewall configuration does not block some payloads obscured by certain evasion techniques, incurred payload limitations through using those techniques might be enough to render any bypassing payload invalid. In such a case, the validity of bypassing payloads depends on the implementation details of the Web server receiving the requests. If this implementation eventually invalidates bypassing payloads, a Web application firewall ruleset that does not block all payloads but only allows invalid payloads to bypass can be considered effective.

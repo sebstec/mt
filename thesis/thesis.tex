@@ -34,7 +34,21 @@
 
 % Paket für Deutschsprachige Inhalte
 \usepackage[english]{babel}
-% \usepackage[utf8]{inputenc}
+% \usepackage{ifxetex,ifluatex}
+%
+% \newif\ifunicode
+% \ifxetex\unicodetrue\fi
+% \ifluatex\unicodetrue\fi
+%
+% \ifunicode
+%   \usepackage[verbose]{newunicodechar}
+%   \newcommand{\DeclareUnicodeCharacter}[2]{%
+%     \begingroup\lccode`|=\string"#1\relax
+%     \lowercase{\endgroup\newunicodechar{|}}{#2}%
+%   }
+% \else
+%   \usepackage[utf8]{inputenc}
+% \fi
 % \usepackage[T1]{fontenc}
 \usepackage[babel, german=quotes]{csquotes}
 
@@ -69,6 +83,11 @@
 % \usepackage{fontspec}
 % \setmainfont{Arial}
 % \setsansfont{Arial}
+% \usepackage{unicode-math}
+% \setmathfont{notosansmath}
+% \setmainfont{droidsans}
+% \usepackage{sourcecodepro}
+
 
 % Wichtig: Als letztes Paket laden!
 \usepackage{hyperref}

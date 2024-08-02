@@ -288,7 +288,7 @@ after using string concatenation to craft an obscured variant of the example pay
 the payload successfully evaded the firewall rule and reached the tested Web server. As mentioned under Section~\ref{sec:stringconc}, this technique is more effective when combined with forced evaluation. Evalutation results of combining this technique with using the function constructor to force the evaluation of the payload are stated under Section~\ref{sec:funconstrconbypass} and Section~\ref{sec:charcodemultiiter}.
 
 
-\subsubsection{Function Constructor}
+\subsubsection{Eval \& function constructor}
 \label{sec:functionconstructorsingleeva}
 Considering the example payload of the previous subsection: String concatenation: Creating a modified payload that forces the evaluation of the part equal to the example payload from the previous subsection would remove the dependency of evaluation through the vulnerable code. The modified payload might use the \verb|eval()| function to achieved forced evaluation:
 
@@ -433,26 +433,25 @@ is also valid and bypasses the evaluated firewall.
 
 Further applications of this technique are stated under Section~\ref{sec:jsescapemultiiter} using escape sequences inside string literals, under Section~\ref{sec:htmlencjsesc} using single character escape and Section~\ref{sec:avoidingbypassA} using escape sequences inside a template literal.
 
-
-\subsubsection{eval() function}
-\label{sec:evalsingleiter}
-The ModSecurity firewall using CRS 4.1.0. checks for usage of the function \verb|eval()| and tries to block requests containing it. An example is listed in Listing~\ref{lst:evalalertXSSblocked}.
-{\color{red} hier evtl noch etwas mehr...}
-
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=eval(`al` + `e` + `rt('XSS')`) blocking example, label={lst:evalalertXSSblocked}]
-<payload>eval(`al` + `e` + `rt('XSS')`)</payload>
-<file>"rules/REQUEST-933-APPLICATION-ATTACK-PHP.conf"</file>
-<fileDetails>[line "331"] [id "933160"]<fileDetails>
-<MatchedData>"eval(`al`   `e`   `rt('XSS')"</MatchedData>
-
-<file>"rules/REQUEST-934-APPLICATION-ATTACK-GENERIC.conf"</file>
-<fileDetails>[line "52"] [id "934100"]<fileDetails>
-<MatchedData>"eval("</MatchedData>
-
-<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
-<fileDetails>[line "714"] [id "941390"]<fileDetails>
-<MatchedData>"eval("</MatchedData>
-\end{lstlisting}
+% \subsubsection{eval() function}
+% \label{sec:evalsingleiter}
+% The ModSecurity firewall using CRS 4.1.0. checks for usage of the function \verb|eval()| and tries to block requests containing it. An example is listed in Listing~\ref{lst:evalalertXSSblocked}.
+% {\color{red} hier evtl noch etwas mehr...}
+%
+% \begin{lstlisting}[style=ruleStyle, language=XML, caption=eval(`al` + `e` + `rt('XSS')`) blocking example, label={lst:evalalertXSSblocked}]
+% <payload>eval(`al` + `e` + `rt('XSS')`)</payload>
+% <file>"rules/REQUEST-933-APPLICATION-ATTACK-PHP.conf"</file>
+% <fileDetails>[line "331"] [id "933160"]<fileDetails>
+% <MatchedData>"eval(`al`   `e`   `rt('XSS')"</MatchedData>
+%
+% <file>"rules/REQUEST-934-APPLICATION-ATTACK-GENERIC.conf"</file>
+% <fileDetails>[line "52"] [id "934100"]<fileDetails>
+% <MatchedData>"eval("</MatchedData>
+%
+% <file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+% <fileDetails>[line "714"] [id "941390"]<fileDetails>
+% <MatchedData>"eval("</MatchedData>
+% \end{lstlisting}
 
 \subsubsection{JSFuck}
 The payload \verb|alert('XSS')| has been sent to the Web Application and blocked (Listing~\ref{lst:alertXSSblocked}). Subsequently the payload was obscured using the service provided by JSFuck: https://jsfuck.com/ \\

