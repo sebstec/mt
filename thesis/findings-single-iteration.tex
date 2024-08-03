@@ -336,7 +336,7 @@ When sent in a request directed to the test Web server protected by the evaluted
 It is apparent, that usage of the \verb|eval()| function is heavily blacklisted. Therefore, \verb|eval()| has been substituted by the function constructor in order to obscure the payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python, caption=Function constructor bypass, label={lst:funconbypass}]
-[].constructor.constructor('alert' + '(`concatenation`)')()
+[].constructor.constructor('alert'+'(`concatenation`)')()
 \end{lstlisting}
 
 The obscured payload successfully bypasses the ModSecurity firewall using CRS4.1.

@@ -39,26 +39,29 @@ console.log(`t\est`);
 // ev\u{0061}l('alert("evalescaped")')
 // console.log(\u0061lert("XSS"))
 // console.log(\u0062)
-function tester() {
-	const b = 11
-  const funb = () => {return 'funb'};
-	console.log(eval(59 + b))
-	console.log([].map.constructor('return 59+b')())
-  console.log(eval('funb()'))
-	// console.log([].map.constructor('funb()')())
-}
-tester()
+// function tester() {
+// 	const b = 11
+//   const funb = () => {return 'funb'};
+// 	console.log(eval(59 + b))
+// 	console.log([].map.constructor('return 59+b')())
+//   console.log(eval('funb()'))
+// 	// console.log([].map.constructor('funb()')())
+// }
+// tester()
 
-const value = 1
-function testFunc() {
-	const value = 2
-	const func = () => { return 'func' }
-	console.log(eval('1 + value'))
-	console.log([].map.constructor('return 1 + value')())
-	console.log(eval('func()'))
-	console.log([].map.constructor('func()')())
-}
-testFunc()
+
+// escape.constructor('alert(`error`)')();
+
+// const value = 1
+// function testFunc() {
+// 	const value = 2
+// 	const func = () => { return 'func' }
+// 	console.log(eval('1 + value'))
+// 	console.log([].map.constructor('return 1 + value')())
+// 	console.log(eval('func()'))
+// 	console.log([].map.constructor('func()')())
+// }
+// testFunc()
 // prompt`\u0024{secret}`
 
 
@@ -79,13 +82,14 @@ document.getElementById('div1').insertAdjacentHTML('afterbegin', '<img src=0 one
 // const input = JSON.parse("{\"body\":\"`var\/**\/s='secret';promp`+`t(s,s)`\"}");
 //
 // const input = JSON.parse("{\"body\":\"[]['constructor']['constructor'](`var\/**\/s\/**\/=\/**\/'secret';\/**\/promp`\/**\/+\/**\/`t(s,\/**\/s)`)()\"}");
-const input = JSON.parse("{\"body\":\"[]['constructor']['constructor'](`var/**/s/**/=/**/'secret';/**/promp`/**/+/**/`t(s,/**/s)`)()\"}");
+// const input = JSON.parse("{\"body\":\"[]['constructor']['constructor'](`var/**/s/**/=/**/'secret';/**/promp`/**/+/**/`t(s,/**/s)`)()\"}");
+const input = JSON.parse("{\"body\":\"[].constructor.constructor('alert'+'(`concatenation`)')()\"}");
 console.log(input.body)
 // input.body = input.body.normalize('NFKC');
 // console.log(input.body)
 document.getElementById('div1').insertAdjacentHTML('afterbegin', `<img src=0 onerror=${input.body}>`)
 
-eval('prompt`\u0024{111}`'.normalize('NFKC'))
+// eval('prompt`\u0024{111}`'.normalize('NFKC'))
 // var/**/s/**/=/**/5;/**/prompt(s,/**/s)
 
 assert(1)
