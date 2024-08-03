@@ -1,2 +1,11 @@
 \section{Executive Summary}
 asd
+The evasion techniques were used to try and create bypassing payloads that would evade the filtering of the evaluated firewall configuration. 
+First, unobscured payloads were sent in HTTP requests towards the Web application firewall.
+At this point, the firewall logs were inspected
+Then, payloads were created using a single iteration of applying a single evasion technique to determine which evasion techniques are most effective. At this point, some created payloads already bypassed the evaluted firewall configuration.
+Afterwards, evasion techniques determined to be effective were used in combination across multiple iterations to eventually create bypassing payloads.
+In total, multiple bypassing payloads could be created. Those were sent in HTTP requests towards the evaluated firewall configuration, bypassed it and reached a testing Web application that should have been proted by the firewall configuration.
+
+It was discovered that 13 of 18 evasion techniques are effective, some only in combination with other evasion techniques. 
+When a created payloads was sent in a request towards the evaluated firewall configuration and blocked by the very same, the firewall log was inspected to determine why a payload caused the request to get blocked by the firewall. 
