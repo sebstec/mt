@@ -26,23 +26,15 @@ Once rules for a specific payload have been developed and implemented, these rul
 \subsection{Continuing the Evaluation}
 Finally, the new rules are tested against the found bypassing payloads to verify their detection. After verifying the rules, either the evaluation comes to an end or is continued at the initial phase of Section~\ref{sec:genericproposalstep3}: Proposed step 3: Multi iteration evaluation. If additional vectors for bypassing payloads have been found during the previous step, these are handled first. Handling these first allows to focus on one evasion technique at a time. As shown in Section~\ref{sec:rulespropfunctionconstructorreflection}, more vectors to use the \verb|Function()| constructor were discovered. As such, the focus lied on those during the next evaluation iteration. Once the rule proposed under Section~\ref{sec:rulespropfunctionconstructorreflection} in Listing~\ref{lst:constructorsruleproposal3} was implemented, the focus shifted to the additional proposals stated under Section~\ref{sec:unicodenormprop}, Section~\ref{sec:htmlcharrefprop} and Section~\ref{sec:jsescprop}.
 
-\subsection{Assessment}
+\subsection{Assessment} 
+During the evaluation of the ModSecurity firewall using CRS4.1 against targeted Cross-site scripting payloads, which was performed according to the proposal stated in this section, multiple insights were gained. It was shown that from initially 18 gathered evasion technique, 13 evasion techniques could be used in some combination to create bypassing payloads. Evaluation results described under Section~\ref{sec:singleiterationeva} and Section~\ref{sec:multiiteration} state some definitively bypassing payloads that the evaluated firewall configuration could not protect against. With this, knowledge about weaknesses in the ruleset has been gained. In addition to that, less and more impactful evasion techniques could be identified. Some evasion techniques were altogether ineffective, while others offered a multitude of bypassing vectors. Based on the gained combined knowledge of bypassing payloads and multiple bypassing vectors, additional firewall rules could be proposed that would increase the protection by the firewall configuration.
 
+For a complete overview regarding a specific Web application, all potentially malicious payloads based on the used Web technologies powering the Web application to be protected need to be investigated in a similar manner. Nevertheless, the results of evaluating only Cross-site scripting payloads allow an estimation of the firewall performance against the focused Cross-site scripting payloads. No matter if a complete evaluation investigating multiple potential weaknesses or an evaluation investigating only one weakness is conducted, using the proposed evaluation technique allows to explore potential loopholes in the rules configuration in any case. This gives insight into filtering performace and subsequently allows to close those loopholes by implementing new rules.
+
+Furthermore, during the evaluation according to the proposal stated in this section, advantages and disadvantages of this technique became apparent. As every step of this proposal is dependend on the subjects performing the evaluation, it is not predefined which evasion techniques will be used to evaluate. In the first step, some Web technologies that the Web application to protect uses could be missed. Building on this, some evasion techniques existent to create bypassing payloads, which would maliciously influence a Web application using a certain Web technology, could also be missed. 
+This could lead to some evasion techniques not being used during the evaluation and subsequently to missed potential bypassing vectors to craft malicious payloads. In addition to that, some malicious payloads could might be missed during the evaluation of known evasion techniques. 
+Therefore, this evaluation method does not guarantee full coverage. 
 Especially during multi-iteration-evaluation, there are many possible evasion technique combinations. If the evaluation is done manually, the subjectively most promising technique combinations can be used. Should this not yield expected results, a fallback on evaluating using any possible combination is possible.
 
-{\color{red} TODO: hinzufügen: was sind die vorteile dieser evaluations technik?  \\
-schneller und mehr bypassing payloads im vergleich zu blackbox testing durch analyse der logs in jedem schritt \\
-dabei aber ähnlicher ansatz wie ein angreifer: research welche eva techniken es gibt und die dann anwenden \\
-dieser ansatz gibt dann insight into performance against targeted requests \\
-blacklist-regeln können so schritt für schritt im hinblick auf die web applikation verfeinert werden \\
-}
+Performing the evaluation in a grey box testing manner allowed access to the firewall log file. Access to the firewall log enabled to analyze the rules that matched on a payload and apply target-oriented evasion techniques in subsequent iterations. Developing bypassing payloads in this manner enabled to find weaknesses and subsequently implement measures to avoid discovered bypass vectors. Analyzing the matching rules during each iteration also enabled to discard some evasion techniques from consideration in following iterations. This is the case when some evasion techniques are effectively countered through certain rule configurations. 
 
-
-{\color{red} TODO: hinzufügen: was sind die nachteile dieser evaluations technik? \\
-risiko, dass evasions techniken übersehen werden \\
-risiko, dass mögliche malicious payloads übersehen werden \\
-risiko, dass einzelne technologien auf die die web app aufbaut vergessen werden \\
-aber: diese risiken gibt es bei einem automatischen scan auch \\
-}
-
-{\color{red} TODO: hinzufügen: überleitung zu conclusion }

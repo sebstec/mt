@@ -2,31 +2,31 @@
 \label{sec:xsstech}
 This section lists evasion techniques applicable to Cross-site Scripting payloads.
 
-\subsubsection{Tag modification}
-In a case, where regex filters are configured to look for html tags, modifying html tags might make a payload evade the filter. Possible modifications include:
-\begin{itemize}
-	\item prepending the tag with an additional \verb|<|: \verb|<<script>alert('XSS')</script>|
-	\item omitting the closing tag: \verb|<script>alert('XSS')|
-	\item using double open angle brackets: \verb|<iframe src=javascript:alert('XSS') <|
-	\item using uncommon tags: \\ \verb|<STYLE>.classname{background-image:url("javascript:alert(XSS)");}</STYLE>|
-\end{itemize}
-Technique by \cite{medium/allypetitt}
-
-\subsubsection{Space replace}
-A regex filter that is expecting a space inside a html tag at certain positions can be evaded by replacing the space with the forward slash: \verb|/|.
-For instance, the payload
-
-\begin{lstlisting}[style=basicStyle, language=Python]
-<img src="1" onerror="alert('XSS')">
-\end{lstlisting}
-
-becomes
-
-\begin{lstlisting}[style=basicStyle, language=Python]
-<img/src="1"/onerror="alert('XSS')">
-\end{lstlisting}
-
-Technique by \cite{medium/allypetitt}. {\color{red}TODO: link to evaluation}
+% \subsubsection{Tag modification}
+% In a case, where regex filters are configured to look for html tags, modifying html tags might make a payload evade the filter. Possible modifications include:
+% \begin{itemize}
+% 	\item prepending the tag with an additional \verb|<|: \verb|<<script>alert('XSS')</script>|
+% 	\item omitting the closing tag: \verb|<script>alert('XSS')|
+% 	\item using double open angle brackets: \verb|<iframe src=javascript:alert('XSS') <|
+% 	\item using uncommon tags: \\ \verb|<STYLE>.classname{background-image:url("javascript:alert(XSS)");}</STYLE>|
+% \end{itemize}
+% Technique by \cite{medium/allypetitt}
+%
+% \subsubsection{Space replace}
+% A regex filter that is expecting a space inside a html tag at certain positions can be evaded by replacing the space with the forward slash: \verb|/|.
+% For instance, the payload
+%
+% \begin{lstlisting}[style=basicStyle, language=Python]
+% <img src="1" onerror="alert('XSS')">
+% \end{lstlisting}
+%
+% becomes
+%
+% \begin{lstlisting}[style=basicStyle, language=Python]
+% <img/src="1"/onerror="alert('XSS')">
+% \end{lstlisting}
+%
+% Technique by \cite{medium/allypetitt}. {\color{red}TODO: link to evaluation}
 
 \subsubsection{HTML character references}
 \label{sec:htmlcharreftech}
