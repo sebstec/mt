@@ -3,15 +3,17 @@ According to synopsys, the concept of \quotes{Web Application Security}
 \begin{quote}
 	involves a collection of security controls engineered into a Web application to protect its assets from potentially malicious agents. Web applications, like all software, inevitably contain defects. Some of these defects constitute actual vulnerabilities that can be exploited, introducing risks to organizations. Web application security defends against such defects. It involves leveraging secure development practices and implementing security measures throughout the software development life cycle (SDLC), ensuring that design-level flaws and implementation-level bugs are addressed.
 \end{quote}
-Developers and publishers of Web applications are leveraging secure development practices to prevent security risks like those specified in the OWASP Top 10 document.
+Developers and publishers of web applications are leveraging secure development practices to prevent security risks like those specified in the OWASP Top 10 document.
 The OWASP Top 10 standard awareness document for developers and web application security represents a broad consensus about the most critical security risks to web applications.
-It includes security risks based on vulnerabilities that could be exploited using malicious HTTP requests.
+It includes security risks based on vulnerabilities that could be exploited using malicious \acrshort{http} requests.
 \cite{OWASP/Top10}
 
 Broken Access Control is the top 1 security risk in the OWASP Top 10 list from 2021.
 Broken Access Control enables users to act outside of their intended permissions.
 Examples include access to undisclosed information, modification or destruction of data and performing business functions outside the users limits.
-OWASP mentiones an attack scenario on an Web application with broken access control where the attacker force browses to target URLs. \cite{OWASP/BrokenAccessControl,OWASP/Risks2021} Force browsing is described by the OWASP Foundation as follows:
+OWASP mentiones an attack scenario on an web application with broken access control where the attacker force browses to target URLs. \cite{OWASP/BrokenAccessControl,OWASP/Risks2021} 
+
+Force browsing is described by the OWASP Foundation as follows:
 \begin{quote}
 	Forced browsing is an attack where the aim is to enumerate and access resources that are not referenced by the application, but are still accessible.
 
@@ -22,21 +24,25 @@ OWASP mentiones an attack scenario on an Web application with broken access cont
 	This attack is also known as Predictable Resource Location, File Enumeration, Directory Enumeration, and Resource Enumeration.
 	If the target URL corresponds to an admin page, admin privileges should be required to access the page. \cite{OWASP/forcebrowsing}
 \end{quote}
-If a user without admin privileges can access the page, the access control is broken.
+If a user without admin privileges can access a page reserved for admins, the access control is broken. An example for Broken Access Control is given involving PhpMyAdmin.
 
-PhpMyAdmin is a Web application that allows users to manage MySQL databases over the web.
-In some cases, the user interface of phpMyAdmin can be accessed via the URL \verb|http://servername/phpmyadmin| after publishing the application via a Web server. Single signon authentication is supported by phpWebAdmin. \cite{phpmyadmin/overview,phpmyadmin/quickinstall,ubuntu/phpmyadmin,phpmyadmin/signon}
-The interface of phpWebAdmin is intended to be accessed by an administrative audience.
-If a user force browses to the specified URL and this page can be accessed by users without administrative privileges through misconfigured single sign on, it is a case of broken access control.
-As an additional security control in this case, a Web application firewall could be used to prohibit any access to the URLs containing the path \verb|/phpmyadmin|.
+PhpMyAdmin is a web application that allows users to manage MySQL databases over the web.
+In some cases, the user interface of PhpMyAdmin can be accessed via the URL \verb|http://servername/phpmyadmin| after publishing the application via a web server. Single signon authentication is supported by PhpWebAdmin. 
+\cite{phpmyadmin/overview,phpmyadmin/quickinstall,ubuntu/phpmyadmin,phpmyadmin/signon}
+
+The interface of PhpWebAdmin is intended to be accessed by an administrative audience.
+If a user force browses to the specified URL and this page can be accessed by users without administrative privileges through misconfigured single sign on, it is a case of Broken Access Control.
+As an additional security control in this case, a web application firewall could be used to prohibit any access to the URLs containing the path \verb|/phpmyadmin|.
 If database administration is usually done locally, this would suffice.
-Alternatively, a whitelist of remote addresses allowed to access \verb|/phpmyadmin| could be used in the Web application firewall configuration.
+Alternatively, a whitelist of remote addresses allowed to access \verb|/phpmyadmin| could be used in the web application firewall configuration.
 
 	%{\color{red} maybe add ssrf here: \\ \verb|https://owasp.org/Top10/A10_2021-Server-Side_Request_Forgery_\%28SSRF\%29/|}
 
 Injection is the top 1 security risk in the OWASP Top 10 list from 2017.
 An application is vulnerable to attack when, among others, user-input is incorrectly validated, sanitized or filtered by the application.
-The OWASP Foundation mentiones the common weakness CWE-79: \gls{xss} as one of the weaknesses caused by incorrectly neutralized user-controllable input. \cite{OWASP/Risks2017,OWASP/Injection} \gls{xss} vulnerabilities are described in the \gls{cwe} as follows:
+The OWASP Foundation mentiones the common weakness CWE-79: \acrfull{xss} as one of the weaknesses caused by incorrectly neutralized user-controllable input. \cite{OWASP/Risks2017,OWASP/Injection}
+
+\acrlong{xss} vulnerabilities are described in the \acrfull{cwe} as follows:
 \begin{quote}
 	Cross-site scripting (XSS) vulnerabilities occur when:
 
@@ -60,18 +66,18 @@ The OWASP Foundation mentiones the common weakness CWE-79: \gls{xss} as one of t
 	In many cases, the attack can be launched without the victim even being aware of it. Even with careful users, attackers frequently use a variety of methods to encode the malicious portion of the attack, such as URL encoding or Unicode, so the request looks less suspicious. \cite{mitre/XSS}
 \end{quote}
 
-As an additional protection mechanism, Web application firewalls can be used to block \gls{xss} payloads in HTTP requests. In Web applications where script code transmission is not part of the business, the rules intended to block requests containing \gls{xss} payloads could be pretty strict.
+As an additional protection mechanism, web application firewalls can be used to block \acrshort{xss} payloads in \acrshort{http} requests. In web applications, where script code transmission is not part of the business, the rules intended to block requests containing \acrshort{xss} payloads could be pretty strict.
 
-Cross-site Scripting (XSS) payloads will be the main payloads tested in the proceeding of this work. 
-Cross-site Scripting weaknesses represent only a fraction of possible weaknesses in Web applications. Therefore, to achieve a comprehensive understanding of a web applications attack surface, research into further kinds of typical web application weaknesses should be considered.
+\acrshort{xss} payloads will be the main payloads tested in the proceeding of this work. 
+\acrshort{xss} weaknesses represent only a fraction of possible weaknesses in web applications. Therefore, to achieve a comprehensive understanding of a web applications attack surface, research into further kinds of typical web application weaknesses should be considered.
 
-When employing a Web application firewall as an 'additional protection mechanism', the Defense-in-Depth strategy is followed.
-The first layer of defense should be the counter measure inside the Web application, like proper access control and neutralization of user-input. 
-An additional layer of defense is then put on top by employing a Web application firewall.
-If a misconfigured security control in the Web application failes to correctly handle a specific malicious request, there is a chance that the Web application firewall is configured in a way that detects and blocks the malicious request before it can reach the Web application and cause an incident.
+When employing a web application firewall as an additional protection mechanism, the Defense-in-Depth strategy is followed.
+The first layer of defense should be the counter measures built into the web application, like proper access control and neutralization of user-input. 
+An additional layer of defense is then put on top by employing a web application firewall.
+If a misconfigured security control in the web application failes to correctly handle a specific malicious request, there is a chance that the web application firewall is configured in a way that detects and blocks the malicious request before it can reach the web application and cause an incident.
 Avoiding security incidents with the Defense-in-Depth strategy corresponds to
 \begin{quote}
 	the application of multiple countermeasures in a layered or stepwise manner to achieve security objectives. The methodology involves layering heterogeneous security technologies in the common attack vectors to ensure that attacks missed by one technology are caught by another.
 \end{quote}
-as defined by the National Institute of Standards and Technology (NIST). \cite{nist/did}
+as defined by the \acrfull{nist}. \cite{nist/did}
 

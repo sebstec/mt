@@ -66,6 +66,7 @@
 
 % Quellenverwaltung
 \usepackage[backend=biber, style=alphabetic, isbn=false, hyperref=true]{biblatex}
+% \usepackage[backend=biber, style=ieee, isbn=false, hyperref=true]{biblatex}
 \addbibresource{literature.bib}
 %\DeclareFieldFormat*{title}{#1}            % Format for bibliography
 \DeclareFieldFormat*{citetitle}{#1}        % Format for citations
@@ -137,13 +138,13 @@
 	\newpage
 	
 	% Abkürzungsverzeichnis
-	\printglossary[type=\acronymtype,title={Abbreviations},style=tree,nonumberlist]
+	\printglossary[type=\acronymtype,title={Acronyms},style=tree,nonumberlist]
 	
 	% Abbildungsverzeichnis
 	\listoffigures
 	
 	% Tabellenverzeichnis
-	%\listoftables
+	\listoftables
 	
 	% Quellcode-Verzeichnis
 	\lstlistoflistings
