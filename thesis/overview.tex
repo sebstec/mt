@@ -1,19 +1,36 @@
 \subsection{Overview and Scope}
-To answer the afromentioned question, this work aims at evaluating web application firewalls using firewall evasion techniques. Firewall Evasion techniques are used by attackers specifically targeting a Web Application behind a Web Application Firewall. Attackers try to evade detection by using these techniques. 
+Related work described in the previous section focuses on improving the efficiency of fuzzy testing by proposing sophisticated systems to iteratively create bypassing payloads. Yet all those systems work in a black-box setting. Payloads are created without the knowledge about the reason why a payload was rejected by the tested web application firewall.
+
+In a real work scenario, when institutions decide to evaluate the performance of an employed web application firewall, it is likely that there is more information available during the evaluation than used in a black-box scenario. 
+Therefore, this work proposes using this information during the evaluation of a web application firewall to form a gray-box evaluation scenario. 
+The overarching idea is to keep the perspective of an attacker that targets a web application protected by a web application firewall while improving the efficiency in finding bypassing payloads by using the information provided by the firewall log. 
+Found bypassing payloads directly correlate to weaknesses in the rule configuration of the evaluted web application firewall.
+Attackers create bypassing payloads targeting web applications protected by web application firewalls using firewall evasion techniques. 
+Therefore, to answer the question
+\begin{quote}
+How well can web application firewalls in their generic standard configuration
+protect a web application against targeted malicious requests?
+\end{quote}
+the author considers using firewall evasion techniques to be essential.
+
+In summary, to answer the afromentioned question, this work proposes to use firewall evasion techniques in a gray box scenario to evaluate web application firewalls. \\
 % Firewall Evasion techniques will be detailed in the further course of this work. 
 
-While malicious request containing payloads without obfuscation are certainly of importance, this work will focus on targeted attacks using payloads that were obscured using Firewall Evasion techniques.
+While malicious request containing payloads without obfuscation are certainly of importance, this work will focus on targeted attacks using payloads that were obscured using firewall evasion techniques.
 % In Section~\ref{sec:fundamentals}, fundamentals regarding Web Applications, Web Application Security, Web Application Firewalls and Web Application Firewall Evasion will be detailed.
-Targeted attacks come in many different forms, one being Cross-site scripting payloads.
-With JavaScript being the most used programming language as of 2023 \cite{statista/mostusedlang} and Cross-Site Scripting being a notable weakness linked to Injection vulnerabilities \cite{OWASP/Injection21}, this work focuses on Cross-site Scripting payloads.
+Targeted attacks come in many different forms, one being Cross-Site Scripting payloads.
+With JavaScript being the most used programming language as of 2023 \cite{statista/mostusedlang} and Cross-Site Scripting being a notable weakness linked to Injection vulnerabilities \cite{OWASP/Injection21}, this work focuses on Cross-Site Scripting payloads.
 
-Following this, in Section~\ref{sec:firewallevasiontechniques}, Firewall Evasion techniques applicable to Cross-site scripting payloads will be discussed. 
-An iterative approach will be developed to try and create bypassing payloads using those evasion techniques to evade the open-source ModSecurity firewall configured to use the OWASP CoreRuleSet in version 4.1. 
+Initially, in the following section, Section~\ref{sec:fundamentals}, this work details fundamentals regarding web applications and web application security. This is followed by an introduction to web application firewalls and web application firewall evasion.
+
+%here
+
+Following this, in Section~\ref{sec:firewallevasiontechniques}, Firewall Evasion techniques applicable to Cross-site scripting payloads will be discussed.
+An iterative approach will be developed to try and create bypassing payloads using those evasion techniques to evade the open-source ModSecurity firewall configured to use the OWASP CoreRuleSet in version 4.1.
 
 Section~\ref{sec:evaluation} and Section~\ref{sec:EvaluationResults} will describe the evaluation methodology and evaluation results. In this context, this work aims at investigating the development steps of bypassing payloads and discussing occuring payload limitations in the context of tested firewall configurations, properties of the Web application to be protected and used firewall evasion techniques. Section~\ref{sec:rulesproposal} will detail proposed rule additions based on found bypassing payloads and effective evasion techniques.
 
-Subsequently, a generic evaluation proposal will be presented and assessed in Section~\ref{sec:proposal}. Finally, this work will be concluded (Section~\ref{sec:conclusion}) and ideas for further reasearch will be proposed (Section~\ref{sec:continuations}). 
+Subsequently, a generic evaluation proposal will be presented and assessed in Section~\ref{sec:proposal}. Finally, this work will be concluded (Section~\ref{sec:conclusion}) and ideas for further reasearch will be proposed (Section~\ref{sec:continuations}).
 
 In this work, no LLM-based or other machine learning approaches are pursued. Nonetheless, these approaches are promising and will be mentioned in Section~\ref{sec:continuations}.
 
-Initially, in the following section, Section~\ref{sec:fundamentals}, fundamentals regarding Web Applications, Web Application Security, Web Application Firewalls and Web Application Firewall Evasion will be detailed.

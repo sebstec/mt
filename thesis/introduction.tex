@@ -1,7 +1,14 @@
 \section{Introduction}
-The OWASP Top 10 is a standard awareness document for developers and web application security. It represents a broad consensus about the most critical security risks to web applications. \cite{OWASP/Top10} In the two most recent editions, OWASP Top 10 2017 Edition and OWASP Top 10 2021 Edition, among others, the top 1 security risk is a risk that developers seek to mitigate by employing a web application firewall. \cite{OWASP/Risks2017,OWASP/Risks2021} Injection (OWASP top 1 risk of 2017) vulnerabilities as well as Broken Access Control (OWASP top 1 risk of 2021) vulnerabilities can both be exploited using malicious HTTP requests. \cite{OWASP/Injection,OWASP/BrokenAccessControl}
+The OWASP Top 10 is a standard awareness document for developers and web application security. It represents a broad consensus about the most critical security risks to web applications.
+% \cite{OWASP/Top10}
+In the two most recent editions, OWASP Top 10 2017 Edition and OWASP Top 10 2021 Edition, the top 1 security risk is a risk that developers seek to mitigate by employing a web application firewall. \cite{OWASP/Top10,OWASP/Risks2017,OWASP/Risks2021}
 
-In a perfect scenario, a web application firewall would filter, detect and block those malicious requests while at the same time allowing standard application traffic to reach the web application. For some web application firewalls, the filtering behaviour can be configured with a set of rules that define which requests are going to be blocked by the firewall. \cite{OWASP/CRS,wargio/naxsiRules,Cisco/SnortRulesDocs}
+Injection vulnerabilities, OWASP top 1 risk of 2017, and Broken Access Control vulnerabilities, OWASP top 1 risk of 2021, can both be exploited using malicious HTTP requests. \cite{OWASP/Injection,OWASP/BrokenAccessControl}
+
+In a perfect scenario, a web application firewall would filter, detect and block those malicious requests while at the same time allowing standard application traffic to reach the web application. 
+For some web application firewalls, the filtering behaviour can be configured with a set of rules that define which requests are going to be blocked by the firewall. \cite{OWASP/CRS,wargio/naxsiRules,Cisco/SnortRulesDocs}
+
+
 When employing a web application firewall, it is mandatory to set up the rules in a way where a maximum of potentially malicious requests gets blocked while allowing all intended application traffic. This set up requires a balancing act of indentifying and defining standard request patterns as well as malicious request patterns. Both identification tasks are non trivial. Some web application firewalls come with a standard set of rules that aim to protect a web application from a wide range of attacks while allowing for a minimal rate of false positives. \cite{OWASP/CRS,wargio/naxsiRules,Cisco/SnortRulesDownload}
 
 Antagonist actors aimed at exploiting vulnerabilities of such a protected web application need to try and make their malicious HTTP requests bypass the web application firewall. To bypass a web application firewall, firewall evasion techniques are being used. \cite{HackTricks/WAFBypass} With firewall evasion techniques in mind, the question arises: 

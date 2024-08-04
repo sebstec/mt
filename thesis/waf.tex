@@ -64,6 +64,35 @@ For usage with the Libmodsecurity Web application firewall engine, the OWASP Fou
 	The OWASP® (Open Worldwide Application Security Project) CRS (Core Rule Set) is a free and open-source collection of rules that work with ModSecurity® and compatible web application firewalls (WAFs). These rules are designed to provide easy to use, generic attack detection capabilities, with a minimum of false positives (false alerts), to web applications as part of a well balanced defense-in-depth solution. \cite{OWASP/crshome}
 \end{quote}
 
-{\color{red} TODO: explain rule setup. give euample rule that prohibits access to /phpadmin where rule setup is explained and ref web app security section: broken access control}
+In the further course of this work, \quotes{ModSecurity} will refer to this setup: A nginx reverse proxy configured to use the Libmodsecurity library to provide Web application firewall capabilities.
+A Web application firewall setup like this, configured with the OWASP CoreRuleSet will be evaluated in the further course of this work. As such, the format of firewall rules used in the CoreRuleSet is described briefly:
 
-A similar setup Web application firewall configured with the OWASP CoreRuleSet will be evaluated in the further course of this work.
+Rules in the OWASP CoreRuleSet are in \verb|SecRule| format, which is understood by Libmodsecurity. The \verb|SecRule| syntax is 
+
+\begin{lstlisting}[style=basicStyle]
+SecRule VARIABLES "OPERATOR" "TRANSFORMATIONS,ACTIONS"
+\end{lstlisting}
+
+% where \verb|VARIABLES| instructs ModSecurity where to look, \verb|OPERATOR| instructs ModSecurity when to trigger a match, \verb|TRANSFORMATIONS| instructs ModSecurity how it should normalize variable data and \verb|ACTIONS| instructs ModSecurity what to do if a rule matches. 
+
+where
+
+\begin{itemize}
+	\item \verb|VARIABLES| instructs ModSecurity where to look
+	\item \verb|OPERATOR| instructs ModSecurity when to trigger a match
+	\item \verb|TRANSFORMATIONS| instructs ModSecurity how it should normalize variable data
+	\item \verb|ACTIONS| instructs ModSecurity what to do if a rule matches. 
+\end{itemize}
+
+
+A very basic rule looks like the following:
+
+\begin{lstlisting}[style=basicStyle]
+SecRule REQUEST_URI "@rx \/phpmyadmin" "id:1,phase:1,t:lowercase,deny"
+\end{lstlisting}
+
+If the ModSecurity firewall is setup with this rule, it looks for matches of the regular expression \verb|\/phpmyadmin| in the request uri as soon as it receives request headers. \verb|phase:1| indicates to ModSecurity that it should process this rule immediately after the request headers have been received.
+The value in the request uri will be transformed to lowercase by the transformer \verb|t:lowercase| before it is matched against the regular expression. 
+If a match is found, the rule directs the firewall to \verb|deny| the request. \cite{modsec/secRule, crs/creating}
+
+
