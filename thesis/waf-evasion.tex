@@ -1,22 +1,37 @@
 \subsection{Web Application Firewall Evasion}
-Web application firewall evasion refers to the action of trying to make malicious payloads evade the detection by the WAF.
+When a targeted web application is protected by a web application firewall, attackers are employing firewall evasion techniques to make malicious payloads evade the detection by the web application firewall.
+\acrshort{http} requests towards the web application are modified in such a way that their payload is both, maliciously influencing the web application as well as evading the detection by the web application firewall. To achieve both attributes in a payload, the payload must be obscured and kept valid simultaneously. 
 
-In the context of Web application firewalls, HTTP requests are modified in such a way that their payload is both, maliciously influencing the Web application as well as evading the detection by the Web application firewall. To achieve both attributes in a payload, the payload must be obscured and kept valid simultaneously. 
+When encountering a web application firewall that filters the traffic based on signature detection, firewall evading payloads are created by modifying the payload syntax while keeping payload semantics.
+When signature detection filtering is based on regular expression matching, the task is to create a payload that does not trigger a match.
+For instance, the character sequence of \verb|alert(| matches on some regular expression based filtering rules. \verb|alert(| would be sent in a payload that is targeting to call the JavaScript built-in function \verb|alert()|. On calling it inside a browser, a visible dialog is displayed by the browser. The dialogs content is dependend on the given argument to the function. \cite{js/alert}
 
-When encountering a Web application firewall that filters the traffic based on signature detection, firewall evading payloads are created by modifying the payload syntax while keeping payload semantics. Considering signature detection filtering based on regex matching, the character sequence of \verb|alert(| matches on some regex based filtering rules. \verb|alert(| is part of the JavaScript built-in function \verb|alert()|. On calling it inside a browser, a visible dialog is displayed by the browser. The dialogs content depend on the given argument to the function. 
+Suppose the payload 
 
-Suppose the payload \verb|alert(1)| is to be used as a proof of concept payload testing for \gls{xss} vulnerabilities.
-To evade a regex based rule that looks for the character sequence \verb|alert(|, the character sequence needs to be substituded with another sequence that does not trigger a match. An example is the sequence \verb|alert`| as part of the payload \verb|alert`1`|. This payload uses a different syntax in the form of Tagged Template Literals to achieve the same effect: displaying a dialog with the content \verb|"1"| inside the browser.
-In this case, the semantics of the payload stayed the same while the syntax was changed to evade detection by the Web application firewall.
+\begin{lstlisting}[style=basicStyle]
+alert(1)
+\end{lstlisting}
+
+is to be used as a proof of concept payload testing for \acrshort{xss} vulnerabilities.
+To evade a regular expression based rule that looks for the character sequence \verb|alert(|, the character sequence needs to be substituted with another sequence that does not trigger a match. 
+This could be the sequence \verb|alert`| for example, which is part of the payload 
+
+\begin{lstlisting}[style=basicStyle]
+alert`1`
+\end{lstlisting}
+
+This payload uses a different syntax in the form of Tagged Template Literals to achieve the same effect: displaying a dialog with the content \verb|"1"| inside the browser.
+In this case, the semantics of the payload stayed the same while the syntax was changed to evade detection by the web application firewall. 
+Technically, calling \verb|alert`1`| using a Tagged Template Literal is handled slightly different to calling it using \verb|alert(1)| in JavaScript. Semantics in this context refers to correctly managing to achieve the target set out by an attacker that would send such payloads. In this example, the target is \quotes{display a dialog with the number 1 in it}, which can be achieved using both options.
 Further techniques to create firewall evading payloads are described in Section~\ref{sec:firewallevasiontechniques}.
 
 With increased obscurity, the difficulty of creating a valid payload increases. Building on the afromentioned example around \verb|alert()|, some payload limitations occur with the usage of Tagged Template Literals. When switching the target from displaying a dialog with the content \verb|"1"| to displaying a dialog with content based on an expression, these limitations become apparent. Considering the expression \verb|1+1|, the target could be achieved by supplying the payload
 \begin{lstlisting}[style=basicStyle]
 alert(1+1)
 \end{lstlisting}
-- without a Web application firewall rejecting messages containing the character sequence \verb|alert(|. Calling the function this way, with the expression as an argument, the expression will be evaluated and the browser displays a dialog with the content based on the expression result: \verb|"2"|.
+given there is no web application firewall rejecting messages containing the character sequence \verb|alert(|. Calling the function this way, with the expression as an argument, the expression will be evaluated and the browser displays a dialog with the content based on the expression result: \verb|"2"|.
 
-If Tagged Template Literals are used to evade the firewall in the same bracket-replacing fashion as before: 
+If Tagged Template Literals are used to evade the firewall in the same parenthesis-replacing fashion as before: 
 \begin{lstlisting}[style=basicStyle]
 alert`1+1`
 \end{lstlisting}
@@ -27,16 +42,26 @@ Placeholders in the form of \verb|${expression}| can be used inside Tagged Templ
 \begin{lstlisting}[style=basicStyle]
 alert`${1+1}`
 \end{lstlisting}
-Executing this payload will result in the display of a dialog with the content \verb|","|. When calling a function using Tagged Template Literals in JavaScript, the first argument given to the function will be an array of strings corresponding to the strings surrounding the \verb|${expression}| placeholders. In the call \verb|alert`${1+1}`|, this array is of the form \verb|["",""]|. When calling the function \verb|alert| with an argument other than a string, it will be converted to a string before being displayed. The array \verb|["",""]| converted to string results in the string \verb|","|. 
+Executing this payload will result in the display of a dialog with the content \verb|","|. When calling a function using Tagged Template Literals in JavaScript, the first argument given to the function will be an array of strings corresponding to the strings surrounding the \verb|${expression}| placeholders. 
+When the payload
+\begin{lstlisting}[style=basicStyle]
+alert`${1+1}`
+\end{lstlisting}
+is evaluated, this array is of the form \verb|["",""]|. When calling the function \verb|alert| with an argument other than a string, it will be converted to a string before being displayed. The array \verb|["",""]| converted to string results in the string \verb|","|, which has been displayed. 
 As the function \verb|alert| accepts a single argument, it can not be used together with Tagged Template Literals to display a dialog with content based on the evaluation of an expression.
 
 When calling a function using Tagged Template Literals that contain \verb|${expression}| placeholders, the evaluation results of the expressions in the placeholders will be given to the calling function as the second and following arguments.
 The specified example target states that the result of the expression \verb|1+1| should be displayed in a dialog.
-To achieve this, the function \verb|alert| can be substituded with the function \verb|prompt|. Executed inside a browser, the \verb|prompt| function displays a dialog consisting of a message to the user, similar to \verb|alert|, and a input field for user input. It takes in two arguments, the first being a string with the content of the message to the user, the second one a string with the default value in the input field. 
-Calling \verb|prompt| with a Tagged Template Literal in the form of \verb|prompt`${1+1}`| in the browser displays a dialog with content consisting of the message \verb|","| and an input field prefilled with \verb|"2"| - the result of the expression \verb|1+1|.  
-Further details regarding payload limitations incurred by applying evasion techniques to a payload are discussed in Section~\ref{sec:payloadlimitations}.
+To achieve this, the function \verb|alert| can be substituded with the function \verb|prompt|. Executed inside a browser, the \verb|prompt| function displays a dialog consisting of a message to the user, similar to \verb|alert|, and an input field for user input. It takes in two arguments, the first being a string with the content of the message to the user, the second one a string with the default value in the input field. 
+Calling \verb|prompt| with a Tagged Template Literal through the payload
+\begin{lstlisting}[style=basicStyle]
+prompt`${1+1}`
+\end{lstlisting}
+will display a dialog in the browser with content consisting of the message \verb|","| and an input field prefilled with \verb|"2"| - the result of the expression \verb|1+1|. The specified target of displaying the result of an expression inside the browser has been achieved.
+Further details around Tagged Template Literals are laid out under Section~\ref{sec:taggedtemplateliterals}, further details regarding payload limitations incurred by applying evasion techniques to a payload are discussed in Section~\ref{sec:payloadlimitations}. 
+\cite{js/taggedtemplates,js/alert,js/prompt}
 
-The syntax of the payload \verb|alert(1+1)| was changed to \verb|prompt`${1+1}`|. The semantics from the perspective of the JavaScript programming language changed as well. From the perspective of the specified target, displaying a dialog with the result of the expression \verb|1+1|, both payloads, \verb|alert(1+1)| and \verb|promp`${1+1}`| might be seen as semantically equivalent. Especially in a case where the result of an expression might reveal a secret instead of a simple mathematical operation. It is obvious that possible attackers do not care if the targeted secret is displayed inside a static textbox or an input field. \cite{js/taggedtemplates,js/alert,js/prompt}
+The syntax of the payload \verb|alert(1+1)| was changed to \verb|prompt`${1+1}`|. The semantics from the perspective of the JavaScript programming language changed as well. From the perspective of the specified target, displaying a dialog with the result of the expression \verb|1+1|, both payloads, \verb|alert(1+1)| and \verb|promp`${1+1}`| might be seen as semantically equivalent. Especially in a case where the result of an expression might reveal a secret instead of a simple mathematical operation. It is obvious that possible attackers do not care if the targeted secret is displayed inside a static textbox or an input field. \\
 
-Based on the fundamentals layed out under this section (Section~\ref{sec:fundamentals}), concrete firewall evasion techniques will be detailed in the following section.
+Based on the fundamentals laid out under this section, concrete firewall evasion techniques will be detailed in the following section.
 
