@@ -245,7 +245,7 @@ This payload bypasses the rules with ids \verb|941170| (NoScript XSS InjectionCh
 
 As this result is promising, another iteration of applying this technique has been used in the multi iteration evaluation. The results are stated unter Section~\ref{sec:doublehtmlcharref}.
 
-\subsubsection{From charcode}
+\subsubsection{fromCharCode()}
 \label{sec:charcodesingleiter}
 As stated under Section~\ref{sec:fromcharcodetech}, a payload where the string containing malicious JavaScript statements was substituted by a call to \verb|String.fromCharCode()| was tested against the ModSecurity firewall using CRS4.1:
 
@@ -260,7 +260,7 @@ As stated under Section~\ref{sec:fromcharcodetech}, a payload where the string c
 
 This rule matches on the character sequence \verb|String.fromCharCode| while this evasion technique depends on using this function. Further use of this technique would require to split the statement into a minimum of two parts. Section~\ref{sec:charcodemultiiter} follows up on this idea. In a single iteration, the firewall effectively prohibits payloads obscured using this technique.
 
-\subsubsection{JavaScript comment substitution}
+\subsubsection{JavaScript Comment Substitution}
 \label{sec:jscommentsubsingleiter}
 As stated under Section~\ref{sec:jscommentsub}, comments instead of whitespaces in payload strings have been used to evaluate the tested Web application firewall. The example payload of:
 
@@ -276,7 +276,7 @@ var/**/s/**/=/**/5;
 
 The obscured payload bypasses the filtering by the ModSecurity firewall using CRS4.1. While obscuring the payload in this context does not significantly change the bypassing of the tested payload, the fact that the evaluated firewall does not block payload containing inline comments in the form of \verb|/**/| opens further use cases during multi iteration evaluation. Further use of this technique is stated under Section~\ref{sec:funconstrconbypass}.
 
-\subsubsection{String concatenation}
+\subsubsection{String Concatenation}
 \label{sec:stringconcsingleiter}
 The example payload mentioned under Section~\ref{sec:stringconc}:
 
@@ -342,6 +342,7 @@ It is apparent, that usage of the \verb|eval()| function is heavily blacklisted.
 The obscured payload successfully bypasses the ModSecurity firewall using CRS4.1.
 
 \subsubsection{Square bracket notation}
+\label{sec:functionconstructorsingleevasbn}
 As stated under Section~\ref{sec:sbn}, the square bracket notation can be used to substitute the dot notation in order to access object properties. When using the Function constructor as mentioned under Section~\ref{sec:functionconstructor}, access to object properties is neccessary. Using the square bracket notation in such a case is standing to reason.
 
 The bypassing payload mentioned under Section~\ref{sec:functionconstructorsingleeva}:
@@ -470,6 +471,7 @@ Further applications of this technique are stated under Section~\ref{sec:jsescap
 % \end{lstlisting}
 
 \subsubsection{JSFuck}
+\label{sec:jsfucksingleiter}
 The payload \verb|alert('XSS')| has been sent to the Web Application and blocked (Listing~\ref{lst:alertXSSblocked}). Subsequently the payload was obscured using the service provided by JSFuck: https://jsfuck.com/ \\
 The resulting payload is shown in Listing~\ref{lst:alertxssjsfuck}. The ModSecurity firewall using CRS 4.1 detects the JSFuck "encoding" and blocks the payload:
 

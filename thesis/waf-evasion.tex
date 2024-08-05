@@ -8,7 +8,7 @@ For instance, the character sequence of \verb|alert(| matches on some regular ex
 
 Suppose the payload 
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 alert(1)
 \end{lstlisting}
 
@@ -16,7 +16,7 @@ is to be used as a proof of concept payload testing for \acrshort{xss} vulnerabi
 To evade a regular expression based rule that looks for the character sequence \verb|alert(|, the character sequence needs to be substituted with another sequence that does not trigger a match. 
 This could be the sequence \verb|alert`| for example, which is part of the payload 
 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 alert`1`
 \end{lstlisting}
 
@@ -26,25 +26,25 @@ Technically, calling \verb|alert`1`| using a Tagged Template Literal is handled 
 Further techniques to create firewall evading payloads are described in Section~\ref{sec:firewallevasiontechniques}.
 
 With increased obscurity, the difficulty of creating a valid payload increases. Building on the afromentioned example around \verb|alert()|, some payload limitations occur with the usage of Tagged Template Literals. When switching the target from displaying a dialog with the content \verb|"1"| to displaying a dialog with content based on an expression, these limitations become apparent. Considering the expression \verb|1+1|, the target could be achieved by supplying the payload
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 alert(1+1)
 \end{lstlisting}
 given there is no web application firewall rejecting messages containing the character sequence \verb|alert(|. Calling the function this way, with the expression as an argument, the expression will be evaluated and the browser displays a dialog with the content based on the expression result: \verb|"2"|.
 
 If Tagged Template Literals are used to evade the firewall in the same parenthesis-replacing fashion as before: 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 alert`1+1`
 \end{lstlisting}
 the result will be semantically different to the intended target.
 Because of how Tagged Template Literals are designed in the JavaScript programming language, the call to \verb|alert`1+1`| will display a dialog with the content \verb|"1+1"|. The expression will not be evaluated, the target has not been achieved. Therefore the payload is not valid. It is neccessary to invite more obscurity into the payload. 
 
 Placeholders in the form of \verb|${expression}| can be used inside Tagged Template Literals. The payload can be modified to 
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 alert`${1+1}`
 \end{lstlisting}
 Executing this payload will result in the display of a dialog with the content \verb|","|. When calling a function using Tagged Template Literals in JavaScript, the first argument given to the function will be an array of strings corresponding to the strings surrounding the \verb|${expression}| placeholders. 
 When the payload
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 alert`${1+1}`
 \end{lstlisting}
 is evaluated, this array is of the form \verb|["",""]|. When calling the function \verb|alert| with an argument other than a string, it will be converted to a string before being displayed. The array \verb|["",""]| converted to string results in the string \verb|","|, which has been displayed. 
@@ -54,7 +54,7 @@ When calling a function using Tagged Template Literals that contain \verb|${expr
 The specified example target states that the result of the expression \verb|1+1| should be displayed in a dialog.
 To achieve this, the function \verb|alert| can be substituded with the function \verb|prompt|. Executed inside a browser, the \verb|prompt| function displays a dialog consisting of a message to the user, similar to \verb|alert|, and an input field for user input. It takes in two arguments, the first being a string with the content of the message to the user, the second one a string with the default value in the input field. 
 Calling \verb|prompt| with a Tagged Template Literal through the payload
-\begin{lstlisting}[style=basicStyle]
+\begin{lstlisting}[style=basicStyle, language=Python]
 prompt`${1+1}`
 \end{lstlisting}
 will display a dialog in the browser with content consisting of the message \verb|","| and an input field prefilled with \verb|"2"| - the result of the expression \verb|1+1|. The specified target of displaying the result of an expression inside the browser has been achieved.

