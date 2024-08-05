@@ -7,6 +7,7 @@
 </head>
 
 <body>
+<a href=javascript:alert('a')>ClickMeFor$</a>
 	<div id="div1"></div>
 
 	<p name="name">This is a secret.</p>
@@ -22,8 +23,8 @@
 	<p>This is a paragraph.</p>
 	<a href="javascript:data:text/HTML;base64,PHNjcmlwdD5hbGVydCgxMjMpPC9zY3JpcHQ+">ClickMe</a>
 	<a style=<!---/**/&#61expression(write(1))/*-->2</a>
-	<img src="data:text/HTML;base64,PHNjcmlwdD5hbGVydCgxMjMpPC9zY3JpcHQ+">2</a>
-	<!-- <img/src="1"/onerror="alert('XSS')"> -->
+	<!-- <img src="data:text/HTML;base64,PHNjcmlwdD5hbGVydCgxMjMpPC9zY3JpcHQ+">2</a> -->
+	<!-- <img/src="1"/onerror="\\u{0061}lert('escapppe')"> -->
 	<style>
 		@import url("javascript:alert(4)");
 	</style>

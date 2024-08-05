@@ -3,19 +3,20 @@
 To answer the previously mentioned question
 \begin{quote} "How well can web application firewalls in their generic standard configuration protect a web application against targeted malicious requests?"
 \end{quote}
-a Gray Box testing strategy using firewall evasion techniques was employed. Tests were conducted inpersonating an attacker persona, much like in Black Box testing.
-To be more efficient in finding payloads that evade the filtering of the WAF, attention to the firewall logs was paid during testing.
+a gray box evaluation strategy using firewall evasion techniques was developed. The evaluation was conducted inpersonating an attacker persona, much like in black box testing.
+In order to evaluate the firewall configuration, an attempt was made to develop firewall evading payloads by following the iterative cycle of sending a request with a malicious payload towards the web application, analyzing the reason(s) why the web application firewall blocked the request and subsequently modifying the payload accordingly. 
+To be more efficient in finding payloads, that evade the filtering of the web application firewall, attention to the firewall logs was paid during the evaluation.
 
-Testing was done in two steps. In the first step, the original test-payloads were modified using a single evasion technique.
-In the second step, multiple evasion techniques were used to modify the original test-payloads.
-The test-payloads in the second step were iteratively modified based on the firewall logs.
+The evaluation was done in two steps. In the first step, the original evaluation-payloads were modified using a single evasion technique. Here, promising evasion techniques against the firewall configuration are identified.
+In the second step, multiple evasion techniques were used to modify the original evaluation-payloads. 
+The evaluation-payloads in the second step were iteratively modified based on the firewall logs and previously identified promising evasion techniques.
 As the firewall logs state the per-request specific matched data and rule that cause the rejection of the request, through analyzing the firewall logs, it is possible to subsequently apply evasion techniques that would circumvent the reason of rejection mentioned in the logs.
 
-An attempt was made to develop firewall evading payloads by following the iterative cycle of sending a request with a malicious payload, analyzing the reason(s) why the web application firewall blocked the request and subsequently modifying the payload. In all requests, the payloads are sent in the request body.
-Request payloads are chosen to supply a proof of concept for a single or a combination of multiple evasion techniques. The validity of all payloads is determined by running them inside FireFox browser version 124.0.1-1. Only valid payloads are considered in the testing context. %For a list of all original-payloads, see Listing~\ref{lst:originalpayloads}.
-To test the validity of payloads, bypassing payloads have been injected into exemplary code snippets with Cross-site scripting vulnerabilities. A HTML file was used that specified a \verb|<div>| element which was dynamically modified and a \verb|<script>| element that imports JavaScript code snippets from an adjacent \verb|.js| file. The HTML file:
+Evaluation-payloads sent in requests toward the web application are chosen to supply a proof of concept for a single or a combination of multiple evasion techniques. The validity of all payloads is determined by running them inside FireFox browser version 124.0.1-1. Only valid payloads are considered in the evaluation context. %For a list of all original-payloads, see Listing~\ref{lst:originalpayloads}.
+In all requests, the payloads are sent in the request body in JSON format.
+To test the validity of payloads, bypassing payloads have been injected into exemplary code snippets with Cross-Site Scripting vulnerabilities. A \acrshort{html} file was used that specified a \verb|<div>| element, which is dynamically modified, and a \verb|<script>| element that imports vulnerable JavaScript code snippets from an adjacent \verb|.js| file. The \acrshort{html} file:
 
-\begin{lstlisting}[style=basicStyle, language=Python]
+\begin{lstlisting}[style=basicStyle, language=Python, caption=payload validation \acrshort{html} file]
 <!doctype html>
 <html>
 <body>
@@ -25,9 +26,9 @@ To test the validity of payloads, bypassing payloads have been injected into exe
 </html>
 \end{lstlisting}
 
-The \verb|tsc.js| file was modified depending on the payload. If the payload included a complete HTML element, the used code snippet was set up to dynamically add the injected payload to the HTML document:
+The \verb|tsc.js| file was modified depending on the payload. If the payload included a complete \acrshort{html} element, the used code snippet was set up to dynamically add the injected payload to the \acrshort{html} document:
 
-\begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
+\begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^, caption=payload validation script for payloads containing full \acrshort{html} elements]
 const injection = 
   JSON.parse("{\"body\":\"   ^{\color{red}<injected payload>}^   \"}")
 
@@ -36,7 +37,7 @@ document.getElementById('div1').insertAdjacentHTML('afterbegin', injection.body)
 
 If the payload was composed of only JavaScript statements to be executed, the injected payload was put inside a template string such that the JavaScript statements would be executed on page load:
 
-\begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
+\begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^, caption=payload validation script for payloads containing only JavaScript statements]
 const injection = 
   JSON.parse("{\"body\":\"   ^{\color{red}<injected payload>}^   \"}")
 
@@ -46,15 +47,16 @@ const injection =
 document.getElementById('div1').insertAdjacentHTML('afterbegin', `<img src=0 onerror=${injection.body}>`)
 \end{lstlisting}
 
-Decoding percent encoded payloads and normalizing Unicode characters was done where neccessary, the according statements marked in yellow and blue were added in such cases.
+Decoding percent encoded payloads and normalizing Unicode characters was done where neccessary, the according statements marked in orange and blue were added in such cases.
 
-All tests have been conducted in a lab environment composed of simple web servers to receive any requests that pass the firewall.
+The evaluation has been conducted in a lab environment composed of a simple web servers to receive any requests that pass the firewall.
 The web servers are reachable via a nginx reverse proxy that is compiled from source with the ModSecurity-nginx connector module. Nginx runs on a Debian Bookworm host with ModSecurity installed.
 All components are built from source from their latest mainline branches as of April 2024.
-For more details see the Dockerfiles in the attached github repository:\\ \verb|https://github.com/sebstec/mt|.
+For more details see the Dockerfiles in the attached GitHub repository:\\ \verb|https://github.com/sebstec/mt|. \\
 
 ModSecurity is configured using the authors recommended configuration by the time of this writing. \cite{modsec/recconf}
+
 Adjustments were made such that hits on potentially malicious requests are logged and the requests are being blocked. The response body is not being filtered.
 The configured ruleset to be used is the OWASP CoreRuleSet in version 4.1.0 from 21/03/2024. \cite{crs/410dl}
 
-As mentioned in Section~\ref{sec:waf}, the configured ruleset is responsible for setting up the filtering rules used by the web application firewall. Results of successful filtering bypasses as well as successful filtered requests while using CRS4.1 are detailed in the following section, Section~\ref{sec:EvaluationResults}.
+As mentioned in Section~\ref{sec:waf}, the configured ruleset is responsible for setting up the filtering rules used by the web application firewall. Results of successful filtering bypasses as well as successful filtered requests while using the OWASP CoreRuleSet in version 4.1 are detailed in the following section, Section~\ref{sec:EvaluationResults}.

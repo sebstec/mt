@@ -1,13 +1,13 @@
 \subsection{Multi Iteration Evaluation}
 \label{sec:multiiteration}
-This chapter states the evaluation results of multiple iterations of application of an evasion technique to the specified payloads. If a considerable bypass was found, the result will be detailed and used to derive additional firewall rules as shown under Section~\ref{sec:rulesproposal}.
+This chapter states the evaluation results of multiple iterations of application of an evasion technique to the specified payloads. If a considerable bypass was found, the result will be used to derive additional firewall rules as shown under Section~\ref{sec:rulesproposal}.
 
 \subsubsection{Double Percent encoding}
 \label{sec:doublepercenc}
 The payload from Listing~\ref{lst:urlencodedexampleblocked} was blocked by the ModSecurity firewall.
 On usage of double Percent encoding , the rules with ids \verb|932130, 941390| no longer triggered and the payload bypasses the WAF:
 
-\begin{lstlisting}[style=basicStyle, caption=url encoded example pass, label={lst:doublepercentencoding}, escapeinside=\^\^, language=Python]
+\begin{lstlisting}[style=basicStyle]
 import urllib
 urllib.parse.quote(urllib.parse.quote('alert(`${new Date()}`)'))
 returns
@@ -20,8 +20,27 @@ However, this payload would not be valid unless the target also performs multipl
 	percent-encode or decode the same string more than once, as decoding
 	an already decoded string might lead to misinterpreting a percent
 	data octet as the beginning of a percent-encoding, or vice versa in
-	the case of percent-encoding an already percent-encoded string.
+	the case of percent-encoding an already percent-encoded string. \cite{rfc3986/sec2.4}
 \end{quote}
+
+
+\subsubsection{JavaScript Character Escape + Percent Encoding}
+\label{sec:jsencpercenc}
+During the single iteration evaluation of the JavaScript Character Escape evasion technique using Unicode code point escaping, the resulting obscured payload managed to bypass the evaluated firewall configuration, but caused an error on the web server during parsing with the function \verb|JSON.parse()|. This result is shown under Section~\ref{sec:jsescapesingleiter}.
+
+In order to avoid the call to \verb|JSON.parse()|, the payload was percent encoded to simulate data transmission via query or path param, as stated under Section~\ref{sec:percenc}. The payload:
+
+\begin{lstlisting}[style=basicStyle, escapeinside=\^\^, language=Python]
+\u{0061}lert("escape")
+\end{lstlisting}
+
+was percent encoded using the Python function \verb|urllib.parse.quote_plus()| to create the payload:
+
+\begin{lstlisting}[style=basicStyle, escapeinside=\^\^, language=Python, caption=JS Character Escape + Percent Encoding bypass]
+%5Cu%7B0061%7Dlert%28%27escape%27%29
+\end{lstlisting}
+
+The percent encoded payload was sent in a request toward the web application. The evaluated firewall configuration did not trigger a match on this payload, it successfully bypassed the ModSecurity firewall using \acrshort{crs} 4.1. It is valid after being percent decoded on the target.
 
 % \subsubsection{Percent encoding + Unicode in JSON}
 % \label{sec:perencunico}

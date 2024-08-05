@@ -71,9 +71,9 @@ console.log(`t\est`);
 // const i = `{"input":"'alert' + '(\\"i\\")'"}`;
 // console.log(document.getElementById('img2'))
 // console.log(JSON.parse(i).input);
-document.getElementById('div1').insertAdjacentHTML('afterbegin', '<img src=0 onerror="`var s = \'sss\'; promp` + `t(s, s)`">')
+// document.getElementById('div1').insertAdjacentHTML('afterbegin', '<img src=0 onerror="`var s = \'sss\'; promp` + `t(s, s)`">')
 // document.getElementById('div1').insertAdjacentHTML('afterbegin', '<img src=0 onerror=' + '"[].constructor.constructor(\'alert\'+\'(11)\')()"' + '/>')
-// document.getElementById('div1').insertAdjacentHTML('afterbegin', '<img src=0 onerror=' + '"alert(111)"' + '/>')
+// document.getElementById('div1').insertAdjacentHTML('afterbegin', '<img src=1 onerror=' + decodeURIComponent('%5Cu%7B0061%7Dlert%28%27escccape%27%29'))
 // var secret= "some sec"
 // console.log(JSON.stringify({xss: "[]['constructor']['constructor']('var\\ s=\"secret\";promp'+'t(s,s)')()" }));
 // []['constructor']['constructor']('var s = `secret`;promp' + 't(s, s)')();
@@ -83,11 +83,12 @@ document.getElementById('div1').insertAdjacentHTML('afterbegin', '<img src=0 one
 //
 // const input = JSON.parse("{\"body\":\"[]['constructor']['constructor'](`var\/**\/s\/**\/=\/**\/'secret';\/**\/promp`\/**\/+\/**\/`t(s,\/**\/s)`)()\"}");
 // const input = JSON.parse("{\"body\":\"[]['constructor']['constructor'](`var/**/s/**/=/**/'secret';/**/promp`/**/+/**/`t(s,/**/s)`)()\"}");
-const input = JSON.parse("{\"body\":\"[].constructor.constructor('alert'+'(`concatenation`)')()\"}");
+const input = JSON.parse("{\"body\":\"%5Cu%7B0061%7Dlert%28%27escaaape%27%29\"}");
 console.log(input.body)
-// input.body = input.body.normalize('NFKC');
+// console.log(decodeURIComponent('%5Cu%7B0061%7Dlert%28%27escape%27%29'))
+input.body = decodeURIComponent(input.body);
 // console.log(input.body)
-document.getElementById('div1').insertAdjacentHTML('afterbegin', `<img src=0 onerror=${input.body}>`)
+document.getElementById('div1').insertAdjacentHTML('afterbegin', `<img src=1 onerror=${input.body}>`)
 
 
 

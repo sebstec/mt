@@ -3,6 +3,7 @@
 This section lists evasion techniques applicable to various payloads.
 
 \subsubsection{Payload Size}
+\label{sec:payloadsize}
 Some web application firewalls are configured to skip requests sizes above a set threshold.
 
 AWS \acrshort{waf} limits the \quotes{Maximum size of a web request body that can be inspected for CloudFront, API Gateway, Amazon Cognito, App Runner, and Verified Access protections**} to 64 KB, the \quotes{Maximum size of a web request body that can be inspected for Application Load Balancer and AWS AppSync protections} to 8 KB. \cite{aws/waflimits}
@@ -33,6 +34,7 @@ Depending on the specific rule configuration by each service, filling up request
 
 
 \subsubsection{Unicode Escaping in JSON}
+\label{sec:unicodeinjson}
 RFC 4627 \quotes{The application/json Media Type for JavaScript Object Notation} states under section 2.5 \quotes{Strings}:
 \begin{quote}
 	The representation of strings is similar to conventions used in the C
@@ -173,6 +175,7 @@ Results of evaluated payloads obscured using this technique are stated under Sec
 
 
 \subsubsection{Case Alternation}
+\label{sec:casealt}
 In order to evade regex filerting by the web application firewall, the case of a payload can be alternated. \cite{medium/allypetitt}
 
 Modern regex flavors allow the application of modifiers to parts of the regular expression.
@@ -254,6 +257,7 @@ after percent encoding it with the Python function \verb|urllib.parse.quote_plus
 
 
 \subsubsection{Charset Alternation}
+\label{sec:charsetalt}
 To indicate the original media type prior to any applied content encoding, the \acrshort{http} \verb|Content-Type| representation header is used.
 It can be used in requests by the client to tell the server what type of data is actually sent.
 \verb|charset| is a possible directive, that can be supplied with the \verb|Content-Type| header.
