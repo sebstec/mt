@@ -85,7 +85,7 @@ Technique inspired by William J Buchanan \cite{asecsite/jsobf1}.
 \label{sec:stringconc}
 In cases where the payload contains statements to be executed and these are passed in string format, string concatenation might be used to obscure the payload. This technique is further limited to cases where the string containing the statements is evaluated on the target. An example for vulnerable code on a target is the following:
 
-\begin{lstlisting}[style=basicStyle, language=Python]
+\begin{lstlisting}[style=basicStyle, language=Python, caption=example code vulnerable to String Concatenation]
 <some html code that contains a div with id="div1">
 
 <script>
@@ -350,7 +350,7 @@ In the process of primitive coercion, for both, their \verb|toString()| method i
 When they are joined by the \verb|+| operator, it results in a string in the form of \verb|open.toString()| concatenated with \verb|[].toString()|. The result is equal to \verb|open.toString()| as \verb|[].toString()| returns an empty string. 
 \verb|open.toString()| returns:
 
-\begin{lstlisting}[style=basicStyle, caption=open.toString() in JavaScript, label={lst:opentostring}]
+\begin{lstlisting}[style=basicStyle]
 function open() {
     [native code]
 }

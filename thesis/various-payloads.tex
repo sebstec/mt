@@ -159,7 +159,7 @@ the payload will be normalized to the initial payload:
 
 If the web application evaluates the payload post normalization, the target effect has been achieved by the antagonist actor. An example of a vulnerable function inside a web application is given in the following code sample. Consider the variable \verb|incomingPayload| to be holding the incoming payload:
 
-\begin{lstlisting}[style=basicStyle, language=Python]
+\begin{lstlisting}[style=basicStyle, language=Python, caption=vulnerable through Unicode Normalization code sample]
 const secret = "very secret string"
 const incomingPayload = "a\");prompt`\uFE69{secret}`;(\""
 const message = "Hello " + incomingPayload.normalize('NFKD')
