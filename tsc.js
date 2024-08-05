@@ -22,7 +22,7 @@ const secret = "very secret string"
 const incomingPayload = "a\");prompt`\u{FE69}{secret}`;(\""
 const message = "Hello " + incomingPayload.normalize('NFKD')
 const evaluateMe = "console.log(\"" + message + "\")"
-// eval(evaluateMe)
+eval(evaluateMe)
 console.log(String.fromCharCode(0x4c, 105, 0x6e, 117, 120))
 console.log(String.fromCharCode(0x61, 108, 0x65, 114, 116, 0x28, 96, 120, 115, 115, 0x60, 0x29))
 console.log(String);
@@ -88,6 +88,8 @@ console.log(input.body)
 // input.body = input.body.normalize('NFKC');
 // console.log(input.body)
 document.getElementById('div1').insertAdjacentHTML('afterbegin', `<img src=0 onerror=${input.body}>`)
+
+
 
 // eval('prompt`\u0024{111}`'.normalize('NFKC'))
 // var/**/s/**/=/**/5;/**/prompt(s,/**/s)

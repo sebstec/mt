@@ -2,25 +2,24 @@
 \label{sec:varioustech}
 This section lists evasion techniques applicable to various payloads.
 
-\subsubsection{Payload size}
-Some Web application firewalls are configured to skip requests sizes above a set threshold.
+\subsubsection{Payload Size}
+Some web application firewalls are configured to skip requests sizes above a set threshold.
 
-AWS WAF limits the \quotes{Maximum size of a web request body that can be inspected for CloudFront, API Gateway, Amazon Cognito, App Runner, and Verified Access protections**} to 64 KB, the \quotes{Maximum size of a web request body that can be inspected for Application Load Balancer and AWS AppSync protections} to 8 KB. \cite{aws/waflimits}
+AWS \acrshort{waf} limits the \quotes{Maximum size of a web request body that can be inspected for CloudFront, API Gateway, Amazon Cognito, App Runner, and Verified Access protections**} to 64 KB, the \quotes{Maximum size of a web request body that can be inspected for Application Load Balancer and AWS AppSync protections} to 8 KB. \cite{aws/waflimits}
 
 Microsoft Azure allows the configuration of limits on newer Rule Sets:
 \begin{quote}
 	For Application Gateway v2 Web Application Firewalls running Core Rule Set 3.2, or newer, the maximum request body size enforcement and max file upload size enforcement can be disabled and the Web Application Firewall will no longer reject a request, or file upload, for being too large. When maximum request body size enforcement and max file upload size enforcement are disabled within the Web Application Firewall, Application Gateway's limits determine the maximum size allowable. For more information, see Application Gateway limits. \cite{ms/azurewaflimits}
 \end{quote}
+with the \quotes{Maximum request inspection limit (\acrshort{waf} SKU)} at a default value of 2 MB with the option to disable the limit completely according to their "Application Gateway limits" document. \cite{ms/appgatewaylimits}
 
-With the \quotes{Maximum request inspection limit (WAF SKU)} at a default value of 2 MB with the option to disable the limit completely according to their "Application Gateway limits" document. \cite{ms/appgatewaylimits}
-
-Akamai answers the question \quotes{Can WAF inspect all arguments and values in request body? Is there any limitation on the size of the request?} on their FAQ page with \quotes{By default, the WAF inspects only the first 8KB of a request. It can increase the limit up to 128KB by adding Advanced Metadata.} \cite{akamai/waflimits}
+Akamai answers the question \quotes{Can [a] \acrshort{waf} inspect all arguments and values in [the] request body? Is there any limitation on the size of the request?} on their \acrshort{faq} page with \quotes{By default, the \acrshort{waf} inspects only the first 8KB of a request. It can increase the limit up to 128KB by adding Advanced Metadata.} \cite{akamai/waflimits}
 
 Cloudflare lists a limit of 128 KB in the Cloudflare Rules language definition, with truncation upon reaching it:
 \begin{quote}
 	All http.request.body.* fields (except http.request.body.size) handle a maximum body size of 128 KB, which means that you cannot define expressions that rely on request body data beyond the first 128 KB. If the request body is larger, the body fields will contain a truncated value and the http.request.body.truncated field will be set to true. The http.request.body.size field will contain the full size of the request without any truncation.
 
-	The maximum body size of 128 KB applies only to the values of HTTP body fields — the origin server will still receive the complete request body.
+	The maximum body size of 128 KB applies only to the values of \acrshort{http} body fields — the origin server will still receive the complete request body. \cite{cloudflare/limits}
 \end{quote}
 
 The ModSecurity recommended configuration sets the following limits for requests:
@@ -30,10 +29,10 @@ The ModSecurity recommended configuration sets the following limits for requests
 \end{quote}
 with requests exceeding the limits being rejected by default. \cite{modsec/recconf}
 
-Depending on the specific rule configuration by each service, blowing up requests with filler-data to exceed the inspection limit might make the malicious payload evade detection. Some Web applications might accept request bodies filled with unused data, as long as there is a valid key: value pair inside. If this key: value pair is positioned past the 8 KB limit of the Akamai WAF for instance, the malicious value might go unnoticed. Results of using this technique during the evaluation are stated under Section~\ref{sec:paylensingleiter}.
+Depending on the specific rule configuration by each service, filling up requests with filler data to exceed the inspection limit might make the malicious payload evade detection. Some web applications might accept request bodies filled with unused data, as long as there is a valid key: value pair inside. If this key: value pair is positioned past the 8 KB limit of the Akamai \acrshort{waf} for instance, the malicious value might go unnoticed. Results of using this technique during the evaluation are stated under Section~\ref{sec:paylensingleiter}.
 
 
-\subsubsection{Unicode escaping in JSON}
+\subsubsection{Unicode Escaping in JSON}
 RFC 4627 \quotes{The application/json Media Type for JavaScript Object Notation} states under section 2.5 \quotes{Strings}:
 \begin{quote}
 	The representation of strings is similar to conventions used in the C
@@ -52,7 +51,7 @@ RFC 4627 \quotes{The application/json Media Type for JavaScript Object Notation}
 	only a single reverse solidus character may be represented as
 	"\verb|\u005C|". \cite{rfc4627}
 \end{quote}
-As escaping any character should be possible in a JSON payload, firewall filters that look for a certain sequence of characters might be evaded by escaping one or more characters from that sequence. Messages exchanged between web clients and web servers are often in JSON format. As such, sometimes the JSON format is used when crafting messages containing malicious payloads. In this case, any character inside the JSON formatted message can be escaped using this technique. For example, the payload inside the JSON formatted body of a HTTP message:
+As escaping any character should be possible in a JSON payload, firewall filters that look for a certain sequence of characters might be evaded by escaping one or more characters from that sequence. Messages exchanged between web clients and web servers are often in JSON format. As such, sometimes the JSON format is used when crafting messages containing malicious payloads. In this case, any character inside the JSON formatted message can be escaped using this technique. For example, a payload inside the JSON formatted body of a \acrshort{http} message:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 {
@@ -60,7 +59,7 @@ As escaping any character should be possible in a JSON payload, firewall filters
 }
 \end{lstlisting}
 
-to evade a filter looking for the character sequence "\verb|alert(|", the payload inside the message may be modified to:
+To evade a filter looking for the character sequence \verb|alert(|, the payload inside the message may be modified to:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 {
@@ -76,10 +75,10 @@ eval(JSON.parse('{"message":"alert(\\"JSON\\")"}').message)
 eval(JSON.parse('{"message":"alert\\u0028\\"JSON\\")"}').message)
 \end{lstlisting}
 
-Results of using this technique during the evaluation are stated under Section~\ref{sec:unicodeinjsontest}.
+Results of using this technique during the evaluation are stated under Section~\ref{sec:unicodeinjsontest} and Section~\ref{sec:forcedunicodenorm}.
 
 
-\subsubsection{Unicode normalization}
+\subsubsection{Unicode Normalization}
 \label{sec:unicodenormalization}
 The unicode standard defines two types of equivalence between characters: canonical equivalence and compatibility equivalence. The report "Unicode Normalization Forms" by Ken Whistler for Unicode Version 15.1.0 states the following regarding the two types of equivalence:
 
@@ -94,11 +93,11 @@ The unicode standard defines two types of equivalence between characters: canoni
 	\end{figure}
 	\\
 	Compatibility equivalence is a weaker type of equivalence between characters or sequences of characters which represent the same abstract character (or sequence of abstract characters), but which may have distinct visual appearances or behaviors. The visual appearances of the compatibility equivalent forms typically constitute a subset of the expected range of visual appearances of the character (or sequence of characters) they are equivalent to. However, these variant forms may represent a visual distinction that is significant in some textual contexts, but not in others. As a result, greater care is required to determine when use of a compatibility equivalent is appropriate. [...] Figure 2 provides examples of compatibility equivalence. \cite{unicode/normalization}
-	\begin{figure}[h]
+	\begin{figure}[!h]
 		\centering
 		\includegraphics[width=0.5\textwidth]{compeq.png}
 		\label{fig:compeq}
-		\caption{ Examples of Canonical Equivalence \cite{unicode/normalization}}
+		\caption{ Examples of Compatibility Equivalence \cite{unicode/normalization}}
 	\end{figure}
 \end{quote}
 
@@ -109,28 +108,29 @@ Regarding Normalization Forms, the report states in further proceedings:
 	Essentially, the Unicode Normalization Algorithm puts all combining marks in a specified order, and uses rules for decomposition and composition to transform each string into one of the Unicode Normalization Forms. A binary comparison of the transformed strings will then determine equivalence.
 
 	The four Unicode Normalization Forms are summarized in Table 1. \cite{unicode/normalization}
-	\begin{table}[h]
-		\centering
-		\label{tab:normform}
-		\caption{ Normalization Forms }
-		\begin{tabular}{ |c|c| }
-			\hline
-			Form                         & Description                       \\
-			\hline
-			\hline
-			Normalization Form D (NFD)   & Canonical Decomposition           \\
-			\hline
-			Normalization Form C (NFC)   & Canonical Decomposition,          \\
-			                             & followed by Canonical Composition \\
-			\hline
-			Normalization Form KD (NFKD) & Compatibility Decomposition       \\
-			Normalization Form KC (NFKC) & Compatibility Decomposition,      \\
-			                             & followed by Canonical Composition \\
-			\hline
-		\end{tabular}
-	\end{table}
 \end{quote}
-In the context of Firewall Evasion, if inputs on the web server are normalized using one of the afromentioned Normalization Forms during processing, an attacker could try to substitute certain characters inside a malicious payload with equivalent unicode characters. \cite{medium/allypetitt} Such a payload might be able to avoid the filter of the Web Application Firewall that is looking for patterns including the normalized form of the unicode character. As an example, the payload:
+\begin{table}
+	\centering
+	\label{tab:normform}
+	\caption{ Normalization Forms }
+	\begin{tabular}{ |c|c| }
+		\hline
+		Form                         & Description                       \\
+		\hline
+		\hline
+		Normalization Form D (NFD)   & Canonical Decomposition           \\
+		\hline
+		Normalization Form C (NFC)   & Canonical Decomposition,          \\
+		                             & followed by Canonical Composition \\
+		\hline
+		Normalization Form KD (NFKD) & Compatibility Decomposition       \\
+		Normalization Form KC (NFKC) & Compatibility Decomposition,      \\
+		                             & followed by Canonical Composition \\
+		\hline
+	\end{tabular}
+\end{table}
+In the context of Firewall Evasion, if inputs on the web server are normalized using one of the afromentioned Normalization Forms during processing, an attacker could try to substitute certain characters inside a malicious payload with equivalent unicode characters. \cite{medium/allypetitt}
+Such a payload might be able to avoid the filter of the web Application Firewall that is looking for patterns including only the normalized form of the unicode character. As an example, the payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 "prompt`${secret}`"
@@ -144,8 +144,8 @@ could be substituted with the payload:
 
 The unicode character U+FE69 is named "Small Dollar Sign" and its decomposition form is U+0024, which is the regular Dollar Sign. \cite{comp/uni}
 
-Using the JavaScript function "normalize", the string containing the Small Dollar Sign: \verb|"\uFE69"| can be decomposed using Compatibility Decomposition (NFKD) into a string containing the normal Dollar Sign: \verb|"\u0024"| respectively \verb|"$"|.
-By calling normalize on the afromentioned example payload:
+Using the JavaScript function \verb|normalize()|, the string containing the Small Dollar Sign: \verb|"\uFE69"| can be decomposed using Compatibility Decomposition (NFKD) into a string containing the normal Dollar Sign: \verb|"\u0024"| respectively \verb|"$"|.
+By calling \verb|.normalize("NFKD")| on the afromentioned example payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 "prompt`\uFE69{secret}`".normalize("NFKD")
@@ -169,29 +169,28 @@ eval(evaluateMe)
 
 Unicode Normalization is also supported in programming languages different to JavaScript, such as Python. \cite{python/normalization}
 
-Results of evaluated payloads obscured using this technique are stated under Section~\ref{sec:uninormsingleiter} and {\color{red} multi iteration?}
+Results of evaluated payloads obscured using this technique are stated under Section~\ref{sec:uninormsingleiter} and Section~\ref{sec:forcedunicodenorm}.
 
 
-\subsubsection{Case alternation}
-In order to evade regex filerting by the WAF, the case of a payload can be alternated. \cite{medium/allypetitt}
+\subsubsection{Case Alternation}
+In order to evade regex filerting by the web application firewall, the case of a payload can be alternated. \cite{medium/allypetitt}
+
 Modern regex flavors allow the application of modifiers to parts of the regular expression.
 One such modifier is \verb|(?i)|. It makes the regex case insensitive. \cite{regex/jan} Only when this modifier is not used, can a payload evade regex filtering using case alternation.
-
 Taking the Cross-site scripting payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 <script>alert('XSS')</script>
 \end{lstlisting}
 
-as an example, after applying case alternation, it might result in a payload in the form of:
+as an example. After applying case alternation, it might result in a payload in the form of:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 <sCrIpT>alert('XSS')</sCriPt>
 \end{lstlisting}
 
 Another example is file access on a wrongfully public file.
-The Windows file system trests file and directory names as case-insensitive by default. \cite{windows/casesensitive}
-On a web server hosted on Windows that exposes a .env file with stored secrets, the url:
+The Windows file system treats file and directory names as case-insensitive by default. \cite{windows/casesensitive} On a web server hosted on Windows that exposes a .env file with stored secrets, the url:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 http://127.0.0.1:8000/.env
@@ -223,7 +222,7 @@ Results of conducting the evaluation using this technique are stated under Secti
 % Ally Petitt suggests using comments inside SQL statements to break up SQL keywords: \verb|?id=1+un/**/ion+sel/**/ect+1,2,3--| \cite{medium/allypetitt}
 
 
-\subsubsection{Percent encoding}
+\subsubsection{Percent Encoding}
 \label{sec:percenc}
 RFC 3986 states under section 2.1 "Percent-Encoding":
 \begin{quote}
@@ -237,7 +236,7 @@ RFC 3986 states under section 2.1 "Percent-Encoding":
 	"00100000" (ABNF: \%x20), which in US-ASCII corresponds to the space
 	character (SP). \cite{rfc3986}
 \end{quote}
-If a Web Application Firewall does not perform percent-decoding on filtered requests but the request is being decoded by the Web Server, such as is the case when data is being sent as part of an URI (\cite{rfc3986/sec2.4}), a malicious payload could be percent-encoded to avoid detection by the firewall.
+If a web application firewall does not perform percent-decoding on filtered requests but the request is being decoded by the web server, such as is the case when data is being sent as part of an \acrshort{uri} (\cite{rfc3986/sec2.4}), a malicious payload could be percent-encoded to avoid detection by the firewall.
 
 The payload:
 
@@ -245,7 +244,7 @@ The payload:
 <script>alert('XSS')</script>
 \end{lstlisting}
 
-becomes 
+becomes
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 %3Cscript%3Ealert%28%27XSS%27%29%3C%2Fscript%3E
@@ -254,26 +253,20 @@ becomes
 after percent encoding it with the Python function \verb|urllib.parse.quote_plus|. Evaluation results using this technique are stated under Section~\ref{sec:percencsingleiter}, Section~\ref{sec:doublepercenc} and Section~\ref{sec:forcedunicodenorm}.
 
 
-\subsubsection{Charset alternation}
-To indicate the original media type prior to any applied content encoding, the HTTP \verb|Content-Type| representation header is used.
+\subsubsection{Charset Alternation}
+To indicate the original media type prior to any applied content encoding, the \acrshort{http} \verb|Content-Type| representation header is used.
 It can be used in requests by the client to tell the server what type of data is actually sent.
-\verb|charset| is a possible directive, that specifies the character encoding standard.
-It can be supplied with the \verb|Content-Type| header. \cite{http/contenttype}
-If a Web server is supporting requests in different encoding standards, but the Web application firewall is not configured to parse certain encoding standards, the Web application firewall may not recognize such encoded request as malicious.
+\verb|charset| is a possible directive, that can be supplied with the \verb|Content-Type| header.
+It specifies the character encoding standard. \cite{http/contenttype}
+If a web server is supporting requests in different encoding standards, but the web application firewall is not configured to parse certain encoding standards, the web application firewall may not recognize such encoded request as malicious.
 
-The payload: 
+If the payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 <script>alert("xss")</script>
 \end{lstlisting}
 
-becomes:
-
-\begin{lstlisting}[style=basicStyle]
-\xff\xfe<\x00s\x00c\x00r\x00i\x00p\x00t\x00>\x00a\x00l\x00e\x00r\x00t\x00(\x00'\x00x\x00s\x00s\x00'\x00)\x00<\x00/\x00s\x00c\x00r\x00i\x00p\x00t\x00>\x00
-\end{lstlisting}
-
-after encoding the payload to the charset \verb|UTF-16|, as stated in the Python 3 code sample:
+is encoded to the charset \verb|UTF-16|, as stated in the Python 3 code sample:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 pl = "<script>alert('xss')</script>"
@@ -281,8 +274,14 @@ ex_encoding = 'UTF-16'
 pl_encoded = pl.encode(ex_encoding)
 \end{lstlisting}
 
-This differs from the original payload in \verb|UTF-8|. \verb|UTF-8| encoding is the standard for URIs according to RFC-3986. \cite{rfc3986} 
+it becomes:
 
-If a Web server accepts HTTP requests in \verb|UTF-16| encoding and the Web application firewall does not recognize payloads encoded in \verb|UTF-16|, any payload can be sent towards the Web application without being detected by the Web application firewall. Results of testing this technique during the evaluation are stated under Section~\ref{sec:charaltsingleiter}.
+\begin{lstlisting}[style=basicStyle]
+\xff\xfe<\x00s\x00c\x00r\x00i\x00p\x00t\x00>\x00a\x00l\x00e\x00r\x00t\x00(\x00'\x00x\x00s\x00s\x00'\x00)\x00<\x00/\x00s\x00c\x00r\x00i\x00p\x00t\x00>\x00
+\end{lstlisting}
 
-Technique by \cite{medium/allypetitt}.
+This payload differs from the original payload in \verb|UTF-8|. \verb|UTF-8| encoding is the standard for \acrshort{uri}s according to RFC-3986. \cite{rfc3986}
+
+If a web server accepts \acrshort{http} requests in \verb|UTF-16| encoding and the web application firewall does not recognize payloads encoded in \verb|UTF-16|, any payload can be sent towards the web application without being detected by the web application firewall. Results of testing this technique during the evaluation are stated under Section~\ref{sec:charaltsingleiter}.
+
+This technique is proposed by Ally Petitt. \cite{medium/allypetitt}

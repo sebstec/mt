@@ -63,5 +63,5 @@ Further details around Tagged Template Literals are laid out under Section~\ref{
 
 The syntax of the payload \verb|alert(1+1)| was changed to \verb|prompt`${1+1}`|. The semantics from the perspective of the JavaScript programming language changed as well. From the perspective of the specified target, displaying a dialog with the result of the expression \verb|1+1|, both payloads, \verb|alert(1+1)| and \verb|promp`${1+1}`| might be seen as semantically equivalent. Especially in a case where the result of an expression might reveal a secret instead of a simple mathematical operation. It is obvious that possible attackers do not care if the targeted secret is displayed inside a static textbox or an input field. \\
 
-Based on the fundamentals laid out under this section, concrete firewall evasion techniques will be detailed in the following section.
+Based on the fundamentals laid out under this section, additional firewall evasion techniques will be detailed in the following section.
 
