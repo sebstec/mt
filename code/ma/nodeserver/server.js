@@ -34,6 +34,12 @@ const server = createServer((req, res) => {
         body: body,
         bodyDecoded: decodeURIComponent(body),
       });
+      try {
+        const parsed = JSON.parse(body)
+        console.log({ parsed: parsed, html: 'onerror=' + parsed[Object.keys(parsed)[0]] })
+      } catch (e) {
+        console.log('error while parsing JSON', e)
+      }
       res.write(
         JSON.stringify({
           url: req.url,

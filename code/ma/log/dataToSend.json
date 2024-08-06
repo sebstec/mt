@@ -1,1 +1,1 @@
-isNaN["constructor"]('alert'+'(`concatenation`)')()
+{"message": "[]['constructor']['constructor']('alert'+'(`concatenation`)')()"}
