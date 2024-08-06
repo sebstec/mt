@@ -32,7 +32,7 @@ This section lists evasion techniques applicable to Cross-Site Scripting payload
 \label{sec:htmlcharreftech}
 Sometimes Cross-Site Scripting payloads are using \acrfull{html} elements to deliver a payload. Inside such payloads, \acrshort{html} character references can be used to obscure the payload. The \acrshort{html} specification states that in certain cases, text may be mixed with character references. Character references must start with a U+0026 AMPERSAND character (\&). Following this, there are three possible kinds of character references: Named character references, Decimal numeric character references or Hexadecimal numeric character references. \cite{www/html}
 
-The example payload using the \verb|<a>| element to exploit a stored Cross-Site Scripting vulnerability:
+The example payload using the \verb|<a>| element to exploit a Cross-Site Scripting vulnerability:
 
 \begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
 <a href=javascript:alert('a')>ClickMeFor$</a>

@@ -361,7 +361,26 @@ after using String Concatenation as proposed under Section~\ref{sec:stringconc} 
 'alert' + '(`concatenation`)'
 \end{lstlisting}
 
-the payload successfully evaded the firewall rule and reached the tested web server. As mentioned under Section~\ref{sec:stringconc}, this technique is more effective when combined with forced evaluation. Evaluation results of combining this technique with other evasion techniques to force the evaluation of the payload are stated under Section~\ref{sec:charcodemultiiter} and Section~\ref{sec:funconstrconbypass}. As this technique is dependend on forced evaluation, it is considered partially effective against the evaluted firewall configuration.
+the payload successfully evaded the firewall rule and reached the web server. As mentioned under Section~\ref{sec:stringconc}, this technique is more effective when combined with forced evaluation. Evaluation results of combining this technique with other evasion techniques to force the evaluation of the payload are stated under Section~\ref{sec:charcodemultiiter} and Section~\ref{sec:funconstrconbypass}. As this technique is dependend on forced evaluation, it is considered partially effective against the evaluted firewall configuration.
+
+
+\subsubsection{String Substitution}
+\label{sec:stringsubsingleiter}
+The example payload mentioned in the previous subsection, under Section~\ref{sec:stringconcsingleiter}, could also be obscured using String Substitution. The payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+"alert('concatenation')"
+\end{lstlisting}
+
+was obscured using String Substitution into the payload:
+
+\begin{lstlisting}[style=basicStyle, language=Python]
+"alert"+[open+[]][0][13]+"'concatenation')"
+\end{lstlisting}
+
+When sent in a request containing the obscured payload, the request bypassed the ModSecurity firewall using \acrshort{crs} 4.1 and reached the web server. However, as is the case with the evasion technique proposing String Concatenation with single iteration results mentioned under the previous Subsection~\ref{sec:stringconcsingleiter}, this technique depends on additional evaluation on the target. 
+It is more effective when combined with forced evaluation techniques. An example is stated under Section~\ref{sec:avoidingbypassB}. 
+As this technique is dependend on forced evaluation, it is considered partially effective against the evaluted firewall configuration.
 
 
 \subsubsection{eval() \& Function() constructor}
@@ -408,13 +427,13 @@ The square bracket notation proposed under Section~\ref{sec:sbn} can be used to 
 The bypassing payload mentioned under Section~\ref{sec:functionconstructorsingleeva}:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
-[].constructor.constructor('alert' + '(`concatenation`)')()
+[].constructor.constructor('alert'+'(`concatenation`)')()
 \end{lstlisting}
 
 has been obscured using the square bracket notation:
 
 \begin{lstlisting}[style=basicStyle, language=Python, caption=square bracket notation bypass]
-[]["constructor"]["constructor"]('alert' + '(`concatenation`)')()
+[]["constructor"]["constructor"]('alert'+'(`concatenation`)')()
 \end{lstlisting}
 
 Equally to the result of the original payload, the obscured payload successfully bypassed the ModSecurity firewall using \acrshort{crs} 4.1. Therefore, this evasion technique is considered effective against the evaluated firewall configuration.

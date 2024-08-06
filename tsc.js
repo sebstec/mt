@@ -92,14 +92,15 @@ var abc = (...input) => {
 // []['constructor']['constructor']`${'var s = "secret";promp' + 't`s${s}`'}```
 //
 
+[].map.constructor('prompt`﹩{secret}`'.normalize('NFKC'))()
 // [][`constructor`][`constructor`]('pro'+'mpt`see4InInput${2+2}:`')();
 // [][`constructor`][`constructor`]('pro'+'mpt`see4InInput$'+[open+[]][0][16]+'2+2'+[open+[]][0][36]+':`')()
 //
 const secret="THISISASECRET"
 // prompt`${secret}`
-prompt(',',secret)
+// prompt(',',secret)
 
-const input = JSON.parse("{\"body\":\"[].map.constructor('prompt`﹩{secret}`'.normalize('NFKC'))()\"}");
+const input = JSON.parse("{\"body\":\"[].map.constructor('[].map.constructor('+'String.'+'fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29)'+')();')()\"}");
 console.log(input.body)
 // console.log(decodeURIComponent('%5Cu%7B0061%7Dlert%28%27escape%27%29'))
 input.body = decodeURIComponent(input.body);

@@ -397,3 +397,112 @@
 \end{lstlisting}
 
 
+\begin{lstlisting}[style=basicStyle, caption=regex of proposed rule id:2, label={lst:constructorsruleproposalregexA}]
+(?i)(?:(?:\[[^\]]*\])|(?:\{[^}]*\}))\.[a-z]*\.constructor[`,(,\[]
+
+explanation:
+(?i)  match the remainder of the pattern with the i modifier: Case insensitive match
+
+(?:   start a non-capturing group (object group)
+
+(?:   start a non-capturing group (square bracket group)
+\[    match on a single opening square bracket
+[     start a list
+^\]   exclude the closing square bracket from matching
+]     end the list
+*     match the characters from the list (anything that is not a square closing bracket) between 0 and unlimited times
+\]    match on a single closing square bracket
+)     close the group (square bracket group)
+
+|     give an alternative the previous group (square bracket group)
+
+(?:	  start a non-capturing group (curly bracket group)
+\{	  match on a single opening curly bracket
+[     start a list
+^}	  exclude the closing curly bracket
+]     end the list
+*     match the characters from the list (anything that is not a curly closing bracket) between 0 and unlimited times
+\}	  match on a single closing curly bracket
+)     close the group (curly bracket group)
+
+)     close the group (object group)
+
+\.    match on a single dot
+
+[     start a list
+a-z   match a single character between a (index 97) and z (index 122)
+]     end the list
+*     match the characters from the list (anything from a to z) between 0 and unlimited times
+
+\.	  match on a single dot
+
+constructor    match on the word "constructor"
+
+[     start a list
+`,(,\[         match on a single `, opening round bracket or opening square bracket
+]     end the list
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[style=basicStyle, caption=regex of proposed rule id:3, label={lst:constructorproposalregexB}]
+(?i)(?:(?:\[[^\]]*\])|(?:\{[^}]*\}))\[[`,',"][a-z]*[`,',"]\]\[[`,',"]constructor[`,',"]\][`,(,\[]
+
+explanation:
+(?i)(?:(?:\[[^\]]*\])|(?:\{[^}]*\}))    equal to the previous regular expression used in proposed rule with id:3
+
+\[    match a single opening square bracket
+[     start a list
+`,'," match ticks indicating a string
+]     end the list
+[     start a list
+a-z   match a single character between a (index 97) and z (index 122)
+]     end the list
+*     match the characters from the list (anything from a to z) between 0 and unlimited times
+[     start a list
+`,'," match ticks indicating a string
+]     end the list
+\]    match a single closing square bracket
+
+\[    match a single opening square bracket
+[     start a list
+`,'," match ticks indicating a string
+]     end the list
+constructor     match on the word "constructor"
+[     start a list
+`,'," match ticks indicating a string
+]     end the list
+\]    match a single closing square bracket
+
+[     start a list
+`,(,\[         match on a single `, opening round bracket or opening square bracket
+]     end the list
+\end{lstlisting}
+
+
+\begin{lstlisting}[style=basicStyle, caption=Regular expression of proposed rule id:4, label={lst:constructorruleproposalregexC}]
+(?i)(?:(?:\[[^\]]*\])|(?:\{[^}]*\})|Object|Boolean|Symbol|(?:[a-z]*Error)|Number|BigInt|Math|Date|String|RegExp|(?:[a-z]*Array)|Map|Set|WeakMap|WeakSet|(?:(?:Shared)*ArrayBuffer)|DataView|Atomics|JSON|WeakRef|FinalizationRegistry|Iterator|AsyncIterator|Promise|GeneratorFunction|AsyncGeneratorFunction|Generator|AsyncGenerator|AsyncFunction|Reflect|Proxy|(?:Intl[\.,a-z]*))(?:(?:\[[`,',\"][a-z]*[`,',\"]\])|(?:\.[a-z]*))(?:(\[[`,',\"]constructor[`,',\"]\])|(?:\.constructor))[`,(,\[]
+
+explanation:
+(?i)(?:(?:\[[^\]]*\])|(?:\{[^}]*\})    equal to the previous regular expression used in proposed rule with id:3
+
+|Object|Boolean|Symbol|(?:[a-z]*Error)|Number|BigInt|Math|Date|String|RegExp|(?:[a-z]*Array)|Map|Set|WeakMap|WeakSet|(?:(?:Shared)*ArrayBuffer)|DataView|Atomics|JSON|WeakRef|FinalizationRegistry|Iterator|AsyncIterator|Promise|GeneratorFunction|AsyncGeneratorFunction|Generator|AsyncGenerator|AsyncFunction|Reflect|Proxy
+   |(?:Intl[\.,a-z]*)     match on built-in alternatives to [] or {}
+
+)     close the group (object group)
+
+(?:   start a non-capturing group (function group)
+
+(?:\[[`,',\"][a-z]*[`,',\"]\])|(?:\.[a-z]*)     match on either square bracket notation or dot notation access to any property
+
+)     close the function group
+
+(?:   start a non-capturing group (constructor group)
+
+(\[[`,',\"]constructor[`,',\"]\])|(?:\.constructor)     match on either square bracket notation or dot notation access to the constructor
+
+)     close the constructor group
+
+
+[`,(,\[]    equal to the previous regular expression used in proposed rule with id:3
+\end{lstlisting}

