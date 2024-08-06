@@ -29,7 +29,7 @@ Filling the request with filler data in the form:
 
 caused the request to be blocked by ModSecurity without matching on any \acrshort{crs} 4.1 rule:
 
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=request body bigger than maximum blocked, label={lst:requesttoobig}]
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=Request with body bigger than expected blocked, label={lst:requesttoobig}]
 <payload>/**aaa...(131052 more a)**/alert('XSS')</payload>
 
 <message>"Failed to parse request body."</message>
@@ -148,7 +148,7 @@ was blocked by the ModSecurity Firewall using \acrshort{crs} 4.1.:
 
 The specific warning that the firewall writes to it's log on blocking the case-alternated payload gives a reason as to why the payload triggered a match:
 
-\begin{lstlisting}[style=basicStyle, caption=ModSecurity warning on case alternated payloads, label={lst:modsecwarning}]
+\begin{lstlisting}[style=basicStyle]
 ModSecurity: Warning. Matched "Operator `Rx' with parameter `(?i)\b(?:eval|set(?:timeout|interval)|new[\s\x0b]+Function|a(?:lert|tob)|btoa|prompt|confirm)[\s\x0b]*\('
 \end{lstlisting}
 
@@ -175,7 +175,7 @@ alert%28%27XSS%27%29
 
 triggered the same rule:
 
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=url encoded payload blocked, label={lst:urlencodedexampleblocked}]
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=Percent encoded alert('XSS') blocked, label={lst:urlencodedexampleblocked}]
 <payload>alert%28%27XSS%27%29</payload>
 
 <message>"Javascript method detected"</message>
@@ -432,7 +432,7 @@ The bypassing payload mentioned under Section~\ref{sec:functionconstructorsingle
 
 has been obscured using the square bracket notation:
 
-\begin{lstlisting}[style=basicStyle, language=Python, caption=square bracket notation bypass]
+\begin{lstlisting}[style=basicStyle, language=Python, caption=Square bracket notation bypass]
 []["constructor"]["constructor"]('alert'+'(`concatenation`)')()
 \end{lstlisting}
 
@@ -514,13 +514,13 @@ This obscured payload was blocked by the ModSecurity firewall using \acrshort{cr
 
 The \acrshort{crs} 4.1 rule with id \verb|941390| applies the \verb|t:jsDecode| transformation, which decodes escape sequences in the form of \verb|\uHHHH| to the payload before checking for potential matches. \cite{modsec/transjsdecode} (The exact definition is mentioned under Section~\ref{sec:unicodeinjsontest})
 
-Since ES6, escaping in identifiers is also possible using the Unicode code point escape \verb|\u{...}|. The payload resulting from using Unicode code point escaping to obscure the initial payload:
+Since ES6, escaping in identifiers is also possible using the Unicode code point escape \verb|\u{...}|. A payload resulting from using Unicode code point escaping to obscure the initial payload:
 
-\begin{lstlisting}[style=basicStyle, language=Python, caption=\textbackslash u\{0061\}lert('escape') bypass]
+\begin{lstlisting}[style=basicStyle, language=Python]
 \u{0061}lert("escape")
 \end{lstlisting}
 
-is also valid. A request sent with this payload bypassed the ModSecurity firewall using \acrshort{crs} 4.1, but caused an error during the call to \verb|JSON.parse()| during validating the obscured payload like mentioned under Section~\ref{sec:evaluation}. 
+was created. A request sent with this payload bypassed the ModSecurity firewall using \acrshort{crs} 4.1, but caused an error during the call to \verb|JSON.parse()| during validating the obscured payload like mentioned under Section~\ref{sec:evaluation}. 
 To avoid the error on the web application, the payload was percent encoded to simulate data transmission via query or path param, which is laid out under Section~\ref{sec:jsencpercenc}. As ES6 Unicode code point escapes allow to create bypassing payloads which are valid in some scenarios, this evasion technique is considered effective against the evaluated firewall configuration.
 
 Further applications of this technique are stated under Section~\ref{sec:jsescapemultiiter} using escape sequences inside string literals, under Section~\ref{sec:avoidingbypassA} using escape sequences inside a template literal and under Section~\ref{sec:htmlencjsesc} using single character escape.
@@ -596,7 +596,7 @@ in a request towards the web application protected by the evaluated firewall, th
 
 If the Aurebesh evasion technique proposed under Section~\ref{sec:aurebesh} is used to substitute most of the payload with the characters \verb|A-I| as well as \verb|() + [] ! ' = {}|, the obscured payload: 
 
-\begin{lstlisting}[style=basicStyle, language=Python, caption=Aurebesh.js bypass, label={lst:aurebeshpromptbypass}]
+\begin{lstlisting}[style=basicStyle, language=Python, caption={prompt(1,2) in Aurebesh.js bypass}, label={lst:aurebeshpromptbypass}]
 A='',B=!A+A,C=!B+A,D=A+{},E=B[A++],F=B[G=A],H=++G+A,I=D[G+H],B[I+=D[A]+(B.C+D)[A]+C[H]+E+F+B[G]+I+E+D[A]+F][I]('p'+F+D[A]+'m'+'p'+E+'(A,++A)')()
 \end{lstlisting}
 

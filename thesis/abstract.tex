@@ -1,1 +1,9 @@
 \section{Abstract}
+Web application firewalls are employed in a defense-in-depth strategy to protect web applications.
+Institutions deciding to employ a web application firewall likely ask the question how well the web application can protect a web application against targeted malicious requests.
+After deciding to employ a web application firewall, knowing the answer to this question is vital to correctly assess the predicted standing of the protected web application against the threat landscape.
+In order to evaluate a web application firewall against targeted malicious requests, a gray box evaluation system is proposed. The main idea is to simulate malicious requests against the web application using firewall evasion techniques, like a real attacker would, and simultaneously use the firewall log to increase the efficiency in finding bypassing payloads.
+Found bypasses are subsequently used to propose ruleset additions in order to reduce the total amount of efficient firewall evasion techniques against the evaluated firewall configuration.
+Experiments are conducted using the proposed system to evaluate the open-source OWASP ModSecurity firewall configured to use the OWASP \acrfull{crs} version 4.1 against targeted malicious \acrfull{xss} payloads.
+The results reveal that 11 of 18 researched evasion techniques to obfuscate \acrshort{xss} payloads can be used in some combination to create multiple bypassing malicious payloads.
+As response to found bypasses, proposals for ruleset additions to the \acrshort{crs} 4.1 could be given based on the developed system.

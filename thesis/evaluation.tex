@@ -16,7 +16,7 @@ Evaluation-payloads sent in requests toward the web application are chosen to su
 In all requests, the payloads are sent in the request body in JSON format.
 To test the validity of payloads, bypassing payloads have been injected into exemplary code snippets with Cross-Site Scripting vulnerabilities. A \acrshort{html} file was used that specified a \verb|<div>| element, which is dynamically modified, and a \verb|<script>| element that imports vulnerable JavaScript code snippets from an adjacent \verb|.js| file. The \acrshort{html} file:
 
-\begin{lstlisting}[style=basicStyle, language=Python, caption=payload validation \acrshort{html} file]
+\begin{lstlisting}[style=basicStyle, language=Python, caption=\acrshort{html} file used for payload validation]
 <!doctype html>
 <html>
 <body>
@@ -28,7 +28,7 @@ To test the validity of payloads, bypassing payloads have been injected into exe
 
 The \verb|tsc.js| file was modified depending on the payload. If the payload included a complete \acrshort{html} element, the used code snippet was set up to dynamically add the injected payload to the \acrshort{html} document:
 
-\begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^, caption=payload validation script for payloads containing full \acrshort{html} elements]
+\begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^, caption=Script used to validate payloads containing full \acrshort{html} elements]
 const injection = 
   JSON.parse("{\"body\":\"   ^{\color{red}<injected payload>}^   \"}")
 
@@ -37,7 +37,7 @@ document.getElementById('div1').insertAdjacentHTML('afterbegin', injection.body)
 
 If the payload was composed of only JavaScript statements to be executed, the injected payload was put inside a template string such that the JavaScript statements would be executed on page load:
 
-\begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^, caption=payload validation script for payloads containing only JavaScript statements]
+\begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^, caption=Script used to validate payloads containing only JavaScript statements]
 const injection = 
   JSON.parse("{\"body\":\"   ^{\color{red}<injected payload>}^   \"}")
 

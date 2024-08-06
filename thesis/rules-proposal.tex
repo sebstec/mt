@@ -9,7 +9,7 @@ The bypassing payloads mentioned under Section~\ref{sec:functionconstructorsingl
 
 To block requests using the function contructor (dot notation) as a method to evade the current evaluated firewall configuration, a new firewall rule is proposed:
 
-\begin{lstlisting}[style=basicStyle, caption=rule proposal to block usage of Function() constructor in dot notation, label={lst:constructorsruleproposal}]
+\begin{lstlisting}[style=basicStyle, caption=Rule proposal to block usage of Function() constructor in dot notation, label={lst:constructorsruleproposal}]
 SecRule REQUEST_COOKIES|REQUEST_COOKIES_NAMES|ARGS_NAMES|ARGS|XML:/* "@rx (?i)(?:(?:\[[^\]]*\])|(?:\{[^}]*\}))\.[a-z]*\.constructor[`,(,\[]" \
     "id:2,\
     phase:2,\
@@ -72,7 +72,7 @@ Further, the bypass mentioned under Section~\ref{sec:charcodemultiiter} was now 
 
 Finally, the bypass mentioned under Section~\ref{sec:forcedunicodenorm} was now also detected and blocked by the evaluated firewall:
 
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=Forced unicode normalization bypass blocked]
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=Forced Unicode Normalization bypass blocked]
 <payload>[].map.constructor('prompt` $ {secret}`'.normalize('NFKC'))()</payload>
 
 <message>"XSS JavaScript function with constructor (square bracket notation)"</message>
@@ -85,7 +85,7 @@ The proposed firewall rule with id \verb|2| manages to block a part the mentione
 
 To block requests using the function contructor via square bracket notation, another firewall rule \verb|id:3| is proposed:
 
-\begin{lstlisting}[style=basicStyle, caption=rule proposal to block usage of Function() constructor in square bracket notation, label={lst:constructorsruleproposalB}]
+\begin{lstlisting}[style=basicStyle, caption=Rule proposal to block usage of Function() constructor in square bracket notation, label={lst:constructorsruleproposalB}]
 SecRule REQUEST_COOKIES|REQUEST_COOKIES_NAMES|ARGS_NAMES|ARGS|XML:/* "@rx (?i)(?:(?:\[[^\]]*\])|(?:\{[^}]*\}))\[[`,',\"][a-z]*[`,',\"]\]\[[`,',\"]constructor[`,',\"]\][`,(,\[]" \
     "id:3,\
     phase:2,\
@@ -123,7 +123,7 @@ Equally, the bypassing payloads using square bracket notation stated under Secti
 
 Section~\ref{sec:functionconstructorsingleevasbn}: Square bracket notation bypass:
 
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=square bracket notation bypass blocked]
+\begin{lstlisting}[style=ruleStyle, language=XML, caption=Square bracket notation bypass blocked]
 <payload>[]["constructor"]["constructor"]('alert'+'(`concatenation`)')()</payload>
 
 <message>"XSS JavaScript function with constructor (square bracket notation)"</message>
@@ -134,7 +134,7 @@ Section~\ref{sec:functionconstructorsingleevasbn}: Square bracket notation bypas
 
 Section~\ref{sec:avoidingbypassA}: Avoiding () bypass:
 
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=avoiding () bypass blocked]
+\begin{lstlisting}[style=ruleStyle, language=XML, caption={Avoiding () bypass blocked}]
 <payload>[]['constructor']['constructor']`someParameterString${'var/**/s/**/=/**/"secret";promp'+'t`s\\u{0024}{s}`'}```</payload>
 
 <message>"XSS JavaScript function with constructor (square bracket notation)"</message>
@@ -145,7 +145,7 @@ Section~\ref{sec:avoidingbypassA}: Avoiding () bypass:
 
 Section~\ref{sec:avoidingbypassB}: Avoiding \{\} bypass:
 
-\begin{lstlisting}[style=ruleStyle, language=XML, caption=avoiding \{\} bypass blocked]
+\begin{lstlisting}[style=ruleStyle, language=XML, caption={Avoiding \{\} bypass blocked}]
 <payload>[][`constructor`][`constructor`]('pro'+'mpt`see4InInput$'+[open+[]][0][16]+'2+2'+[open+[]][0][36]+':`')()</payload>
 
 <message>"XSS JavaScript function with constructor (square bracket notation)"</message>

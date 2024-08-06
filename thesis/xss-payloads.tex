@@ -85,7 +85,7 @@ Technique inspired by William J Buchanan \cite{asecsite/jsobf1}.
 \label{sec:stringconc}
 In cases where the payload contains statements to be executed and these are passed in string format, string concatenation might be used to obscure the payload. This technique is further limited to cases where the string containing the statements is evaluated on the target. An example for vulnerable code on a target is the following:
 
-\begin{lstlisting}[style=basicStyle, language=Python, caption=example code vulnerable to String Concatenation]
+\begin{lstlisting}[style=basicStyle, language=Python]
 <some html code that contains a div with id="div1">
 
 <script>
@@ -386,7 +386,9 @@ Martin Kleppe describes JSFuck as follows:
 
 	It does not depend on a browser, so you can even run it on Node.js. \cite{mk/jsfuck}
 \end{quote}
+
 Encoding the payload \verb|alert(1)| in JSFuck results in following payload:
+
 \begin{lstlisting}[style=basicStyle, caption=alert(1) in JSFuck, label={lst:alert1jsfuck}]
   (![] + [])[+!+[]] +
     (![] + [])[!+[] + !+[]] +
@@ -456,7 +458,7 @@ In contrast to the author who is pursuing the translation of JavaScript into oth
 The obfuscation gained by using Aurebesh.js might make payloads evade detection while the added payload content maliciously influences the web application.
 As a proof of concept, the function \verb|alert()| has been substituded with the function \verb|prompt()| in the following example:
 
-\begin{lstlisting}[style=basicStyle, caption=Aurebesh.js obfuscation of prompt, label={lst:aurebeshprompt}]
+\begin{lstlisting}[style=basicStyle, caption={Aurebesh.js obfuscation of prompt(1,2)}, label={lst:aurebeshprompt}]
 		A = ''              // empty string
 		B = !A + A          // "true"
 		C = !B + A          // "false"
