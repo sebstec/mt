@@ -47,7 +47,7 @@ const injection =
 document.getElementById('div1').insertAdjacentHTML('afterbegin', `<img src=0 onerror=${injection.body}>`)
 \end{lstlisting}
 
-Decoding percent encoded payloads and normalizing Unicode characters was done where neccessary, the according statements marked in orange and blue were added in such cases.
+Decoding percent encoded payloads and normalizing Unicode characters was done where neccessary, the according statements marked in orange and blue were added in such cases. 
 
 The evaluation has been conducted in a lab environment composed of a simple web servers to receive any requests that pass the firewall.
 The web servers are reachable via a nginx reverse proxy that is compiled from source with the ModSecurity-nginx connector module. Nginx runs on a Debian Bookworm host with ModSecurity installed.

@@ -169,14 +169,14 @@ The following table details where certain escape sequences can be used:
 \end{table}
 \cite{exploringes6/escapeseq,bynens/escape,js/lexicalgrammar}
 
-This technique is used under Section~\ref{sec:jsescapesingleiter}, Section~\ref{sec:avoidingbypassA}, Section~\ref{sec:htmlencjsesc} and Section~\ref{sec:jsescapemultiiter}.
+This technique is used under Section~\ref{sec:jsescapesingleiter}, Section~\ref{sec:jsescapemultiiter}, Section~\ref{sec:avoidingbypassA} and Section~\ref{sec:htmlencjsesc}.
 
 
 \subsubsection{Tagged Template Literals}
 \label{sec:taggedtemplateliterals}
 Tagged Template Literals can be used in JavaScript payloads to avoid detection of JavaScript function calls in an \acrshort{http} request payload. Dr. Alex Rauschmeyer explains Tagged Template Literals in \quotes{Exploring ES6}:
 \begin{quotation} Tagged Template Literals are function calls whose parameters are provided via template literals. [...]
-	The following is a tagged template literal (short: tagged template): \\\\ 
+	The following is a tagged template literal (short: tagged template): \\\\
 	\verb|tagFunction`Hello ${firstName} ${lastName}!`| \\\\
 	Putting a template literal after an expression triggers a function call, similar to how a parameter list (comma-separated values in parentheses) triggers a function call. The previous code is equivalent to the following function call (in reality, first parameter is more than just an Array, but that is explained later): \\\\
 	\verb|tagFunction(['Hello ', ' ', '!'], firstName, lastName)| \\\\
@@ -219,13 +219,13 @@ it is possible to split the function call into parts of \verb|al|, \verb|e| and 
 \end{lstlisting}
 
 Sending the payload in this form will not cause the the desired effect, as a JavaScript interpreter will interpret the payload as a string instead of a function call to the \verb|alert()| function.
-Using the \verb|eval()| function in combination with the splitted string solves this problem. Sending a payload in the form of 
+Using the \verb|eval()| function in combination with the splitted string solves this problem. Sending a payload in the form of
 
 \begin{lstlisting}[style=basicStyle,language=Python]
 eval(`al` + `e` + `rt('XSS')`)
 \end{lstlisting}
 
-where the initial payload is passed as an argument to the \verb|eval()| function will cause the string to be evaluated and interpreted. 
+where the initial payload is passed as an argument to the \verb|eval()| function will cause the string to be evaluated and interpreted.
 
 Evaluation results using this technique are stated under Section~\ref{sec:functionconstructorsingleeva} and Section~\ref{sec:jsescapemultiiter}.
 
@@ -251,7 +251,10 @@ Using \verb|[].constructor.constructor| will yield access to the \verb|Function(
 Calling the \verb|Function()| constructor directly can create functions dynamically, similar to using \verb|eval()|.
 The difference being that the \verb|Function()| constructor creates functions that execute in the global scope only. More on this limitation will be laid out under Section~\ref{sec:payloadlimitations}.
 
-The \verb|Function()| constructor takes a variable count of arguments. The first $n - 1$ arguments are the \quotes{names to be used by the function as formal argument names. Each must be a string that corresponds to a valid JavaScript parameter [...]}. \cite{js/function} \\
+The \verb|Function()| constructor takes a variable count of arguments. The first $n - 1$ arguments are the
+\begin{quote}
+	names to be used by the function as formal argument names. Each must be a string that corresponds to a valid JavaScript parameter (any of plain identifier, rest parameter, or destructured parameter, optionally with a default), or a list of such strings separated with commas. \cite{js/function}
+\end{quote}
 The last argument given to the \verb|Function()| constructor is expected to be a string containing the JavaScript statements compromising the function definition. \cite{js/function}
 
 Therefore, the afromentioned substitute for \verb|eval()|:
@@ -282,7 +285,7 @@ In addition to accessing the \verb|Function()| constructor via the \verb|constru
 
 Depending on the context where the payload will be inserted, sometimes the \verb|Function()| constructor can not be accessed using empty arrays or empty objects. Such a case can occur when there are statements in the context prior to the point of payload insertion. Not explicitly terminated statements that depend on JavaScripts automatic semicolon insertion can cause the payload to not execute correctly. In some cases, when using empty arrays or objects in the beginning of the payload, the automatic semicolon insertion might not insert a semicolon between the end of the statement prior to the point of payload insertion and the beginning of the payload. Subsequently, the JavaScript parser will throw a SyntaxError at this point. One example for such a case is mentioned under Section~\ref{sec:charcodemultiiter}. MDN contributors state details around automatic semicolon insertion under the Lexical grammar section of their JavaScript reference \cite{js/autosemi}.
 
-If, for any reason, the Array object can not be used, there are substitutes available in the form of JavaScript's standard built-in objects.  
+If, for any reason, the Array object can not be used, there are substitutes available in the form of JavaScript's standard built-in objects.
 JavaScript's built-in objects include but are not limited to built-in global functions that can be used as a substitute: \cite{js/builtin}
 
 \begin{lstlisting}[style=basicStyle,language=Python,escapeinside=\^\^]
@@ -347,7 +350,7 @@ Since the return value is an object, it is ignored and \verb|toString()| is call
 
 In the expression \verb|open + []|, \verb|open()| is a built-in Function object, \verb|[]| is a built-in Array object.
 In the process of primitive coercion, for both, their \verb|toString()| method is being called.
-When they are joined by the \verb|+| operator, it results in a string in the form of \verb|open.toString()| concatenated with \verb|[].toString()|. The result is equal to \verb|open.toString()| as \verb|[].toString()| returns an empty string. 
+When they are joined by the \verb|+| operator, it results in a string in the form of \verb|open.toString()| concatenated with \verb|[].toString()|. The result is equal to \verb|open.toString()| as \verb|[].toString()| returns an empty string.
 \verb|open.toString()| returns:
 
 \begin{lstlisting}[style=basicStyle]

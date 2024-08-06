@@ -502,9 +502,9 @@ Since ES6, escaping in identifiers is also possible using the Unicode code point
 \end{lstlisting}
 
 is also valid. A request sent with this payload bypassed the ModSecurity firewall using \acrshort{crs} 4.1, but caused an error during the call to \verb|JSON.parse()| during validating the obscured payload like mentioned under Section~\ref{sec:evaluation}. 
-To avoid the error on the web application, the payload was percent encoded to simulate data transmission via query or path param, which is laid out under Section~\ref{sec:jsencpercenc}. As ES6 Unicode code point escapes allow to create bypassing payloads which are valid in some scenarios, this evasion technique is considered effective against the evaluted firewall configuration.
+To avoid the error on the web application, the payload was percent encoded to simulate data transmission via query or path param, which is laid out under Section~\ref{sec:jsencpercenc}. As ES6 Unicode code point escapes allow to create bypassing payloads which are valid in some scenarios, this evasion technique is considered effective against the evaluated firewall configuration.
 
-Further applications of this technique are stated under Section~\ref{sec:htmlencjsesc} using single character escape, under Section~\ref{sec:jsescapemultiiter} using escape sequences inside string literals and Section~\ref{sec:avoidingbypassA} using escape sequences inside a template literal.
+Further applications of this technique are stated under Section~\ref{sec:jsescapemultiiter} using escape sequences inside string literals, under Section~\ref{sec:avoidingbypassA} using escape sequences inside a template literal and under Section~\ref{sec:htmlencjsesc} using single character escape.
 
 % \subsubsection{eval() function}
 % \label{sec:evalsingleiter}

