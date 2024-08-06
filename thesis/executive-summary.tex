@@ -9,3 +9,29 @@ In total, multiple bypassing payloads could be created. Those were sent in HTTP 
 
 It was discovered that 13 of 18 evasion techniques are effective, some only in combination with other evasion techniques. 
 When a created payloads was sent in a request towards the evaluated firewall configuration and blocked by the very same, the firewall log was inspected to determine why a payload caused the request to get blocked by the firewall. 
+
+In order to answer the question
+\begin{quote}
+	How well can web application firewalls in their generic standard configuration
+	protect a web application against targeted malicious requests?
+\end{quote}
+fundamentals regarding the context around web application firewalls were described.
+The focus here was on web application firewall evasion, which is the action of obscuring malicious payloads in such a way that they bypass web application firewalls.
+If an attacker wants to actively target a web application that is protected by a firewall, it stands to reason that such evasion techniques would come to use. 
+
+Therefore, firewall evasion techniques used to obscure payloads were researched.
+As Cross-Site Scripting is a notable weakness linked to injection vulnerabilities, the focus was on evasion techniques used to obscure Cross-Site Scripting payloads.
+6 different techniques to obscure various payloads were researched, 12 different techniques to specifically obscure Cross-site payloads were researched. 
+
+Subsequently, researched evasion techniques were used to evaluate the performance of the OWASP ModSecurity firewall configured to use the OWASP CoreRuleSet in version 4.1 against targeted payloads. 
+The evasion techniques were used to try and create bypassing payloads that would evade the filtering of the evaluated firewall configuration. 
+
+In order to achieve this, an evaluation methodology was proposed. 
+The evaluation methodology follows a gray box approach that pays close attention to the firewall log during the evaluation.
+When a created payloads was sent in a request towards the evaluated firewall configuration and blocked by the very same, the firewall log was inspected to determine why a payload caused the request to get blocked by the firewall. 
+Through analyzing the log messages, it was possible to trace which rules caused the request to get blocked and which parts of a payloads caused those rules to trigger. 
+They led to insight about which evasion techniques were effective in creating bypassing payloads against the evaluated firewall configuration.
+Using this knowledge, bypassing payloads to evaluate the firewall configuration could be developed efficiently.
+In total, it was discovered that 11 of 18 evasion techniques are effective in creating targeted bypassing payloads, some only in combination with other evasion techniques. 
+
+In closing, the insight into the filtering performance of the evaluted firewall configuration was used to propose additional firewall rules. Those prevent some of the found bypassing payloads. In addition to that, ideas for further ruleset improvements were stated.
