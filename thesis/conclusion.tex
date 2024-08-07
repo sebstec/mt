@@ -8,7 +8,7 @@ In order to answer the question
 a gray box evaluation system was developed.
 This system is built upon using the perspective of an attacker while employing the information, that a web application firewall log provides.
 It proposes a multi-step approach to developing firewall evading payloads by initially researching and classifying applicable firewall evasion techniques.
-Then, firewall evasion techniques classified as efficent in the evaluation context are used iteratively to create bypassing payloads using the information provided by the firewall log during each iteration.
+Then, firewall evasion techniques classified as efficent in the evaluation context are used iteratively to create bypassing payloads. The information provided by the firewall log is used during each iteration. This enables to create bypassing payloads straightforward.
 Through experimenting on the open-source OWASP ModSecurity firewall configured to use the OWASP CoreRuleSet in version 4.1 from April 2024, it is shown, that this system enables to efficiently craft targeted firewall evading payloads in order to evaluate a web application firewall configuration against targeted malicious requests.
 With the proposed system, 11 from 18 researched evasion techniques relevant to the evaluation context could be used to craft multiple targeted malicious requests that bypassed the ModSecurity firewall using \acrshort{crs} 4.1.
 Further, the proposed system enabled to identify, develop and evaluate additional firewall rules as response to discovered bypassing payloads.

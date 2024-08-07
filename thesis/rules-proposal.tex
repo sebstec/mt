@@ -1,13 +1,13 @@
 \subsection{Rules Proposal}
 \label{sec:rulesproposal}
 During the evaluation of the tested firewall configuration, some firewall evading payloads were found. For some of those bypasses, new rule configurations are proposed. As mentioned before, adding new filtering rules always poses a risk that subsequently, benign requests might be flagged as malicious. As such, the possible implications of adding new firewall rules needs to be considered.
-The proposed rules are in the SecRules format supported by ModSecurity and setup according to the rule setup mentioned under Section~\ref{sec:waf}: Web Application Firewall.
+The proposed rules are in the \verb|SecRules| format supported by ModSecurity and set up according to the rule setup mentioned under Section~\ref{sec:waf}.
 
 \subsubsection{Function Constructor: Results}
 \label{sec:rulespropfunctionconstructor}
-The bypassing payloads mentioned under Section~\ref{sec:functionconstructorsingleeva}, Section~\ref{sec:funconstrconbypass}, Section~\ref{sec:charcodemultiiter}, Section~\ref{sec:avoidingbypassA}, Section~\ref{sec:avoidingbypassB} and Section~\ref{sec:forcedunicodenorm} rely on accessing the function constructor via accessing functions on built-in objects.
+The bypassing payloads mentioned under Section~\ref{sec:functionconstructorsingleeva}, Section~\ref{sec:funconstrconbypass}, Section~\ref{sec:charcodemultiiter}, Section~\ref{sec:avoidingbypassA}, Section~\ref{sec:avoidingbypassB} and Section~\ref{sec:forcedunicodenorm} rely on accessing the \verb|Function()| constructor via accessing functions on built-in objects.
 
-To block requests using the function contructor (dot notation) as a method to evade the current evaluated firewall configuration, a new firewall rule is proposed:
+To block requests using the \verb|Function()| constructor (dot notation) as a method to evade the current configuration of the evaluated firewall, a new firewall rule is proposed:
 
 \begin{lstlisting}[style=basicStyle, caption=Rule proposal to block usage of Function() constructor in dot notation, label={lst:constructorsruleproposal}]
 SecRule REQUEST_COOKIES|REQUEST_COOKIES_NAMES|ARGS_NAMES|ARGS|XML:/* "@rx (?i)(?:(?:\[[^\]]*\])|(?:\{[^}]*\}))\.[a-z]*\.constructor[`,(,\[]" \
@@ -27,17 +27,15 @@ SecRule REQUEST_COOKIES|REQUEST_COOKIES_NAMES|ARGS_NAMES|ARGS|XML:/* "@rx (?i)(?
     setvar:'tx.xss_score=+%{tx.critical_anomaly_score}',\
     setvar:'tx.inbound_anomaly_score_pl1=+%{tx.critical_anomaly_score}'"
 \end{lstlisting}
-
-The rule with \verb|id:2| shown in Listing~\ref{lst:constructorsruleproposal} aims at matching usage of the function constructor via dot notation using the following regular expression:
+The rule with \verb|id:2|, shown in Listing~\ref{lst:constructorsruleproposal}, aims at matching usage of the \verb|Function()| constructor via dot notation using the following regular expression:
 
 \begin{lstlisting}[style=basicStyle]
 (?i)(?:(?:\[[^\]]*\])|(?:\{[^}]*\}))\.[a-z]*\.constructor[`,(,\[]
 \end{lstlisting}
-
 It is explained in Listing~\ref{lst:constructorsruleproposalregexA}.
 The two payload options of: \\
 \verb|[].something.constructor()| and \verb|{}.something.constructor()| \\
-are matched by this regular expression. Therefore, once the configuration was updated with the proposed rule, the bypassing payload using dot notation that is mentioned under Section~\ref{sec:funconstrconbypass} was detected by the evaluated firewall:
+are matched by this regular expression. Therefore, once the configuration was updated with the proposed rule, the bypassing payload using dot notation, that is mentioned under Section~\ref{sec:funconstrconbypass}, was detected and blocked by the evaluated firewall:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, label={lst:constructorsblockedpoc}, caption=Function() constructor + string concatenation bypass in dot notation blocked]
 <payload>[].constructor.constructor(`var/**/s/**/=/**/'secret';/**/promp`/**/+/**/`t(s,/**/s)`)()</payload>
@@ -47,8 +45,7 @@ are matched by this regular expression. Therefore, once the configuration was up
 <fileDetails>[line "13"] [id "2"]<fileDetails>
 <MatchedData>"[].constructor.constructor("</MatchedData>
 \end{lstlisting}
-
-Equally, the bypassing payload using dot notation that is mentioned under Section~\ref{sec:functionconstructorsingleeva} was now detected by the evaluated firewall:
+Equally, the bypassing payload using dot notation, that is mentioned under Section~\ref{sec:functionconstructorsingleeva}, was now detected and blocked by the evaluated firewall:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=Function() constructor bypass blocked]
 <payload>[].constructor.constructor('alert'+'(`concatenation`)')()</payload>
@@ -58,7 +55,6 @@ Equally, the bypassing payload using dot notation that is mentioned under Sectio
 <fileDetails>[line "13"] [id "2"]<fileDetails>
 <MatchedData>"[].constructor.constructor`"</MatchedData>
 \end{lstlisting}
-
 Further, the bypass mentioned under Section~\ref{sec:charcodemultiiter} was now detected and blocked by the evaluated firewall:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=fromCharCode() bypass blocked]
@@ -69,7 +65,6 @@ Further, the bypass mentioned under Section~\ref{sec:charcodemultiiter} was now 
 <fileDetails>[line "13"] [id "2"]<fileDetails>
 <MatchedData>"[]['constructor']['constructor']`"</MatchedData>
 \end{lstlisting}
-
 Finally, the bypass mentioned under Section~\ref{sec:forcedunicodenorm} was now also detected and blocked by the evaluated firewall:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=Forced Unicode Normalization bypass blocked]
@@ -80,10 +75,9 @@ Finally, the bypass mentioned under Section~\ref{sec:forcedunicodenorm} was now 
 <fileDetails>[line "13"] [id "2"]<fileDetails>
 <MatchedData>"[]['constructor']['constructor']("</MatchedData>
 \end{lstlisting}
+The proposed firewall rule with \verb|id:2| managed to block a part the mentioned bypassing payloads. Section~\ref{sec:funconstrconbypass}, Section~\ref{sec:avoidingbypassA} and Section~\ref{sec:avoidingbypassB} further state related payloads created using the \verb|Function()| constructor via square bracket notation. These are not detected and filtered by the proposed rule with \verb|id:2|.
 
-The proposed firewall rule with id \verb|2| manages to block a part the mentioned bypassing payloads. Section~\ref{sec:funconstrconbypass}, Section~\ref{sec:avoidingbypassA} and Section~\ref{sec:avoidingbypassB} further state related payloads created using the square bracket notation. These are not detected and filtered by the proposed rule with \verb|id:2|.
-
-To block requests using the function contructor via square bracket notation, another firewall rule \verb|id:3| is proposed:
+To block requests using the \verb|Function()| constructor via square bracket notation, another firewall rule, with \verb|id:3|, is proposed:
 
 \begin{lstlisting}[style=basicStyle, caption=Rule proposal to block usage of Function() constructor in square bracket notation, label={lst:constructorsruleproposalB}]
 SecRule REQUEST_COOKIES|REQUEST_COOKIES_NAMES|ARGS_NAMES|ARGS|XML:/* "@rx (?i)(?:(?:\[[^\]]*\])|(?:\{[^}]*\}))\[[`,',\"][a-z]*[`,',\"]\]\[[`,',\"]constructor[`,',\"]\][`,(,\[]" \
@@ -103,12 +97,11 @@ SecRule REQUEST_COOKIES|REQUEST_COOKIES_NAMES|ARGS_NAMES|ARGS|XML:/* "@rx (?i)(?
     setvar:'tx.xss_score=+%{tx.critical_anomaly_score}',\
     setvar:'tx.inbound_anomaly_score_pl1=+%{tx.critical_anomaly_score}'"
 \end{lstlisting}
-
-The rule with \verb|id:3| shown in Listing~\ref{lst:constructorsruleproposalB} aims at matching usage of the function constructor via square bracket notation using the regular expression shown and explained in Listing~\ref{lst:constructorproposalregexB}.
+The rule with \verb|id:3|, shown in Listing~\ref{lst:constructorsruleproposalB}, aims at matching usage of the \verb|Function()| constructor via square bracket notation using the regular expression shown and explained in Listing~\ref{lst:constructorproposalregexB}.
 
 The two payload options of: \\
 \verb|[]['something']['constructor']()| and \verb|{}['something']['constructor']()| \\
-are matched by this regular expression. Therefore, once the configuration was updated with the proposed rule, the bypassing payload using square bracket notation that is stated under Section~\ref{sec:funconstrconbypass} was detected by the evaluated firewall:
+are matched by this regular expression. Therefore, once the configuration was updated with the proposed rule, the bypassing payload using the \verb|Function()| constructor via square bracket notation, that is stated under Section~\ref{sec:funconstrconbypass}, was detected and blocked by the evaluated firewall:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=Function() constructor bypass in square bracket notation blocked, label={lst:constructorsblockedsbn}]
 <payload>[]['constructor']['constructor'](`var/**/s/**/=/**/'secret';/**/promp`/**/+/**/`t(s,/**/s)`)()</payload>
@@ -118,8 +111,7 @@ are matched by this regular expression. Therefore, once the configuration was up
 <fileDetails>[line "30"] [id "3"]<fileDetails>
 <MatchedData>"[]['constructor']['constructor']("</MatchedData>
 \end{lstlisting}
-
-Equally, the bypassing payloads using square bracket notation stated under Section~\ref{sec:functionconstructorsingleevasbn}, Section~\ref{sec:avoidingbypassA} and Section~\ref{sec:avoidingbypassB} were now being detected and blocked by the evaluated firewall. 
+Equally, the bypassing payloads using the \verb|Function()| constructor via square bracket notation stated under Section~\ref{sec:functionconstructorsingleevasbn}, Section~\ref{sec:avoidingbypassA} and Section~\ref{sec:avoidingbypassB}, were now being detected and blocked by the evaluated firewall. 
 
 Section~\ref{sec:functionconstructorsingleevasbn}: Square bracket notation bypass:
 
@@ -131,7 +123,6 @@ Section~\ref{sec:functionconstructorsingleevasbn}: Square bracket notation bypas
 <fileDetails>[line "13"] [id "2"]<fileDetails>
 <MatchedData>"[]['constructor']['constructor']`"</MatchedData>
 \end{lstlisting}
-
 Section~\ref{sec:avoidingbypassA}: Avoiding () bypass:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption={Avoiding () bypass blocked}]
@@ -142,7 +133,6 @@ Section~\ref{sec:avoidingbypassA}: Avoiding () bypass:
 <fileDetails>[line "13"] [id "2"]<fileDetails>
 <MatchedData>"[]['constructor']['constructor']`"</MatchedData>
 \end{lstlisting}
-
 Section~\ref{sec:avoidingbypassB}: Avoiding \{\} bypass:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption={Avoiding \{\} bypass blocked}]
@@ -153,53 +143,47 @@ Section~\ref{sec:avoidingbypassB}: Avoiding \{\} bypass:
 <fileDetails>[line "13"] [id "2"]<fileDetails>
 <MatchedData>"[]['constructor']['constructor']("</MatchedData>
 \end{lstlisting}
-
-The proposed firewall rule manages to block the second part of the mentioned bypassing payloads.
+The proposed firewall rule with \verb|id:3| managed to block the second part of the mentioned bypassing payloads.
 
 Using proposed rules \verb|id:2| and \verb|id:3|, all discovered payloads mentioned under Section~\ref{sec:functionconstructorsingleeva}, Section~\ref{sec:funconstrconbypass}, Section~\ref{sec:charcodemultiiter}, Section~\ref{sec:avoidingbypassA}, Section~\ref{sec:avoidingbypassB} and Section~\ref{sec:forcedunicodenorm} were successfully blocked.
 
 
 \subsubsection{Function Constructor: Reflection}
 \label{sec:rulespropfunctionconstructorreflection}
-The rules implemented in the previous section (Section~\ref{sec:rulespropfunctionconstructor}: Function Constructor: Results) have been reflected upon based on the used evasion technique stated in Section~\ref{sec:functionconstructor}.
+The rules implemented in the previous subsection, Section~\ref{sec:rulespropfunctionconstructor}, have been reflected upon based on the used evasion technique stated in Section~\ref{sec:functionconstructor}.
 
-While accessing the function constructor as it is done in the mentioned bypassing payloads is no longer possible with the proposed rules \verb|id:2| and \verb|id:3| stated under Section~\ref{sec:rulespropfunctionconstructor}, the practice of creating firewall evading payloads through accessing the function constructor by accessing the constructor of JavaScript's built-in objects will still yield successful results.
+While accessing the \verb|Function()| constructor as it is done in the mentioned bypassing payloads is no longer possible with the proposed rules \verb|id:2| and \verb|id:3| stated under Section~\ref{sec:rulespropfunctionconstructor}, the practice of creating firewall evading payloads through accessing the \verb|Function()| constructor by accessing the constructor of JavaScript's built-in objects will still yield successful results.
 Not all vectors opened by this technique are covered by the proposed rules. Creating an Array object by calling \verb|new Array()| is equivalent to calling \verb|[]| in terms of creating a malicious payload that accesses the \verb|Function()| constructor.
-Section~\ref{sec:functionconstructor} states more options to access the \verb|Function()| constructor via other built-in objects that are part of JavaScript at the time of this writing. In addition to that, mixing property access via dot- and square bracket notation would bypass the proposed rules with ids \verb|2| and \verb|3|.
+Section~\ref{sec:functionconstructor} states more options to access the \verb|Function()| constructor via other built-in objects, that are part of JavaScript at the time of this writing. In addition to that, mixing property access via dot- and square bracket notation would bypass the proposed rules with \verb|id:2| and \verb|id:3|.
 
 Increased coverage of bypassing vectors using built-in objects (and functions) could be achieved by removing the first part of the regular expression mentioned under Listing~\ref{lst:constructorsruleproposalregexA}, such that only the following remains:
 
 \begin{lstlisting}[style=basicStyle, caption=Reduced regular expression of proposed rule id:2, label={lst:propredregex}]
 (?i)\.constructor[`,(,\[]
 \end{lstlisting}
-
 The reduced regular expression matches on any payload that includes \verb|.constructor| followed by one of the characters \verb|`([|. This rule matches on the payload:
 
 \begin{lstlisting}[style=basicStyle]
 [].constructor.constructor()
 \end{lstlisting}
-
 as well as the payloads:
 
 \begin{lstlisting}[style=basicStyle]
 new Array().constructor.constructor()
 \end{lstlisting}
-
 and
 
 \begin{lstlisting}[style=basicStyle]
 isNaN.constructor()
 \end{lstlisting}
-
-As would it flag the following benign payload that contains an example tutorial post with a missing whitespace as malicious:
+As would it flag the following benign payload, that contains an example tutorial post with a missing whitespace as malicious:
 
 \begin{lstlisting}[style=basicStyle]
 Object property access in JavaScript is possible using the dot-notation.Constructor(s) can be used to initialize instances with variable properties.
 \end{lstlisting}
+Using this reduced regular expression might be considered too general to be used in certain environments. A more fine grained regular expression covering more options of accessing the \verb|Function()| constructor is therefore proposed. 
 
-Using this reduced regular expression might be considered too general to be used in certain environments. A more fine grained regular expression covering more options of accessing the function constructor is therefore proposed. 
-
-In the context of this work, it was decided suitable to balance the mentioned risks by implementing a rule that would detect usage of all built-in objects and classes mentioned under Section~\ref{sec:functionconstructor}. In addition, it should cover the mixed use of dot- and square bracket notation: 
+In the context of this work, it was decided suitable to balance the mentioned risks by implementing a rule that would detect usage of all built-in objects and classes mentioned under Section~\ref{sec:functionconstructor}. In addition, it should cover the mixed use of dot- and square bracket notation. Therefore, rule with \verb|id:4| is proposed: 
 
 \begin{lstlisting}[style=basicStyle, caption=Rule proposal to block usage of Function() constructor via built-in objects, label={lst:constructorsruleproposal3}]
 SecRule REQUEST_COOKIES|REQUEST_COOKIES_NAMES|ARGS_NAMES|ARGS|XML:/* "@rx 
@@ -221,10 +205,9 @@ SecRule REQUEST_COOKIES|REQUEST_COOKIES_NAMES|ARGS_NAMES|ARGS|XML:/* "@rx
     setvar:'tx.xss_score=+%{tx.critical_anomaly_score}',\
     setvar:'tx.inbound_anomaly_score_pl1=+%{tx.critical_anomaly_score}'"
 \end{lstlisting}
+The rule with \verb|id:4|, shown in Listing~\ref{lst:constructorsruleproposal3}, aims at matching on payloads that access the \verb|Function()| constructor via any of the built-in objects. The used regular expression is explained under Listing~\ref{lst:constructorruleproposalregexC}.
 
-The rule with \verb|id:4| shown in Listing~\ref{lst:constructorsruleproposal3} aims at matching on payloads that access the \verb|Function()| constructor via any of the built-in objects. The used regular expression is explained under Listing~\ref{lst:constructorruleproposalregexC}.
-
-If proposed rule with id \verb|4| is used, it replaces proposed rules \verb|2| and \verb|3|. As this rule does not cover access to the \verb|Function()| constructor via built-in global functions, an additional rule to cover this vector is proposed:
+If proposed rule with id \verb|4| is used, it replaces proposed rules \verb|id:2| and \verb|id:3|. As this rule does not cover access to the \verb|Function()| constructor via built-in global functions, an additional rule to cover this vector is proposed. Rule with \verb|id:5|:
 
 \begin{lstlisting}[style=basicStyle, caption=Rule proposal to block usage of Function() constructor via built-in functions]
 SecRule REQUEST_COOKIES|REQUEST_COOKIES_NAMES|ARGS_NAMES|ARGS|XML:/* "@rx 
@@ -246,14 +229,12 @@ SecRule REQUEST_COOKIES|REQUEST_COOKIES_NAMES|ARGS_NAMES|ARGS|XML:/* "@rx
     setvar:'tx.xss_score=+%{tx.critical_anomaly_score}',\
     setvar:'tx.inbound_anomaly_score_pl1=+%{tx.critical_anomaly_score}'"
 \end{lstlisting}
-
-After implementing rules with ids \verb|4| and \verb|5|, the payload:
+After implementing rules with \verb|id:4| and \verb|id:5|, the payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 Error["constructor"].constructor('alert'+'(`concatenation`)')()
 \end{lstlisting}
-
-using a built-in object as an alternative to \verb|[]|, which was used in the bypassing payload stated in Listing~\ref{lst:funconbypass} under Section~\ref{sec:functionconstructorsingleeva}, was successfully blocked by the evaluated firewall:
+using a built-in object as an alternative to \verb|[]|, which was used in the bypassing payload stated in Listing~\ref{lst:funconbypass} under Section~\ref{sec:functionconstructorsingleeva}, was successfully detected and blocked by the evaluated firewall:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=Function() constructor bypass using a built-in object blocked, label={lst:constructorsblockedbio}]
 <payload>Error["constructor"].constructor('alert'+'(`concatenation`)')()</payload>
@@ -263,13 +244,11 @@ using a built-in object as an alternative to \verb|[]|, which was used in the by
 <fileDetails>[line "54"] [id "4"]<fileDetails>
 <MatchedData>"Error[\x22constructor\x22].constructor("</MatchedData>
 \end{lstlisting}
-
 A built-in function was used to create a semantically similar payload: 
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 isNaN["constructor"]('alert'+'(`concatenation`)')()
 \end{lstlisting}
-
 This payload was now blocked by the updated evaluated firewall as well:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=Function() constructor bypass using a built-in function blocked, label={lst:constructorsblockedbif}]
@@ -280,8 +259,7 @@ This payload was now blocked by the updated evaluated firewall as well:
 <fileDetails>[line "78"] [id "5"]<fileDetails>
 <MatchedData>"isNaN[\x22constructor\x22]("</MatchedData>
 \end{lstlisting}
-
-The proposed rules decrease the risk of false positives compared to the reduced regular expression mentioned under Listing~\ref{lst:propredregex} but simultaneously increases the risk of missed built-in objects in comparison. For instance, once new built-in objects are introduced into the JavaScript language, the proposed rule needs to be updated while usage of the reduced regular expression would match on any character sequence without depending on knowledge about built-in object identifiers.
+The proposed rules decrease the risk of false positives compared to the reduced regular expression mentioned under Listing~\ref{lst:propredregex}, but simultaneously increases the risk of missed built-in objects in comparison. For instance, once new built-in objects are introduced into the JavaScript language, the proposed rule needs to be updated while usage of the reduced regular expression would match on any character sequence without depending on knowledge about built-in object identifiers.
 
 Deciding between using the full regular expression stated in Listing~\ref{lst:constructorsruleproposalregexA} or it's variants, such as mentioned in Listing~\ref{lst:propredregex} and Listing~\ref{lst:constructorruleproposalregexC}, forces the decision between the increased risk of allowing certain malicious payloads to bypass the firewall or the increased risk of false positives. It points to the required balancing act between the two risks.
 
@@ -292,15 +270,15 @@ In the following subsections, additional insights into the performance of the ev
 \subsubsection{Unicode normalization: proposal}
 \label{sec:unicodenormprop}
 Section~\ref{sec:uninormsingleiter} and Section~\ref{sec:forcedunicodenorm} have shown that Unicode normalization can be used to bypass the evaluated firewall.
-The ModSecurity web application firewall uses transformers to decode percent encoded payloads before they are checked against the ruleset. In a similar manner, the same could be done with Unicode normalization. Incoming requests would be normalized according to Normalization Form NFKC as detailed under Section~\ref{sec:unicodenormalization} and then matched against the ruleset.
+The ModSecurity web application firewall uses transformers to decode percent encoded payloads before they are checked against the ruleset. In a similar manner, the same could be done with Unicode normalization. Incoming requests would be normalized according to Normalization Form NFKC, as detailed under Section~\ref{sec:unicodenormalization}, and then matched against the ruleset.
 
 \subsubsection{HTML character references: proposal}
 \label{sec:htmlcharrefprop}
-Section~\ref{sec:htmlcharrefsingleeva}, Section~\ref{sec:doublehtmlcharref} and Section~\ref{sec:htmlencjsesc} have shown that the evaluated firewall is vulnerable to \acrshort{html} character reference bypasses. ModSecurity provides the \verb|t:htmlEntityDecode| transformer. As seen in Section~\ref{sec:htmlcharrefsingleeva} under Listing~\ref{lst:storedxssinjblocked}, the blank payload is being blocked by the CRS4.1 rules with ids \verb|941170|, \verb|941210| and \verb|941390|. Each of those rules use the \verb|t:htmlEntityDecode| transformer provided by ModSecurity. Nonetheless, the bypassing payload stated under Listing~\ref{lst:htmlcharacterreferencebypass} successfully bypasses all three rules using HTML character references. As those should be decoded by the firewall previously to matching the payload against the ruleset, it seems to be a bug in ModSecurity or the ruleset. In any case, the performance of the evaluated firewall against the \acrshort{html} character reference evasion technique has been  evaluated. The proposed measure to improve the filter is improving the \verb|t:htmlEntityDecode| transformer.
+Section~\ref{sec:htmlcharrefsingleeva}, Section~\ref{sec:doublehtmlcharref} and Section~\ref{sec:htmlencjsesc} have shown that the evaluated firewall is vulnerable to \acrshort{html} character reference bypasses. ModSecurity provides the \verb|t:htmlEntityDecode| transformer. As seen in Section~\ref{sec:htmlcharrefsingleeva} under Listing~\ref{lst:storedxssinjblocked}, the blank payload is being blocked by the \acrshort{crs} 4.1 rules with ids \verb|941170|, \verb|941210| and \verb|941390|. Each of those rules use the \verb|t:htmlEntityDecode| transformer provided by ModSecurity. Nonetheless, the bypassing payload stated under Listing~\ref{lst:htmlcharacterreferencebypass} successfully bypasses all three rules using \acrshort{html} character references. As those should be decoded by the firewall previously to matching the payload against the ruleset, it seems to be a bug in ModSecurity or the ruleset. In any case, the performance of the evaluated firewall against the \acrshort{html} character reference evasion technique has been  evaluated. The proposed measure to improve the filter is improving the \verb|t:htmlEntityDecode| transformer.
 
 \subsubsection{JavaScript escape sequences: proposal}
 \label{sec:jsescprop}
-Similar to what was noticed in the previous subsection, Section~\ref{sec:htmlcharrefprop}, the ModSecurity firewall provides a \verb|t:jsDecode| transformer which is being used by rules from the ruleset. The tested payload used in Section~\ref{sec:jsescapesingleiter} was obscured using a JavaScript escape sequence in the form of \verb|\uHHHH|. This escape sequence was successfully decoded by the ModSecurity firewall and the obscured payload correctly blocked according to rule \verb|941390|. If the tested payload is obscured using an escape sequence in the form of \verb|\u{HHHH}|, which was introduced with ES6, the firewall does not manage to decode the payload and the payload subsequently bypassed the evaluated firewall. It was detected that the evaluated ModSecurity firewall using CRS4.1 can be bypassed by using JavaScript escape sequences in the form of \verb|\u{HHHH}|. The proposed measure to improve the filtering capabilities is to extend the \verb|t:jsDecode| transformer with the ability to decode newer escape sequences.
+Similar to what was noticed in the previous subsection, Section~\ref{sec:htmlcharrefprop}, the ModSecurity firewall provides a \verb|t:jsDecode| transformer which is being used by rules from the ruleset. The tested payload used in Section~\ref{sec:jsescapesingleiter} was obscured using a JavaScript escape sequence in the form of \verb|\uHHHH|. This escape sequence was successfully decoded by the ModSecurity firewall and the obscured payload correctly blocked according to rule \verb|941390|. If the tested payload is obscured using an escape sequence in the form of \verb|\u{HHHH}|, which was introduced with ES6, the firewall does not manage to decode the payload and the payload subsequently bypassed the evaluated firewall. It was detected, that the evaluated ModSecurity firewall using \acrshort{crs} 4.1 can be bypassed by using JavaScript escape sequences in the form of \verb|\u{HHHH}|. The proposed measure to improve the filtering capabilities is to extend the \verb|t:jsDecode| transformer with the ability to decode newer escape sequences.
 
 \bigskip
 The rules proposed in this section conclude the evaluation of the tested firewall configuration. Based on the gathered results and insights, the next section proposes a generic evaluation methodology for web application firewalls using firewall evasion techniques.
