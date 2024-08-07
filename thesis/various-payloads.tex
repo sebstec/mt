@@ -60,7 +60,6 @@ As escaping any character should be possible in a JSON payload, firewall filters
 	"message": "alert(\"JSON\")"
 }
 \end{lstlisting}
-
 To evade a filter looking for the character sequence \verb|alert(|, the payload inside the message may be modified to:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
@@ -68,7 +67,6 @@ To evade a filter looking for the character sequence \verb|alert(|, the payload 
 	"message": "alert\u0028\"JSON\")"
 }
 \end{lstlisting}
-
 The JSON parser does not differentiate between both payloads. As such, the following statements running inside a web browser are semantically equal:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
@@ -76,13 +74,12 @@ eval(JSON.parse('{"message":"alert(\\"JSON\\")"}').message)
 
 eval(JSON.parse('{"message":"alert\\u0028\\"JSON\\")"}').message)
 \end{lstlisting}
-
 Results of using this technique during the evaluation are stated under Section~\ref{sec:unicodeinjsontest} and Section~\ref{sec:forcedunicodenorm}.
 
 
 \subsubsection{Unicode Normalization}
 \label{sec:unicodenormalization}
-The unicode standard defines two types of equivalence between characters: canonical equivalence and compatibility equivalence. The report "Unicode Normalization Forms" by Ken Whistler for Unicode Version 15.1.0 states the following regarding the two types of equivalence:
+The Unicode standard defines two types of equivalence between characters: canonical equivalence and compatibility equivalence. The report "Unicode Normalization Forms" by Ken Whistler for Unicode Version 15.1.0 states the following regarding the two types of equivalence:
 
 \begin{quote}
 	Canonical equivalence is a fundamental equivalency between characters or sequences of characters which represent the same abstract character, and which when correctly displayed should always have the same visual appearance and behavior. Figure~\ref{fig:caneq} shows this type of equivalence with examples of several subtypes.
@@ -131,19 +128,17 @@ Regarding Normalization Forms, the report states in further proceedings:
 	\caption{Normalization Forms}
 	\label{tab:normform}
 \end{table}
-In the context of Firewall Evasion, if inputs on the web server are normalized using one of the afromentioned Normalization Forms during processing, an attacker could try to substitute certain characters inside a malicious payload with equivalent unicode characters. \cite{medium/allypetitt}
-Such a payload might be able to avoid the filter of the web Application Firewall that is looking for patterns including only the normalized form of the unicode character. As an example, the payload:
+In the context of firewall evasion, if inputs on the web server are normalized using one of the afromentioned Normalization Forms during processing, an attacker could try to substitute certain characters inside a malicious payload with equivalent Unicode characters. \cite{medium/allypetitt}
+Such a payload might be able to avoid the filter of the web application firewall that is looking for patterns including only the normalized form of a Unicode character. As an example, the payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 "prompt`${secret}`"
 \end{lstlisting}
-
 could be substituted with the payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 "prompt`\uFE69{secret}`"
 \end{lstlisting}
-
 The unicode character U+FE69 is named "Small Dollar Sign" and its decomposition form is U+0024, which is the regular Dollar Sign. \cite{comp/uni}
 
 Using the JavaScript function \verb|normalize()|, the string containing the Small Dollar Sign: \verb|"\uFE69"| can be decomposed using Compatibility Decomposition (NFKD) into a string containing the normal Dollar Sign: \verb|"\u0024"| respectively \verb|"$"|.
@@ -152,13 +147,11 @@ By calling \verb|.normalize("NFKD")| on the afromentioned example payload:
 \begin{lstlisting}[style=basicStyle, language=Python]
 "prompt`\uFE69{secret}`".normalize("NFKD")
 \end{lstlisting}
-
 the payload will be normalized to the initial payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 "prompt`${secret}`"
 \end{lstlisting}
-
 If the web application evaluates the payload post normalization, the target effect has been achieved by the antagonist actor. An example of a vulnerable function inside a web application is given in the following code sample. Consider the variable \verb|incomingPayload| to be holding the incoming payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
@@ -168,7 +161,6 @@ const message = "Hello " + incomingPayload.normalize('NFKD')
 const evaluateMe = "console.log(\"" + message + "\")"
 eval(evaluateMe)
 \end{lstlisting}
-
 Unicode Normalization is also supported in programming languages different to JavaScript, such as Python. \cite{python/normalization}
 
 Results of evaluated payloads obscured using this technique are stated under Section~\ref{sec:uninormsingleiter} and Section~\ref{sec:forcedunicodenorm}.
@@ -180,12 +172,12 @@ In order to evade regex filerting by the web application firewall, the case of a
 
 Modern regex flavors allow the application of modifiers to parts of the regular expression.
 One such modifier is \verb|(?i)|. It makes the regex case insensitive. \cite{regex/jan} Only when this modifier is not used, can a payload evade regex filtering using case alternation.
+
 Taking the Cross-site scripting payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 <script>alert('XSS')</script>
 \end{lstlisting}
-
 as an example. After applying case alternation, it might result in a payload in the form of:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
@@ -198,7 +190,6 @@ The Windows file system treats file and directory names as case-insensitive by d
 \begin{lstlisting}[style=basicStyle, language=Python]
 http://127.0.0.1:8000/.env
 \end{lstlisting}
-
 is treated equally to the url:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
@@ -246,14 +237,14 @@ The payload:
 \begin{lstlisting}[style=basicStyle, language=Python]
 <script>alert('XSS')</script>
 \end{lstlisting}
-
 becomes
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 %3Cscript%3Ealert%28%27XSS%27%29%3C%2Fscript%3E
 \end{lstlisting}
+after percent encoding it with the Python function \verb|urllib.parse.quote_plus|.
 
-after percent encoding it with the Python function \verb|urllib.parse.quote_plus|. Evaluation results using this technique are stated under Section~\ref{sec:percencsingleiter}, Section~\ref{sec:doublepercenc}, Section~\ref{sec:jsencpercenc} and Section~\ref{sec:forcedunicodenorm}.
+Evaluation results using this technique are stated under Section~\ref{sec:percencsingleiter}, Section~\ref{sec:doublepercenc}, Section~\ref{sec:jsencpercenc} and Section~\ref{sec:forcedunicodenorm}.
 
 
 \subsubsection{Charset Alternation}
@@ -262,6 +253,7 @@ To indicate the original media type prior to any applied content encoding, the \
 It can be used in requests by the client to tell the server what type of data is actually sent.
 \verb|charset| is a possible directive, that can be supplied with the \verb|Content-Type| header.
 It specifies the character encoding standard. \cite{http/contenttype}
+
 If a web server is supporting requests in different encoding standards, but the web application firewall is not configured to parse certain encoding standards, the web application firewall may not recognize such encoded request as malicious.
 
 If the payload:
@@ -269,7 +261,6 @@ If the payload:
 \begin{lstlisting}[style=basicStyle, language=Python]
 <script>alert("xss")</script>
 \end{lstlisting}
-
 is encoded to the charset \verb|UTF-16|, as stated in the Python 3 code sample:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
@@ -277,15 +268,15 @@ pl = "<script>alert('xss')</script>"
 ex_encoding = 'UTF-16'
 pl_encoded = pl.encode(ex_encoding)
 \end{lstlisting}
-
 it becomes:
 
 \begin{lstlisting}[style=basicStyle]
 \xff\xfe<\x00s\x00c\x00r\x00i\x00p\x00t\x00>\x00a\x00l\x00e\x00r\x00t\x00(\x00'\x00x\x00s\x00s\x00'\x00)\x00<\x00/\x00s\x00c\x00r\x00i\x00p\x00t\x00>\x00
 \end{lstlisting}
-
 This payload differs from the original payload in \verb|UTF-8|. \verb|UTF-8| encoding is the standard for \acrshort{uri}s according to RFC-3986. \cite{rfc3986}
 
-If a web server accepts \acrshort{http} requests in \verb|UTF-16| encoding and the web application firewall does not recognize payloads encoded in \verb|UTF-16|, any payload can be sent towards the web application without being detected by the web application firewall. Results of testing this technique during the evaluation are stated under Section~\ref{sec:charaltsingleiter}.
+If a web server accepts \acrshort{http} requests in \verb|UTF-16| encoding and the web application firewall does not recognize payloads encoded in \verb|UTF-16|, any payload can be sent towards the web application without being detected by the web application firewall. 
+
+Results of using this technique during the evaluation are stated under Section~\ref{sec:charaltsingleiter}.
 
 This technique is proposed by Ally Petitt. \cite{medium/allypetitt}

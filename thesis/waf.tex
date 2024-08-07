@@ -3,7 +3,7 @@
 In contrast to network firewalls based on \acrfull{ip} packet filtering, which operate on layers 3 and 4, a web application firewall is a firewall acting on the application layer.
 
 Users interact with a web application using their web browser.
-After instructing the browser to show resources identified by a \acrfull{uri} according to the http or https \acrshort{uri} Schemes, the web browser will initiate opening \acrfull{tcp} connections to the designated open port on the web server hosting the web application.
+After instructing the browser to show resources identified by a \acrfull{uri} according to the \acrfull{http} or \acrfull{https} \acrshort{uri} Schemes, the web browser will initiate opening \acrfull{tcp} connections to the designated open port on the web server hosting the web application.
 Usually the well-known default ports 80 for \acrfull{http} connections and 443 for \acrfull{https} connections are being used.
 The \acrshort{tcp} connections are used to transport the datagrams of the \acrshort{http} connections on the application layer. \cite{rfc7230}
 
@@ -22,17 +22,17 @@ The web application firewall acts as a reverse proxy, an intermediary between cl
 Messages originating from a client are first received by the web application firewall.
 At this point, the configured filtering rules are applied and a decision is made if the message is to be forwarded or rejected.
 If the message is considered benign, the web application firewall forwards the message to the server hosting the web application.
-If the message is considered malicious, the web application rejects the message.
+If the message is considered malicious, the web application firewall rejects the message.
 In the case of rejection, the web application will never receive the malicious message and it will stay unaffected by the malicious payload.
 
 \acrshort{http} answers originating from a server hosting a web application are also first received by the web application firewall.
 There, rules for outgoing \acrshort{http} messages are applied.
 If the content of an \acrshort{http} answer is unusual in comparison to the usual outgoing traffic, a rule might match and deny the client from receiving the \acrshort{http} answer.
 
-Configuring the web application firewall with which rules to apply to incoming and outgoing traffic requires a balancing act between security and false positives.
+Configuring the web application firewall with rules to apply to incoming and outgoing traffic requires a balancing act between security and false positives.
 When a genuine \acrshort{http} message causes a rule to match, it is described as false positive.
 A stricter ruleset provides more security, but the risk of false positives increases as well.
-The contributors to the OWASP Core Rule Set, which is a generic rule set used by a web application firewall to protect any web application, provide instructions on false positives:
+The contributors to the OWASP \acrfull{crs}, which is a generic rule set used by a web application firewall to protect web applications, provide instructions on false positives:
 
 \begin{quote}
 	When a genuine transaction causes a rule from the Core Rule Set to match in error it is described as a false positive. False positives need to be tuned away by writing rule exclusions, [...]

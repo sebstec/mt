@@ -37,7 +37,6 @@ The example payload using the \verb|<a>| element to exploit a Cross-Site Scripti
 \begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
 <a href=javascript:alert('a')>ClickMeFor$</a>
 \end{lstlisting}
-
 is therefore semantically equal to the following payload where a named character reference is used to substitute the left parenthesis of the initial payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python, escapeinside=\^\^]
@@ -60,7 +59,7 @@ The evaluation results of payloads obscured using this technique are stated unde
 
 \subsubsection{fromCharCode()}
 \label{sec:fromcharcodetech}
-Evading signature based web application firewalls that match on payloads containing JavaScript statements can be achieved by syntactically modifying the payload string. This technique can be used if the JavaScript statements constituting the malicious part of the payload are passed in string format.
+Evading signature based web application firewalls, that match on payloads containing JavaScript statements, can be achieved by syntactically modifying the payload string. This technique can be used if the JavaScript statements constituting the malicious part of the payload are passed in string format.
 Rules blocking requests based on detected character sequences might be evaded by substituting payloads with a sematically equivalent but syntactically different string. This subsection and the following two subsections will detail three different methods to syntactically alter payload strings in JavaScript. \\
 
 With the built-in \verb|String| object, JavaScript provides the static \verb|fromCharCode()| function. The \verb|String.fromCharCode()| function returns a string created from the sequence of UTF-16 code units given as parameters to the function. \cite{js/fromCharCode}
@@ -70,14 +69,14 @@ For instance, the payload:
 \begin{lstlisting}[style=basicStyle, language=Python]
 eval(String.fromCharCode(0x61,108,0x65,114,116,0x28,96,120,115,115,0x60,0x29))
 \end{lstlisting}
-
 is semantically equal to the payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 eval("alert('xss')")
 \end{lstlisting}
+The obscured payload uses charcodes specified in decimal or hexadecimal format to compose the malicious payload string. 
 
-The obscured payload uses charcodes specified in decimal or hexadecimal format to compose the malicious payload string. Evaluation results using this evasion technique are stated under Section~\ref{sec:charcodesingleiter} and Section~\ref{sec:charcodemultiiter}.
+Evaluation results using this evasion technique are stated under Section~\ref{sec:charcodesingleiter} and Section~\ref{sec:charcodemultiiter}.
 
 Technique inspired by William J Buchanan \cite{asecsite/jsobf1}.
 
@@ -94,15 +93,13 @@ const toEvaluate = "<some statements>" + route.query.payload
 document.getElementById('div1').insertAdjacentHTML('afterbegin',`<img src=0 onerror=${eval(toEvaluate)}>`)
 </script>
 \end{lstlisting}
-
-If \verb|route.query.payload| is replaced by the payload string, this string will be evaluated as part of the statements that compose the variable \verb|toEvaluate|. Whether the payload will be executed with the desired effect depends on the statements that compose \verb|toEvaluate|. In the following, it will be assumed that these statements do not have any effect.
+If \verb|route.query.payload| is replaced by the payload string, this string will be evaluated as part of the statements that compose the variable \verb|toEvaluate|. Whether the payload will be executed with the desired effect, depends on the statements that compose \verb|toEvaluate|. In the following, it will be assumed that these statements do not have any effect.
 
 If the payload:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 "alert('concatenation')"
 \end{lstlisting}
-
 is sent towards the targeted web application, it will be concatenated to the \verb|toEvaluate| string and subsequently evaluated by the call to the \verb|eval()| function. With the initial payload, this is where the desired effect is achieved.
 
 If a web application firewall filters and blocks this payload, because of the additional call to the \verb|eval()| function in the vulnerable code, the payload can be obscured by using string concatenation. If the target executes the afromentioned or similar vulnerable code, following obscured payload is also semantically valid:
@@ -110,28 +107,25 @@ If a web application firewall filters and blocks this payload, because of the ad
 \begin{lstlisting}[style=basicStyle, language=Python]
 "alert"+"('concatenation')"
 \end{lstlisting}
-
-Again, the payload string will be concatenated to the \verb|toEvaluate| string and subsequently evaluated by the call to the \verb|eval()| function. Once the page is loaded inside a browser, the evaluated and thereby concatenated statements will be executed as soon as the \verb|img| with \verb|src=0| fails to load an image from the invalid 0-source.
+Again, the payload string will be concatenated to the \verb|toEvaluate| string and subsequently evaluated by the call to the \verb|eval()| function. Once the page is loaded inside a browser, the evaluated and thereby concatenated statements will be executed as soon as the \verb|<img>| with \verb|src=0| fails to load an image from the invalid 0-source.
 
 Results of evaluating the tested web application firewall against this technique are stated under Section~\ref{sec:stringconcsingleiter}, Section~\ref{sec:charcodemultiiter} and Section~\ref{sec:funconstrconbypass}. This technique is especially useful in combination with methods to force the evaluation of statements sent inside a payload string. If forced evaluation is achieved by parts of the payload, this technique does no longer depend on evaluation by the vulnerable code. Methods to achieve forced evaluation are stated under Section~\ref{sec:eval} and Section~\ref{sec:functionconstructor}.
 
 
 \subsubsection{JavaScript Comment Substitution}
 \label{sec:jscommentsub}
-During the evaluation and subsequent payload validation according to the methodology stated under Section~\ref{sec:evaluation} it turned out that if a payload is to be concatenated to an \acrshort{html} attribute like in the vulnerable test code snippet mentioned under Section~\ref{sec:evaluation}, whitespaces in the payload string are causing the concatenated string to be split. An example is laid out under Section~\ref{sec:funconstrconbypass}.
+During the evaluation and subsequent payload validation according to the methodology stated under Section~\ref{sec:evaluation}, it turned out that if a payload is to be concatenated to a \acrshort{html} attribute like in the vulnerable test code snippet mentioned under Section~\ref{sec:evaluation}, whitespaces in the payload string are causing the concatenated string to be split. An example is laid out under Section~\ref{sec:funconstrconbypass}.
 
 Considering the JavaScript statements:
 
 \begin{lstlisting}[style=basicStyle,language=Python]
 var s = 5; prompt(s, s)
 \end{lstlisting}
-
 In order to avoid passing whitespaces inside the JavaScript payload string, whitespaces can be replaced by inline comments:
 
 \begin{lstlisting}[style=basicStyle,language=Python]
 var/**/s/**/=/**/5;/**/prompt(s,/**/s)
 \end{lstlisting}
-
 Semantically, both code snippets are equal as they will both be executed with the desired effect.
 
 Results of evaluating the tested web application firewall against this technique are stated under Section~\ref{sec:jscommentsubsingleiter} and Section~\ref{sec:funconstrconbypass}.
@@ -150,7 +144,7 @@ In JavaScript, characters can be represented by escape sequences:
 
 Single character escapes are subject to some reserved characters represented by the regular expression: \verb|\\[bfnrtv0'"\\]|. Apart from those, any character without special meaning can be escaped using single character escape. For instance: \verb|'\a' == 'a'|.
 
-Unicode code point escapes have been introduced in ES6, octal escapes have been deprecated since ES5. As such, unicode code point escapes might not be recognized by outdated firewall rulesets, octal escapes might not be valid on some up-to-date targets.
+Unicode code point escapes have been introduced in ES6, octal escapes have been deprecated since ES5. As such, Unicode code point escapes might not be recognized by outdated firewall rulesets, octal escapes might not be valid on some up-to-date targets.
 
 The following table details where certain escape sequences can be used:
 
@@ -169,7 +163,7 @@ The following table details where certain escape sequences can be used:
 \end{table}
 \cite{exploringes6/escapeseq,bynens/escape,js/lexicalgrammar}
 
-This technique is used under Section~\ref{sec:jsescapesingleiter}, Section~\ref{sec:jsescapemultiiter}, Section~\ref{sec:avoidingbypassA} and Section~\ref{sec:htmlencjsesc}.
+Results of using this technique during the evaluation are stated under Section~\ref{sec:jsescapesingleiter}, Section~\ref{sec:jsescapemultiiter}, Section~\ref{sec:avoidingbypassA} and Section~\ref{sec:htmlencjsesc}.
 
 
 \subsubsection{Tagged Template Literals}
@@ -188,13 +182,11 @@ As the function \verb|alert()| can be called with an array as first parameter, i
 \begin{lstlisting}[style=basicStyle,language=Python]
 alert('XSS')
 \end{lstlisting}
-
 with the payload:
 
 \begin{lstlisting}[style=basicStyle,language=Python]
 alert`XSS`
 \end{lstlisting}
-
 In general, such substitute payloads might evade regular expression filtering that looks for a function name followed by an opening \verb|(|.
 
 Results of using this technique in payloads to evaluate the tested firewall configuration are stated under Section~\ref{sec:taggedtemplateliteralsevaluation}, Section~\ref{sec:avoidingbypassA} and Section~\ref{sec:avoidingbypassB}.
@@ -204,53 +196,46 @@ Technique inspired by Rafael Scheel. \cite{onecons/wafbypass}
 \subsubsection{eval()}
 \label{sec:eval}
 
-JavaScript payloads that are being passed in string format can be force evaluated using the eval function. The \verb|eval()| function will evaluate the source string given as an argument and return its completion value. \cite{js/eval}
+JavaScript payloads, that are being passed in string format, can be force evaluated using the \verb|eval()| function. The \verb|eval()| function will evaluate the source string given as an argument and return its completion value. \cite{js/eval}
 
 A possible usecase for \verb|eval()| in the quest to bypass a web application firewall is the splitting of function names in payloads that would cause a \acrshort{http} request to get rejected by the firewall. By using string concatenation as laid out under Section~\ref{sec:stringconc}, to avoid a match on \verb|alert(| in the payload:
 
 \begin{lstlisting}[style=basicStyle,language=Python]
 alert('XSS')
 \end{lstlisting}
-
 it is possible to split the function call into parts of \verb|al|, \verb|e| and \verb|rt('XSS')| by using string concatenation:
 
 \begin{lstlisting}[style=basicStyle,language=Python]
 `al` + `e` + `rt('XSS')`
 \end{lstlisting}
-
 Sending the payload in this form will not cause the the desired effect, as a JavaScript interpreter will interpret the payload as a string instead of a function call to the \verb|alert()| function.
-Using the \verb|eval()| function in combination with the splitted string solves this problem. Sending a payload in the form of
+Using the \verb|eval()| function in combination with the splitted string solves this problem. Sending a payload in the form of:
 
 \begin{lstlisting}[style=basicStyle,language=Python]
 eval(`al` + `e` + `rt('XSS')`)
 \end{lstlisting}
-
-where the initial payload is passed as an argument to the \verb|eval()| function will cause the string to be evaluated and interpreted.
+where the initial payload is passed as an argument to the \verb|eval()| function, will cause the string to be evaluated and interpreted.
 
 Evaluation results using this technique are stated under Section~\ref{sec:functionconstructorsingleeva} and Section~\ref{sec:jsescapemultiiter}.
 
 \subsubsection{Function() Constructor}
 \label{sec:functionconstructor}
 
-When using the function \verb|eval()| (see Section~\ref{sec:eval}) causes a request to be blocked, a substitute payload in the form of
+When using the function \verb|eval()| (see Section~\ref{sec:eval}) causes a request to be blocked, a substitute payload in the form of:
 
 \begin{lstlisting}[style=basicStyle,language=Python]
 [].constructor.constructor(`alert('XSS')`)()
 \end{lstlisting}
-
 is available in JavaScript.
 
 Calling \verb|[]| will create an empty array, which is a special kind of object.
 Any kind of object in JavaScript, with the exception of null prototype objects, will have a constructor property on its prototype. \cite{js/object}
-
-The Array objects constructor can be accessed by calling \verb|.constructor| on an instance of Array, like \verb|[].constructor|. \cite{js/array}
-
+The constructor of an Array object can be accessed by calling \verb|.constructor| on an instance of Array, like \verb|[].constructor|. \cite{js/array}
 Constructors are technically regular functions. As such, they are Function objects. Function objects have a constructor themselfes, which again is called using the \verb|.constructor| notation. \cite{js/constructor}
-
 Using \verb|[].constructor.constructor| will yield access to the \verb|Function()| constructor.
+
 Calling the \verb|Function()| constructor directly can create functions dynamically, similar to using \verb|eval()|.
 The difference being that the \verb|Function()| constructor creates functions that execute in the global scope only. More on this limitation will be laid out under Section~\ref{sec:payloadlimitations}.
-
 The \verb|Function()| constructor takes a variable count of arguments. The first $n - 1$ arguments are the
 \begin{quote}
 	names to be used by the function as formal argument names. Each must be a string that corresponds to a valid JavaScript parameter (any of plain identifier, rest parameter, or destructured parameter, optionally with a default), or a list of such strings separated with commas. \cite{js/function}
@@ -262,11 +247,10 @@ Therefore, the afromentioned substitute for \verb|eval()|:
 \begin{lstlisting}[style=basicStyle,language=Python]
 [].constructor.constructor(`alert('XSS')`)()
 \end{lstlisting}
-
 will create a function with the function body \verb|alert('XSS')| and call it directly.
 In other words: It will call a function that calls \verb|alert('XSS')|.
 
-Technique inspired by Rafael Scheel \cite{onecons/wafbypass}.
+Technique inspired by Rafael Scheel \cite{onecons/wafbypass}. \\
 
 A more straightforward and less obscure way of accessing the \verb|Function()| contructor is to call it directly:
 \begin{quote}
@@ -280,10 +264,9 @@ In addition to accessing the \verb|Function()| constructor via the \verb|constru
 \begin{lstlisting}[style=basicStyle,language=Python,escapeinside=\^\^]
 [].^map^.constructor(`alert('XSS')`)()
 \end{lstlisting}
+Technique using \verb|map| inspired by Martin Kleppe. \cite{mk/elementsVid} \\
 
-(Technique using \verb|map| inspired by Martin Kleppe. \cite{mk/elementsVid})
-
-Depending on the context where the payload will be inserted, sometimes the \verb|Function()| constructor can not be accessed using empty arrays or empty objects. Such a case can occur when there are statements in the context prior to the point of payload insertion. Not explicitly terminated statements that depend on JavaScripts automatic semicolon insertion can cause the payload to not execute correctly. In some cases, when using empty arrays or objects in the beginning of the payload, the automatic semicolon insertion might not insert a semicolon between the end of the statement prior to the point of payload insertion and the beginning of the payload. Subsequently, the JavaScript parser will throw a SyntaxError at this point. One example for such a case is mentioned under Section~\ref{sec:charcodemultiiter}. MDN contributors state details around automatic semicolon insertion under the Lexical grammar section of their JavaScript reference \cite{js/autosemi}.
+Depending on the context, where the payload will be inserted, sometimes the \verb|Function()| constructor can not be accessed using empty arrays or empty objects. Such a case can occur when there are statements in the context prior to the point of payload insertion. Not explicitly terminated statements, that depend on JavaScript's automatic semicolon insertion, can cause the payload to not execute correctly. In some cases, when using empty arrays or objects in the beginning of the payload, the automatic semicolon insertion might not insert a semicolon between the end of the statement prior to the point of payload insertion and the beginning of the payload. Subsequently, the JavaScript parser will throw a SyntaxError at this point. One example for such a case is mentioned under Section~\ref{sec:charcodemultiiter}. MDN contributors state details around automatic semicolon insertion under the Lexical grammar section of their JavaScript reference: \cite{js/autosemi}
 
 If, for any reason, the Array object can not be used, there are substitutes available in the form of JavaScript's standard built-in objects.
 JavaScript's built-in objects include but are not limited to built-in global functions that can be used as a substitute: \cite{js/builtin}
@@ -291,47 +274,42 @@ JavaScript's built-in objects include but are not limited to built-in global fun
 \begin{lstlisting}[style=basicStyle,language=Python,escapeinside=\^\^]
 isNaN.constructor(`alert('XSS')`)()
 \end{lstlisting}
-
 as well as a multitude of other built-in objects, for example the \verb|Error| object:
 
 \begin{lstlisting}[style=basicStyle,language=Python,escapeinside=\^\^]
 Error.constructor.constructor(`alert('XSS')`)()
 \end{lstlisting}
-
 If firewall rule maintainers implement new rules to specifically block the access to the \verb|Function()| constructor by blacklisting all built-in JavaScript objects, there is still the possibility that in the time after an update to JavaScript (ECMAScript) some newly released built-in objects are not blocked yet. This can be caused by either the rule maintainers slow adaption speed or a missing update on the web application firewall.
 
-In any case, the access to the \verb|Function| constructor is possible on self defined objects too. The following code sample displays this:
+The access to the \verb|Function| constructor is also possible on self defined objects. The following code sample displays this:
 
 \begin{lstlisting}[style=basicStyle,language=Python,escapeinside=\^\^]
 const someObject = { someProperty: "some string" }
 someObject.constructor.constructor(`alert('XSS')`)()
 \end{lstlisting}
+If the availablitiy of custom object references in the execution scope of the payload-code is given, custom object references can be used to create a function via the \verb|Function()| constructor.
 
-If the availablitiy of custom object references in the execution scope of the payload-code is given, custom object references can be used to create a function via the \verb|Function| constructor.
-
-The results of the evaluation by applying this evasion technique are shown under Section~\ref{sec:functionconstructorsingleeva}, Section~\ref{sec:charcodemultiiter}, Section~\ref{sec:funconstrconbypass}, Section~\ref{sec:avoidingbypassA}, Section~\ref{sec:avoidingbypassB} and Section~\ref{sec:forcedunicodenorm}.
+The results of the evaluation when applying this evasion technique are shown under Section~\ref{sec:functionconstructorsingleeva}, Section~\ref{sec:charcodemultiiter}, Section~\ref{sec:funconstrconbypass}, Section~\ref{sec:avoidingbypassA}, Section~\ref{sec:avoidingbypassB} and Section~\ref{sec:forcedunicodenorm}.
 
 Firewall rules in addition to the OWASP CoreRuleSet in version 4.1 to combat bypasses using the \verb|Function()| constructor are proposed under Section~\ref{sec:rulespropfunctionconstructor} and Section~\ref{sec:rulespropfunctionconstructorreflection}.
 
 
 \subsubsection{Square Bracket Notation}
 \label{sec:sbn}
-JavaScript provides a square bracket notation to access properties of an Object. It is used to access multiword properties as well as provide a way of obtaining property names as the result of an expression. \cite{js/brackets}
+JavaScript provides a square bracket notation to access properties of an object. It is used to access multiword properties as well as provide a way of obtaining property names as the result of an expression. \cite{js/brackets}
 
-This square bracket notation allows to substitute the dot notation in a case where using the dot notation is not feasible or blocked by firewall rules.
+The square bracket notation allows to substitute the dot notation in a case, where using the dot notation is not feasible or blocked by firewall rules.
 For instance, in a payload composed using the \verb|Function()| constructor:
 
 \begin{lstlisting}[style=basicStyle,language=Python]
 [].constructor.constructor(`alert('XSS')`)()
 \end{lstlisting}
-
 the dot notation can be substituted by the square bracket notation:
 
 \begin{lstlisting}[style=basicStyle,language=Python]
 []["constructor"]["constructor"](`alert('XSS')`)()
 \end{lstlisting}
-
-The \quotes{String Substitution} (Section~\ref{sec:stringreplace}), \quotes{JSFuck} (Section~\ref{sec:jsfuck}) and \quotes{Aurebesh.js} (Section~\ref{sec:aurebesh}) techniques mentioned in the further proceedings of this section heavily rely on JavaScript's square bracket notation.
+The String Substitution (Section~\ref{sec:stringreplace}), JSFuck (Section~\ref{sec:jsfuck}) and Aurebesh.js (Section~\ref{sec:aurebesh}) techniques mentioned in the further proceedings of this section heavily rely on JavaScript's square bracket notation.
 
 Evaluation results using the square bracket notation are stated under Section~\ref{sec:functionconstructorsingleevasbn}, Section~\ref{sec:funconstrconbypass}, Section~\ref{sec:avoidingbypassA} and Section~\ref{sec:avoidingbypassB}.
 
@@ -360,7 +338,6 @@ function open() {
 \end{lstlisting}
 
 In JavaScript, array-like access to string objects is possible. \cite{js/stringbrackets}
-
 For example, \verb|[open+[]][0][13]| returns the character \verb|(|. \verb|[open+[]][0][14]| returns the character \verb|)|. Listing~\ref{lst:opentostringindices} visualizes open.toString() with the corresponding indices:
 
 \begin{lstlisting}[style=basicStyle, caption=open.toString() with indices in JavaScript, label={lst:opentostringindices}]
@@ -378,7 +355,7 @@ Technique inspired by Rafael Scheel. \cite{onecons/wafbypass}
 
 \subsubsection{JSFuck}
 \label{sec:jsfuck}
-JSFuck was created by Martin Kleppe to write any valid JavaScript with only 6 different characters. 6 different characters is close to the possible Minimum, there are suggestions to use only 5 different characters, but they have some preconditions. \cite{mk/five, tc39/pipeline}
+JSFuck was created by Martin Kleppe to write any valid JavaScript with only 6 different characters. 6 different characters is close to the possible minimum. There are suggestions to use only 5 different characters, but they have some preconditions. \cite{mk/five, tc39/pipeline}
 
 Martin Kleppe describes JSFuck as follows:
 \begin{quote}
@@ -386,7 +363,6 @@ Martin Kleppe describes JSFuck as follows:
 
 	It does not depend on a browser, so you can even run it on Node.js. \cite{mk/jsfuck}
 \end{quote}
-
 Encoding the payload \verb|alert(1)| in JSFuck results in following payload:
 
 \begin{lstlisting}[style=basicStyle, caption=alert(1) in JSFuck, label={lst:alert1jsfuck}]
@@ -411,14 +387,13 @@ Encoding the payload \verb|alert(1)| in JSFuck results in following payload:
           (!![] + [])[+[]]
       ])[!+[] + !+[] + [+[]]],
 \end{lstlisting}
-
 This payload is 297 characters long, which is around 37 times more than the 8 characters forming \verb|alert(1)|. On usage of JSFuck, payload size increases dramatically. Encoding the payload \verb|alert('XSS')| already requires 5739 characters (see Listing~\ref{lst:alertxssjsfuck}). If payload size is not limited, a lot of obscuration can be gained by using JSFuck to obscure payloads. The JSFuck website provides an encoder that is ready to use. It supports implemented evaluating of the payload such that no additional measure is needed to execute the payload. \cite{mk/jsfuck}
 
 Evaluation results using JSFuck are stated under Section~\ref{sec:jsfucksingleiter}.
 
 \subsubsection{Aurebesh.js}
 \label{sec:aurebesh}
-Next to JSFuck, Aurebesh.js was created by Martin Kleppe. In its minimalistic form, it allows to write valid JavaScript statements calling the function \verb|alert(1)| while only using the characters \verb|() + [] ! " = {}| as well as at minimum one other character of choice. Aurebesh.js allows the choice of up to 9 distinct characters or words. In the case where the characters \verb|A B C D E F G H I| are chosen, the system is explained as follows:
+Next to JSFuck, Aurebesh.js was created by Martin Kleppe. In its minimalistic form, it allows to write valid JavaScript statements calling the function \verb|alert(1)|, while only using the characters \verb|() + [] ! " = {}| as well as at minimum one other character of choice. Aurebesh.js allows the choice of up to 9 distinct characters or words. In the case where the characters \verb|A B C D E F G H I| are chosen, the system is explained as follows:
 \begin{lstlisting}[style=basicStyle, caption=Aurebesh.js explanation \cite{mk/aurebesh}, label={lst:aurebeshexplanation}]
 		A = ''              // empty string
 		B = !A + A          // "true"
@@ -454,9 +429,9 @@ Next to JSFuck, Aurebesh.js was created by Martin Kleppe. In its minimalistic fo
 \end{lstlisting}
 If less than 9 characters (or words) are supplied, Aurebesh.js will reuse some characters by concatenating them together to create 9 different variables. \cite{mk/aurebesh}
 
-In contrast to the author who is pursuing the translation of JavaScript into other writing systems, antagonist actors might use this idea to translate \acrshort{xss} payloads that are blocked by a web application firewall into \acrshort{xss} payloads that bypass web application firewalls. Antagonist actors are not limited to just using 9 variables when crafting \acrshort{xss} payloads using Aurebesh.js. They can use Aurebesh.js as a base for their payloads while adding more characters and variables as needed.
+In contrast to the author of Aurebesh.js, who is pursuing the translation of JavaScript into other writing systems, antagonist actors might use this idea to translate \acrshort{xss} payloads, that are blocked by a web application firewall, into \acrshort{xss} payloads, that bypass web application firewalls. Antagonist actors are not limited to just using 9 variables when crafting \acrshort{xss} payloads using Aurebesh.js. They can use Aurebesh.js as a base for their payloads while adding more characters and variables as needed.
 The obfuscation gained by using Aurebesh.js might make payloads evade detection while the added payload content maliciously influences the web application.
-As a proof of concept, the function \verb|alert()| has been substituded with the function \verb|prompt()| in the following example:
+As a proof of concept, the function call \verb|alert(1)| has been replaced with the function call \verb|prompt(1,2)| in the following example:
 
 \begin{lstlisting}[style=basicStyle, caption={Aurebesh.js obfuscation of prompt(1,2)}, label={lst:aurebeshprompt}]
 		A = ''              // empty string
@@ -495,4 +470,4 @@ As a proof of concept, the function \verb|alert()| has been substituded with the
 
 For the evaluation results using Aurebesh.js to obfuscate payloads, see Section~\ref{sec:aurebeshevaluation}. \\
 
-Mentioned evasion techniques under this section (Section~\ref{sec:firewallevasiontechniques}) will be used to create targeted malicious requests in an effort to evaluate the performace of a tested firewall configuration against these requests. The evaluation methodology will be explained in the following section (Section~\ref{sec:evaluation}).
+Mentioned evasion techniques under this section, Section~\ref{sec:firewallevasiontechniques}, will be used in an experiment to create targeted malicious requests in an effort to evaluate the performace of a firewall configuration against these requests. The evaluation methodology will be explained in the following section, Section~\ref{sec:evaluation}.

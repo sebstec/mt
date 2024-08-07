@@ -1,9 +1,9 @@
 \subsection{Payload limitations}
 \label{sec:payloadlimitations}
-During the evaluation of the tested web application firewall using firewall evasion techniques, some payload limitations incurred through using certain evasion techniques became apparent. This section highlights some of them and states whether workarounds for those have been found. If a workaround for an incurred payload limitation exists, but is not known during the evaluation, a loophole in the evaluted firewall configuration might be missed.
+During the evaluation of the tested web application firewall using firewall evasion techniques, some payload limitations incurred through using certain evasion techniques became apparent. This section highlights some of them and states whether workarounds for those have been found. If a workaround for an incurred payload limitation exists, but is not known during the evaluation, a loophole in the evaluated firewall configuration might be missed.
 
 On usage of Tagged Template Literals like stated under Section~\ref{sec:taggedtemplateliterals}, the function being called always is called with the first parameter being an array of string literals, the second parameter being the first placeholder expression and following parameters according to following placeholders. Therefore, a workaround must be found for functions whose first parameter is to be called with the result of an expression.
-For instance, if the return value of an expression is to be displayed using the \verb|alert()| function, a substitute needs to found, as \verb|alert()| only accepts one parameter which contains the message \verb|alert()| will display. \cite{js/alert} 
+For instance, if the return value of an expression is to be displayed using the \verb|alert()| function, a substitute needs to found, as \verb|alert()| only accepts one parameter, which contains the message \verb|alert()| will display. \cite{js/alert} 
 Therefore, using \verb|alert()| will limit the displaying possibilities to the first parameter (an array of strings) of a Tagged Template Literal call. Substituting \verb|alert()| with the function \verb|prompt()| in combination with Tagged Template Literals allows to display a parameter given to the template string. The function \verb|prompt()| allows two parameters whereas the second parameter is used for a default input text in the displayed prompt. \cite{js/prompt} 
 As such, it is possible to display the result of the expression given in the first placeholder {\verb|{<expression>}|} after string coercion.
 However, in some cases there might not be a substitute function available. In such a case, the usage of Tagged Template Literals might not be possible at the time of the evaluation.
@@ -11,9 +11,9 @@ However, in some cases there might not be a substitute function available. In su
 If payloads make use of string concatenation, they need to be evaluated an additional time in order to concatenate the strings composing the statements that are be executed by the target. Therefore, either this evaluation must be forced by supplying according statements with the payload or this additional evaluation must be built-in the web application code that receives such payloads. An example of enforcing evaluation by supplying according statements is demonstrated under Section~\ref{sec:funconstrconbypass}. 
 Therefore, if a given ruleset manages to block requests equipped with statements to enforce the evaluation, and the web application does not perform any additional evaluation, using string concatenation to bypass a web application firewall in this configuration might not be possible at the time of the evaluation.
 
-If a payload makes use of percent encoding and the payloads are sent in the request body, the web application that receives this request must commit to percent decoding request bodies. As stated under Section~\ref{sec:percenc}, web servers receiving data via URI are inclined to percent decode this data before handing this data to the web application. This does not apply to request bodies. These must be explicitly percent decoded by the web application, if a web application is expecting data sent via request bodies to be percent encoded. As such, this technique is limited to being used when payload data is being sent via URI, via the request body towards a web application that explicityl decodes percent encoded bodies or partially percent encoded with force percent decoding similar to the forced unicode normalization stated under Section~\ref{sec:forcedunicodenorm}.
+If a payload makes use of percent encoding and the payloads are sent in the request body, the web application that receives this request must commit to percent decoding request bodies. As stated under Section~\ref{sec:percenc}, web servers receiving data via URI are inclined to percent decode this data before handing this data to the web application. This does not apply to request bodies. These must be explicitly percent decoded by the web application, if a web application is expecting data sent via request bodies to be percent encoded. As such, this technique is limited to being used when payload data is being sent via URI, via the request body towards a web application that explicitly decodes percent encoded bodies or partially percent encoded with force percent decoding similar to the forced unicode normalization stated under Section~\ref{sec:forcedunicodenorm}.
 
-If payloads make use of the \verb|Function()| constructor, multiple limitations apply. The first limitation potentially restricts access to local identifiers. As stated under Section~\ref{sec:functionconstructor}, the Function() constructor creates functions that execute in the global scope only. If trying to access local identifiers in statements given to the function constructor, these will cause errors or unexpected results. In the example code snippet:
+If payloads make use of the \verb|Function()| constructor, multiple limitations apply. The first limitation potentially restricts access to local identifiers. As stated under Section~\ref{sec:functionconstructor}, the \verb|Function()| constructor creates functions that execute in the global scope only. If trying to access local identifiers in statements given to the function constructor, these will cause errors or unexpected results. In the example code snippet:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
 const value = 1
@@ -28,7 +28,6 @@ function testFunc() {
 }
 testFunc()
 \end{lstlisting}
-
 The console will log the following four logs in order:
 
 \begin{lstlisting}[style=basicStyle, language=Python]
@@ -37,7 +36,6 @@ The console will log the following four logs in order:
 func 
 Uncaught ReferenceError: func is not defined
 \end{lstlisting}
-
 This is caused by the variable \verb|value| being initialized and accessed in global scope by the \verb|Function()| constructor with the value of 1, while a variable with the same identifier is being initialized and accessed by the \verb|eval()| function in the local scope. The same applies to the \verb|func()| function. There are two different functions in the global and local scope that go by lexically equal indentifiers.
 
 The second limitation inherent to using the \verb|Function()| constructor comes with using the statements \verb|[]| or \verb|{}| creating empty objects to access said constructor. As mentioned under Section~\ref{sec:functionconstructor} and Section~\ref{sec:charcodemultiiter}, the validity of payloads that include statements like \verb|[].constructor.constructor| depends on the context where the statements of such a payload will be injected. 

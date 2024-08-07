@@ -1,15 +1,15 @@
 \section{Evaluation Results}
 \label{sec:EvaluationResults}
-This section details the results of the evaluation that has been conducted like stated under Section~\ref{sec:evaluation}. 
+This section details the results of the evaluation. The evaluation has been conducted like stated under Section~\ref{sec:evaluation}. 
 
 When the ModSecurity firewall is mentioned in context with evaluation results, the firewall configuration stated in Section~\ref{sec:evaluation} applies. 
 All mentioned firewall evasion strategies were tested in at least one evaluation-payload.
 All payloads sent have been tested for validity according to Section~\ref{sec:evaluation}.
 Where the author of this work deemed appropriate, validation results are stated next to the evaluation results. Where no validation results are stated, the payloads validated successfully.
 
-Firewall evasion techniques have been evaluated in a single iteration against the firewall first. During this phase, each request is crafted to evaluate a single firewall evasion technique against the firewall. Results of the single iteration evaluation are detailed in the first subsection. 
+The ModSecurity firewall using \acrshort{crs} 4.1 was first evaluated against firewall evasion techniques, that have been applied in a single iteration to a payload. During this phase, each request is crafted to evaluate a single firewall evasion technique against the firewall. Results of the single iteration evaluation are detailed in the first subsection, Section~\ref{sec:singleiterationeva}. 
 
-Subsequently, multi iteration evaluation results are detailed in the second subsection. These results are based on the evaluation of the firewall against payloads that have been crafted using multiple iterations of applying evasion techniques.
+Subsequently, multi iteration evaluation results are detailed in the second subsection, Section~\ref{sec:multiiteration}. These results are from the evaluation of the ModSecurity firewall using \acrshort{crs} 4.1 against payloads that have been crafted using multiple iterations of applying evasion techniques.
 
 % From a total of {\color{red} W } requests sent after a single iteration of modification with an evasion technique, {\color{red} X } successfully bypassed the firewall. 
 %

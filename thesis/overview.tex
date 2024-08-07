@@ -3,9 +3,10 @@ Related work described in the previous section focuses on improving the efficien
 
 In a real work scenario, when institutions decide to evaluate the performance of an employed web application firewall, it is likely that there is more information available during the evaluation than used in a black-box scenario. 
 Therefore, this work proposes using this information during the evaluation of a web application firewall to form a gray-box evaluation scenario. 
-The overarching idea is to keep the perspective of an attacker that targets a web application protected by a web application firewall while improving the efficiency in finding bypassing payloads by using the information provided by the firewall log. 
-Found bypassing payloads directly correlate to weaknesses in the rule configuration of the evaluted web application firewall.
-Attackers create bypassing payloads targeting web applications protected by web application firewalls using firewall evasion techniques. 
+The overarching idea is to keep the perspective of an attacker that targets a web application protected by a web application firewall, while improving the efficiency in finding bypassing payloads by using the information provided by the firewall log. 
+
+Attackers targeting web applications protected by web application firewalls are using firewall evasion techniques to create bypassing payloads. 
+Found bypassing payloads directly correlate to weaknesses in the rule configuration of the evaluated web application firewall.
 Therefore, to answer the question
 \begin{quote}
 How well can web application firewalls in their generic standard configuration
@@ -13,7 +14,7 @@ protect a web application against targeted malicious requests?
 \end{quote}
 the author considers using firewall evasion techniques to be essential.
 
-In summary, to answer the afromentioned question, this work proposes to use firewall evasion techniques in a gray box scenario to evaluate web application firewalls. \\
+In summary, to answer the afromentioned question, this work proposes to use firewall evasion techniques in a gray box scenario to efficiently evaluate web application firewalls. \\
 % Firewall Evasion techniques will be detailed in the further course of this work. 
 
 While malicious request containing payloads without obfuscation are certainly of importance, this work will focus on targeted attacks using payloads that were obscured using firewall evasion techniques.
@@ -25,12 +26,12 @@ Initially, in the following Section~\ref{sec:fundamentals}, this work details fu
 
 In Section~\ref{sec:firewallevasiontechniques}, firewall evasion techniques applicable to Cross-Site Scripting payloads are laid out.
 
-In Section~\ref{sec:evaluation} the evaluation methodology is described. An iterative approach to try and create bypassing payloads using the evasion techniques laid out under Section~\ref{sec:firewallevasiontechniques}. The goal is to make the payloads evade the open-source ModSecurity firewall configured to use the OWASP CoreRuleSet version 4.1.
+In Section~\ref{sec:evaluation}, the evaluation methodology is described. An iterative approach to try and create bypassing payloads using the evasion techniques laid out under Section~\ref{sec:firewallevasiontechniques}. In an experiment, the evaluation methodology is used to to make payloads evade the open-source ModSecurity firewall configured to use the OWASP CoreRuleSet version 4.1.
 
-Section~\ref{sec:EvaluationResults} describes the evaluation results. Effective evasion techniques and found bypasses are stated. Based on those, this work aims at discussing occuring payload limitations in the context of tested firewall configurations, properties of the web application to be protected and used firewall evasion techniques. Section~\ref{sec:rulesproposal} details proposed rule additions derived from the evaluation results.
+Section~\ref{sec:EvaluationResults} describes the evaluation results. Effective evasion techniques and found bypasses are stated. Based on those, this work discusses occuring payload limitations in the context of tested firewall configurations, properties of the web application to be protected and used firewall evasion techniques in Section~\ref{sec:payloadlimitations}. Section~\ref{sec:rulesproposal} details proposed rule additions derived from the evaluation results.
 
 Subsequently, a generic evaluation proposal is presented and assessed in Section~\ref{sec:proposal}.
 
-Finally, this work is concluded (Section~\ref{sec:conclusion}) and ideas for further research are proposed (Section~\ref{sec:continuations}).
+Finally, this work is concluded in Section~\ref{sec:conclusion} and ideas for further research are proposed in Section~\ref{sec:continuations}.
 
 In this work, no LLM-based or other machine learning approaches are pursued. Nonetheless, these approaches are promising and will be mentioned in Section~\ref{sec:continuations}.
