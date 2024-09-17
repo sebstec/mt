@@ -84,8 +84,53 @@
 		\item<2-> Similar to JSFuck \cite{mk/jsfuck}
 		\item<3-> Write valid JavaScript statements calling \verb|alert(1)|
 		\item<4-> Using the characters \verb|() + [] ! " = {}| and 1 to 9 other characters of choice
-		\item<5-> created by Martin Kleppe \cite{mk/aurebesh}
+		\item<5-> Created by Martin Kleppe \cite{mk/aurebesh}
 	\end{vfilleditems}
+\end{frame}
+
+\begin{frame}[fragile]{Aurebesh.js - How it works part 1}
+	\begin{lstlisting}[style=basicStyle]
+A = ''              // empty string
+B = !A + A          // "true"
+C = !B + A          // "false"
+D = A + {}          // "[object Object]"
+E = B[A++]          // "t" = "true"[0]
+F = B[G = A]        // "r" = "true"[1]
+H = ++G + A         // 2, 3
+I = D[G + H]        // "c"
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Aurebesh.js - How it works part 2}
+	\begin{lstlisting}[style=basicStyle]
+B[
+  I +=              // "c"
+    D[A] +          // "o" = "object"[0]
+    (B.C+D)[A] +    // "n" = "undefined"[1]
+    C[H] +          // "s" = "false"[3]
+    E +             // "t"
+    F +             // "r"
+    B[G] +          // "u" = "true"[2]
+    I +             // "c" = "[object]"[5]
+    E +             // "t"
+    D[A] +          // "o" = "[object]"[1]
+    F               // "r"
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Aurebesh.js - How it works part 3}
+	\begin{lstlisting}[style=basicStyle]
+][
+  I                 // "constructor"
+](
+  C[A] +            //  "a"
+  C[G] +            //  "l"
+  B[H] +            //  "e"
+  F +               //  "r"
+  E +               //  "t"
+  "(A)"             // "(1)"
+)()
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Aurebesh.js - prompt(1,2) blocked}
