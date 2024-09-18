@@ -1,6 +1,15 @@
 # myadditions:
 *.pdf
 build/
+us.png
+.env
+code.tar
+ma-old/
+LICENSE
+build-s/
+masterarbeit_sebastian_stecher.zip
+pdf/
+todo.md
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
