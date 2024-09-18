@@ -138,6 +138,34 @@
 	\end{columns}
 \end{frame}
 
+\section{Evaluation Methodology}
+\begin{frame}[fragile]{Evaluation Methodology - in general}
+	\begin{vfilleditems}
+		\item<2-> Choose PoC XSS payload
+		\item<3-> Obscure payload using evasion technique
+		\item<4-> Send payload towards WAF
+		\item<5-> If
+		\begin{vfilleditems}
+			\item<6-> blocked: check firewall log for reasons
+			\item<7-> bypassed: test received payload for validity
+		\end{vfilleditems}
+	\end{vfilleditems}
+\end{frame}
+
+\begin{frame}[fragile]{Evaluation Methodology - developing bypassing payloads}
+	\begin{vfilleditems}
+		\item<2-> Multiple iterations
+		\item<3-> First iteration: identify potentially effective evasion techniques
+		\item<4-> Following iterations:
+		\begin{vfilleditems}
+			\item<5-> check WAF log for blocked reason(s)
+			\item<6-> accordingly apply identified evasion technique(s) to the payload
+			\item<7-> repeat until a bypassing payload is found or no more fitting evasion techniques are available
+		\end{vfilleditems}
+	\end{vfilleditems}
+\end{frame}
+
+
 
 \section{Aurebesh.js}
 
