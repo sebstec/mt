@@ -77,6 +77,48 @@
 	\vfill
 \end{frame}
 
+\section{Related work}
+\begin{frame}[fragile]{Related work}
+	\begin{vfilleditems}
+		\item<2-> Fuzz testing \cite{rw/demetrio}
+		\item<3-> Payload clustering and selection using reinforcement learning \cite{rw/mohammad}
+		\item<4-> Bridging test input generation across different
+		types of injection attack \cite{rw/derLI}
+		\item<5-> Commonality: black box testing
+	\end{vfilleditems}
+\end{frame}
+
+\section{Proposal}
+\begin{frame}[fragile]{Proposal}
+	\begin{vfilleditems}
+		\item<2-> During WAF evaluation likely more information available than in typical black box scenario
+		\item<3-> Firewall log
+		\item<4-> But: keep attacker perspective
+		\item<5-> Use firewall evasion techniques
+	\end{vfilleditems}
+\end{frame}
+
+\section*{Proposal Conclusion}
+\begin{frame}[plain, noframenumbering]
+	\centering
+	\vfill
+	\supertext{Use firewall evasion techniques in a gray box scenario to efficiently evaluate web application firewalls against targeted malicious attacks}
+	\vfill
+\end{frame}
+
+\section{Firewall evasion techniques}
+\begin{frame}[fragile]{Firewall evasion techniques}
+	\begin{vfilleditems}
+		\item<2-> Attacker: \verb|alert(1)|
+		\item<3-> WAF:
+		\begin{lstlisting}[style=ruleStyle, language=XML]
+<MatchedData>"alert("</MatchedData>
+\end{lstlisting}
+		\item<4-> Attacker: \verb|alert`1`|
+		\item<5-> WAF: \  \includegraphics[width=.07\linewidth]{thumbsup.png}
+	\end{vfilleditems}
+\end{frame}
+
 \section{Aurebesh.js}
 
 \begin{frame}[fragile]{Aurebesh.js}
