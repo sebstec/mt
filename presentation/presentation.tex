@@ -302,6 +302,53 @@ A='',B=!A+A,C=!B+A,D=A+{},E=B[A++],F=B[G=A],H=++G+A,I=D[G+H],B[I+=D[A]+(B.C+D)[A
 	\vfill
 \end{frame}
 
+\section{Rules proposal}
+\begin{frame}[fragile]{Rules proposal}
+	\begin{vfilleditems}
+		\item<2-> Bypassing payloads were found during the evaluation
+		\item<3-> ModSecurity uses the SecRules format
+		\item<4-> ModSecurity standard setting: blacklist filtering
+		\item<5-> SecRules can make use of regular expressions
+	\end{vfilleditems}
+\end{frame}
+
+\begin{frame}[fragile]{Rules proposal - function constructor}
+	% \begin{lstlisting}[style=basicStyle, language=Python, caption={prompt(1,2) bypass in Aurebesh.js}, label={lst:aurebeshpromptbypass}]
+	\begin{lstlisting}[style=basicStyle]
+@rx (?i)(?:(?:\[[^\]]*\])|(?:\{[^}]*\})|Object|Boolean|Symbol|(?:[a-z]*Error)|Number|BigInt|Math|Date|String|RegExp|(?:[a-z]*Array)|Map|Set|WeakMap|WeakSet|(?:(?:Shared)*ArrayBuffer)|DataView|Atomics|JSON|WeakRef|FinalizationRegistry|Iterator|AsyncIterator|Promise|GeneratorFunction|AsyncGeneratorFunction|Generator|AsyncGenerator|AsyncFunction|Reflect|Proxy|(?:Intl[\.,a-z]*))(?:(?:\[[`,',\"][a-z]*[`,',\"]\])|(?:\.[a-z]*))(?:(\[[`,',\"]constructor[`,',\"]\])|(?:\.constructor))[`,(,\[]
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Rules proposal - function constructor}
+	% \begin{lstlisting}[style=basicStyle, language=Python, caption={prompt(1,2) bypass in Aurebesh.js}, label={lst:aurebeshpromptbypass}]
+	\begin{lstlisting}[style=basicStyle]
+@rx (?i)(?:eval|isFinite|isNaN|parseFloat|parseInt|decodeURI|decodeURIComponent|encodeURI|encodeURIComponent|escape|unescape)(?:(\[[`,',\"]constructor[`,',\"]\])|(?:\.constructor))[`,(,\[]
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Rules proposal - function constructor blocked}
+	% \begin{lstlisting}[style=ruleStyle, language=XML, caption={prompt(1,2) blocked}, label=lst:promptblocked]
+	\begin{lstlisting}[style=ruleStyle, language=XML]
+<payload>[]['constructor']['constructor'](`var/**/s/**/=/**/'secret';/**/promp`/**/+/**/`t(s,/**/s)`)()</payload>
+
+<message>"XSS JavaScript function with constructor (built-in object access)"</message>
+<file>"/rules/REQUEST-000-XSS-PROPOSAL.conf"</file>
+<fileDetails>[line "54"] [id "4"]<fileDetails>
+<MatchedData>"[]['constructor']['constructor']("</MatchedData>
+\end{lstlisting}
+\end{frame}
+
+\section{Conclusion}
+\begin{frame}[fragile]{Conclusion}
+	\begin{vfilleditems}
+		\item<2-> Intense manual work: crafting, evaluating, validating
+		\item<3-> Allowed to create bypassing payloads straightforward
+		\item<4-> 11 from 18 researched evasion techniques proved efficient in crafting bypassing payloads for ModSecurity WAF using CRS 4.1.
+		\item<5-> Rule additions could be developed based on the findings
+	\end{vfilleditems}
+\end{frame}
+
+
 % \section{Aspect ratio}
 % \begin{frame}[fragile]{Aspect ratio}
 % 	This pdf uses a 16:9 aspect ratio. To utilize
@@ -560,14 +607,14 @@ A='',B=!A+A,C=!B+A,D=A+{},E=B[A++],F=B[G=A],H=++G+A,I=D[G+H],B[I+=D[A]+(B.C+D)[A
 	\printbibliography
 \end{frame}
 
-\appendix % do not count the following slides for the total number
-\section*{Backup Slides}
-\begin{frame}[plain, noframenumbering]
-	\centering
-	\vfill
-	{\fontsize{40}{50}\selectfont Backup Slides}
-	\vfill
-\end{frame}
+% \appendix % do not count the following slides for the total number
+% \section*{Backup Slides}
+% \begin{frame}[plain, noframenumbering]
+% 	\centering
+% 	\vfill
+% 	{\fontsize{40}{50}\selectfont Backup Slides}
+% 	\vfill
+% \end{frame}
 
 % \begin{frame}{What happened to the page numbering?}
 % 	\begin{itemize}
